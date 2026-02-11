@@ -407,3 +407,5 @@ Desktop.ini: 2
 # JetBrains Rider: 2
 ##: 3
 _UpgradeReport_Files/: 2
+
+*/obj
