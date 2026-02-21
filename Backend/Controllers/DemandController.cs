@@ -41,5 +41,11 @@ namespace Backend.Controllers
                 return BadRequest("Failed to add Demand.");
             }
         }
+        [HttpGet("{month:int}")]
+        public async Task<IActionResult> GetByMonth(int month)
+        {
+            var Demands = await _demandService.ListByMonth(month);
+            return Ok(Demands);
+        }
     }
 }

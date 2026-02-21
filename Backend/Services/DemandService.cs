@@ -27,5 +27,12 @@ namespace Backend.Services
             await _dbContext.Demands.AddAsync(demand);
             return await _dbContext.SaveChangesAsync();
         }
+        public async Task<IEnumerable<Demand>> ListByMonth(int month)
+        {
+            var demands = await _dbContext.Demands
+                    .Where(d => d.StartTime.Month == month)
+                    .ToListAsync();
+            return demands;
+        }
     }
 }
