@@ -1,0 +1,25 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Backend/Dockerfile
+    ports: 
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      #- ConnectionStrings__DatabaseConnectionString=Host=db;username=mysql;password=alma;database=heat_db;
+    depends_on:
+        - db
+  db:
+    image: mysql
+    container_name: heat_db_container
+    environment:
+      - MYSQL_ROOT_PASSWORD=alma
+      - MYSQL_DATABASE=heat_db
+      - MYSQL_USER=mysql
+      - MYSQL_PASSWORD=alma 
+    ports:
+      - "3306:3306"
+
+volumes:
+  postgres_data:
