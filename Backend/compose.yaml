@@ -1,0 +1,27 @@
+﻿services:
+  api:
+    build:
+      context: .
+      dockerfile: /Dockerfile
+    ports: 
+      - "5117:80"
+    environment:
+      - ASPNETCORE_URLS=http://+80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DatabaseConnectionString=Host=postgres;username=postgres;password=postgres;database=heat_db;
+    depends_on:
+        - postgres
+  postgres:
+    image: postgres:17-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=heat_db
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
