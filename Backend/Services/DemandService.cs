@@ -14,6 +14,16 @@ namespace Backend.Services
         {
             return await _dbContext.Demands.ToListAsync();
         }
+        public async Task<int> AddDemands(List<Demand> demands)
+        {
+            if(demands==null || demands.Count==0)
+            {
+                Console.WriteLine("Error |  No demands sent.");
+                return 0;
+            }
+            await _dbContext.Demands.AddRangeAsync(demands);
+            return await _dbContext.SaveChangesAsync();
+        }
         public async Task<int> AddDemand(int id, DateTime From, DateTime Til, float Heat, float Electro)
         {
             Demand demand = new Demand

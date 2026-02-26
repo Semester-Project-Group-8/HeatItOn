@@ -1,6 +1,7 @@
-using Backend.Data;
 using Microsoft.EntityFrameworkCore;
+using Backend.Data;
 using Backend.Services;
+//using Backend.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,12 @@ using (var scope = app.Services.CreateScope())
 { 
     var db = scope.ServiceProvider.GetRequiredService<BackendDbContext>();
     db.Database.Migrate();
+
+    string csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "heating.csv");
+
+    var demandService = scope.ServiceProvider.GetRequiredService<DemandService>();
+    ReadCsv importer = new ReadCsv(demandService, csvPath);
+    var inserted = await importer.ImportCsv();
 }
 
 app.Run();

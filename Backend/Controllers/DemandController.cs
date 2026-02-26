@@ -21,15 +21,15 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> AddDemand([FromBody] Demand Demand)
+        public async Task<IActionResult> AddDemand([FromBody] Demand demand)
         {
             Demand d = new Demand
             {
-                ID = Demand.ID,
-                StartTime = Demand.StartTime,
-                EndTime = Demand.EndTime,
-                HeatDemand = Demand.HeatDemand,
-                ElectricityPrice = Demand.ElectricityPrice
+                ID = demand.ID,
+                StartTime = demand.StartTime,
+                EndTime = demand.EndTime,
+                HeatDemand = demand.HeatDemand,
+                ElectricityPrice = demand.ElectricityPrice
             };
             var result = await _demandService.AddDemand(d.ID, d.StartTime, d.EndTime, d.HeatDemand, d.ElectricityPrice);
             if (result > 0)
@@ -39,6 +39,7 @@ namespace Backend.Controllers
             else
             {
                 return BadRequest("Failed to add Demand.");
+
             }
         }
         [HttpGet("{month:int}")]
