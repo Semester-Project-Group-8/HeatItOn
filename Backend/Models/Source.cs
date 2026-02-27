@@ -4,13 +4,13 @@ namespace Backend.Models
     public class Source
     {
         [Required]
-        public int ID { get; set; }
+        public int Id { get; set; }
         [Required]
         [DataType(DataType.DateTime)]
-        public DateTime StartTime { get; set; }
+        public DateTime TimeFrom { get; set; }
         [Required]
         [DataType(DataType.DateTime)]
-        public DateTime EndTime { get; set; }
+        public DateTime TimeTo { get; set; }
         [Required]
         public float HeatDemand { get; set; }
         [Required]

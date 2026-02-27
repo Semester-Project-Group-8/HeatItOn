@@ -25,16 +25,16 @@ namespace Backend.Controllers
         {
             Source s = new Source
             {
-                ID = source.ID,
-                StartTime = source.StartTime,
-                EndTime = source.EndTime,
+                Id = source.Id,
+                TimeFrom = source.TimeFrom,
+                TimeTo = source.TimeTo,
                 HeatDemand = source.HeatDemand,
                 ElectricityPrice = source.ElectricityPrice
             };
-            var result = await _sourceService.AddSource(s.ID, s.StartTime, s.EndTime, s.HeatDemand, s.ElectricityPrice);
+            var result = await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
             if (result > 0)
             {
-                return Created($"/Source/{s.ID}", new { ID = s.ID, StartTime = s.StartTime, EndTime = s.EndTime, HeatDemand = s.HeatDemand, ElectricityPrice = s.ElectricityPrice });
+                return Created($"/Source/{s.Id}", new { Id = s.Id, TimeFrom = s.TimeFrom, TimeTo = s.TimeTo, HeatDemand = s.HeatDemand, ElectricityPrice = s.ElectricityPrice });
             }
             else
             {

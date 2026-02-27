@@ -28,9 +28,9 @@ namespace Backend.Services
         {
             Source source = new Source
             {
-                ID= id,
-                StartTime= From,
-                EndTime= Til,
+                Id= id,
+                TimeFrom = From,
+                TimeTo= Til,
                 HeatDemand=Heat,
                 ElectricityPrice=Electro
             };
@@ -40,7 +40,7 @@ namespace Backend.Services
         public async Task<IEnumerable<Source>> ListByMonth(int month)
         {
             var demands = await _dbContext.Sources
-                    .Where(d => d.StartTime.Month == month)
+                    .Where(d => d.TimeFrom.Month == month)
                     .ToListAsync();
             return demands;
         }

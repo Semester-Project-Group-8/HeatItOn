@@ -50,10 +50,10 @@ namespace Backend.Data
         }
         private bool IsDate(string value)
         {
-            return DateTime.TryParse(value,new CultureInfo("de-DE"),DateTimeStyles.None, out _);
+            return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
         }
 
-        private static readonly CultureInfo CsvCulture = new CultureInfo("de-DE");
+        private static readonly CultureInfo CsvCulture = new CultureInfo("da-DK");
         private Source SourceConverter(string? startDate, string? endDate, string? heatDemand, string? electricityPrice)
         {
             startDate ??= "2000.01.01 00:00";
@@ -64,8 +64,8 @@ namespace Backend.Data
             Source source = new Source()
             {
                 //ID = id,
-                StartTime = DateTime.Parse(startDate,CsvCulture),
-                EndTime = DateTime.Parse(endDate,CsvCulture),
+                TimeFrom = DateTime.Parse(startDate,CsvCulture),
+                TimeTo = DateTime.Parse(endDate,CsvCulture),
                 HeatDemand = float.Parse(heatDemand),
                 ElectricityPrice = float.Parse(electricityPrice)
             };
