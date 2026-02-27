@@ -21,7 +21,6 @@ namespace Backend.Models
         public float MaxElectricicty { get; set; }
         [Required]
         public int ImageId { get; set; }
-        [Required]
         public Image Image { get; set; }
     }
 }

@@ -18,7 +18,6 @@ namespace Backend.Models
         public int CO2Produced { get; set; }
         [Required]
         public int AssetId { get; set; }
-        [Required]
         public Asset Asset { get; set; }
     }
 }
