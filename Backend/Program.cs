@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Backend.Data;
+using Backend.Services;
+//using Backend.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddDbContext<BackendDbContext>(
+    options =>
+    {
+        options.UseMySql(
+            builder.Configuration.GetConnectionString("DefaultConnection"),
+            new MySqlServerVersion(new Version(8, 0, 45)),
+            mySqlOptions => { mySqlOptions.EnableRetryOnFailure(); }
+            );
+    }
+);
+builder.Services.AddScoped<SourceService>();
 
 var app = builder.Build();
 
@@ -14,10 +30,20 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope()) 
+{ 
+    var db = scope.ServiceProvider.GetRequiredService<BackendDbContext>();
+    db.Database.Migrate();
+
+    string csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "heating.csv");
+
+    var demandService = scope.ServiceProvider.GetRequiredService<SourceService>();
+    ReadCsv importer = new ReadCsv(demandService, csvPath);
+    var inserted = await importer.ImportCsv();
+}
 
 app.Run();
