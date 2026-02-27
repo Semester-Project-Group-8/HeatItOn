@@ -3,30 +3,30 @@ using Backend.Data;
 using Backend.Models;
 namespace Backend.Services
 {
-    public class DemandService
+    public class SourceService
     {
         private readonly BackendDbContext _dbContext;
-        public DemandService(BackendDbContext dbContext)
+        public SourceService(BackendDbContext dbContext)
         {
             _dbContext=dbContext;
         }
-        public async Task<IEnumerable<Demand>> ListDemands() 
+        public async Task<IEnumerable<Source>> ListSources() 
         {
-            return await _dbContext.Demands.ToListAsync();
+            return await _dbContext.Sources.ToListAsync();
         }
-        public async Task<int> AddDemands(List<Demand> demands)
+        public async Task<int> AddSources(List<Source> source)
         {
-            if(demands==null || demands.Count==0)
+            if(source == null || source.Count==0)
             {
-                Console.WriteLine("Error |  No demands sent.");
+                Console.WriteLine("Error |  No Sources sent.");
                 return 0;
             }
-            await _dbContext.Demands.AddRangeAsync(demands);
+            await _dbContext.Sources.AddRangeAsync(source);
             return await _dbContext.SaveChangesAsync();
         }
-        public async Task<int> AddDemand(int id, DateTime From, DateTime Til, float Heat, float Electro)
+        public async Task<int> AddSource(int id, DateTime From, DateTime Til, float Heat, float Electro)
         {
-            Demand demand = new Demand
+            Source source = new Source
             {
                 ID= id,
                 StartTime= From,
@@ -34,12 +34,12 @@ namespace Backend.Services
                 HeatDemand=Heat,
                 ElectricityPrice=Electro
             };
-            await _dbContext.Demands.AddAsync(demand);
+            await _dbContext.Sources.AddAsync(source);
             return await _dbContext.SaveChangesAsync();
         }
-        public async Task<IEnumerable<Demand>> ListByMonth(int month)
+        public async Task<IEnumerable<Source>> ListByMonth(int month)
         {
-            var demands = await _dbContext.Demands
+            var demands = await _dbContext.Sources
                     .Where(d => d.StartTime.Month == month)
                     .ToListAsync();
             return demands;

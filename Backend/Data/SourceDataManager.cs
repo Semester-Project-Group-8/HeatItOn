@@ -7,15 +7,15 @@ namespace Backend.Data
     class ReadCsv
     {
         readonly string location;
-        DemandService _demandService;
-        public ReadCsv(DemandService demandService,string location)
+        SourceService _sourceService;
+        public ReadCsv(SourceService sourceService, string location)
         {
-            _demandService = demandService;
+            _sourceService = sourceService;
             this.location = location;
         }
         public async Task<int> ImportCsv()
         {
-            List<Demand> Demands = new List<Demand>();
+            List<Source> Sources = new List<Source>();
             using (TextFieldParser parser = new TextFieldParser(location))
             {
                 parser.SetDelimiters(",");
@@ -30,8 +30,8 @@ namespace Backend.Data
                         {
                             if (IsDate(fields[i]))
                             {
-                                Demand demand = DemandConverter(fields[i], fields[i + 1], fields[i + 2], fields[i + 3]);
-                                Demands.Add(demand);
+                                Source source = SourceConverter(fields[i], fields[i + 1], fields[i + 2], fields[i + 3]);
+                                Sources.Add(source);
                                 i = i + 3;
                             }
                             i++;
@@ -44,7 +44,7 @@ namespace Backend.Data
                 }
                 Console.WriteLine("completed | csv file read");
             }
-            var inserted = await _demandService.AddDemands(Demands);
+            var inserted = await _sourceService.AddSources(Sources);
             Console.WriteLine($"completed | inserted {inserted} lines of data");
             return inserted;
         }
@@ -54,14 +54,14 @@ namespace Backend.Data
         }
 
         private static readonly CultureInfo CsvCulture = new CultureInfo("de-DE");
-        private Demand DemandConverter(string? startDate, string? endDate, string? heatDemand, string? electricityPrice)
+        private Source SourceConverter(string? startDate, string? endDate, string? heatDemand, string? electricityPrice)
         {
             startDate ??= "2000.01.01 00:00";
             endDate ??= "2000.01.01 01:00";
             heatDemand ??= "0";
             electricityPrice ??= "0";
 
-            Demand demand = new Demand()
+            Source source = new Source()
             {
                 //ID = id,
                 StartTime = DateTime.Parse(startDate,CsvCulture),
@@ -69,7 +69,7 @@ namespace Backend.Data
                 HeatDemand = float.Parse(heatDemand),
                 ElectricityPrice = float.Parse(electricityPrice)
             };
-            return demand;
+            return source;
         }
     }
 }

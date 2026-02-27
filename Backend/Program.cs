@@ -20,7 +20,7 @@ builder.Services.AddDbContext<BackendDbContext>(
             );
     }
 );
-builder.Services.AddScoped<DemandService>();
+builder.Services.AddScoped<SourceService>();
 
 var app = builder.Build();
 
@@ -41,7 +41,7 @@ using (var scope = app.Services.CreateScope())
 
     string csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "heating.csv");
 
-    var demandService = scope.ServiceProvider.GetRequiredService<DemandService>();
+    var demandService = scope.ServiceProvider.GetRequiredService<SourceService>();
     ReadCsv importer = new ReadCsv(demandService, csvPath);
     var inserted = await importer.ImportCsv();
 }

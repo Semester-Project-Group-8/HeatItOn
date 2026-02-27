@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace Backend.Models
 {
-    public class Demand
+    public class Source
     {
         [Required]
         public int ID { get; set; }
