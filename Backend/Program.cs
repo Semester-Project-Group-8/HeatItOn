@@ -21,6 +21,7 @@ builder.Services.AddDbContext<BackendDbContext>(
     }
 );
 builder.Services.AddScoped<SourceService>();
+builder.Services.AddScoped<AssetsService>();
 
 var app = builder.Build();
 
