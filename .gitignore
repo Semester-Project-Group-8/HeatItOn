@@ -413,3 +413,6 @@ Frontend/obj
 
 # Postman local workspace config
 .postman/
+
+# Local dev connection string override
+Backend/appsettings.Development.json
