@@ -37,13 +37,17 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope()) 
 { 
     var db = scope.ServiceProvider.GetRequiredService<BackendDbContext>();
-    db.Database.Migrate();
-
+    var pending = db.Database.GetPendingMigrations();
+    if (pending.Any())
+    {
+        db.Database.Migrate();
+    }
+    /*
     string csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "heating.csv");
 
     var demandService = scope.ServiceProvider.GetRequiredService<SourceService>();
     ReadCsv importer = new ReadCsv(demandService, csvPath);
-    var inserted = await importer.ImportCsv();
+    var inserted = await importer.ImportCsv();*/
 }
 
 app.Run();
