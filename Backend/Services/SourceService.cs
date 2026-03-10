@@ -43,6 +43,35 @@ namespace Backend.Services
                     .Where(d => d.TimeFrom.Month == month)
                     .ToListAsync();
             return demands;
+
         }
+        //update function - get item by id, update item, save changes
+        public async Task<int> UpdateSource(int id, DateTime From, DateTime Til, float Heat, float Electro)
+        {
+            var source = await _dbContext.Sources.FindAsync(id);
+            if (source == null)
+            {
+                Console.WriteLine($"Error | Source with id {id} not found.");
+                return 0;
+            }
+            source.TimeFrom = From;
+            source.TimeTo = Til;
+            source.HeatDemand = Heat;
+            source.ElectricityPrice = Electro;
+            return await _dbContext.SaveChangesAsync();
+        }
+        //delete - get item by id, delete item, save changes
+        public async Task<int> DeleteSource(int id)
+        {
+            var source = await _dbContext.Sources.FindAsync(id);
+            if (source == null)
+            {
+                Console.WriteLine($"Error | Source with id {id} not found.");
+                return 0;
+            }
+            _dbContext.Sources.Remove(source);
+            return await _dbContext.SaveChangesAsync();
+        }
+
     }
 }
