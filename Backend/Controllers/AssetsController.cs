@@ -21,6 +21,20 @@ namespace Backend.Controllers
             return Ok(assets);
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetAssetById(int id)
+        {
+            var asset = await _assetsService.GetAssetById(id);
+            if (asset != null)
+            {
+                return Ok(asset);
+            }
+            else
+            {
+                return NotFound($"Asset with ID {id} not found.");
+            }
+        }
+
         [HttpPost("Add")]
         public async Task<IActionResult> AddAsset([FromBody] Asset asset)
         {
@@ -33,14 +47,14 @@ namespace Backend.Controllers
                 CO2Emission = asset.CO2Emission,
                 GasConsumption = asset.GasConsumption,
                 OilConsumption = asset.OilConsumption,
-                MaxElectricicty = asset.MaxElectricicty,
+                MaxElectricity = asset.MaxElectricity,
                 ImageId = asset.ImageId,
                 Image = asset.Image
             };
-            var result = await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricicty, a.ImageId, a.Image);
+            var result = await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageId, a.Image);
             if (result > 0)
             {
-                return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption, MaxElectricity = a.MaxElectricicty, ImageId = a.ImageId });
+                return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption, MaxElectricity = a.MaxElectricity, ImageId = a.ImageId });
             }
             else
             {
@@ -66,7 +80,7 @@ namespace Backend.Controllers
 
         public async Task<IActionResult> UpdateAsset(int id, [FromBody] Asset asset)
         {
-            var result = await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricicty, asset.ImageId, asset.Image);
+            var result = await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageId, asset.Image);
             if (result > 0)
             {
                 return Ok($"Asset with ID {id} updated successfully.");

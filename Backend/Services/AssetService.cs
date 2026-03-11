@@ -38,7 +38,7 @@ namespace Backend.Services
                 CO2Emission= co2Emission,
                 GasConsumption= gasConsumption,
                 OilConsumption= oilConsumption,
-                MaxElectricicty= maxElectricity,
+                MaxElectricity= maxElectricity,
                 ImageId= imageId,
                 Image= image
             };
@@ -72,31 +72,24 @@ namespace Backend.Services
             asset.CO2Emission = co2Emission;
             asset.GasConsumption = gasConsumption;
             asset.OilConsumption = oilConsumption;
-            asset.MaxElectricicty = maxElectricity;
+            asset.MaxElectricity = maxElectricity;
             asset.ImageId = imageId;
             asset.Image = image;
 
             _dbContext.Assets.Update(asset);
             return await _dbContext.SaveChangesAsync();
         }
+
+        public async Task<Asset> GetAssetById(int id)
+        {
+            var asset = await _dbContext.Assets.FindAsync(id);
+            if (asset == null)
+            {
+                Console.WriteLine($"Error | Asset with ID {id} not found.");
+                return null;
+            }
+            return asset;
+        }
     
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
