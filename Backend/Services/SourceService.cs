@@ -51,8 +51,7 @@ namespace Backend.Services
             var source = await _dbContext.Sources.FindAsync(id);
             if (source == null)
             {
-                Console.WriteLine($"Error | Source with id {id} not found.");
-                return 0;
+                throw new KeyNotFoundException($"Source with id {id} not found.");
             }
             source.TimeFrom = From;
             source.TimeTo = Til;
@@ -66,8 +65,7 @@ namespace Backend.Services
             var source = await _dbContext.Sources.FindAsync(id);
             if (source == null)
             {
-                Console.WriteLine($"Error | Source with id {id} not found.");
-                return 0;
+                throw new KeyNotFoundException($"Source with id {id} not found.");
             }
             _dbContext.Sources.Remove(source);
             return await _dbContext.SaveChangesAsync();
