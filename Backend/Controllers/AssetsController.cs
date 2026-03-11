@@ -22,16 +22,16 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAssetById(int id)
+        public async Task<IActionResult> GetAsset(int id)
         {
-            var asset = await _assetsService.GetAssetById(id);
-            if (asset != null)
+            try
             {
+                var asset = await _assetsService.GetAsset(id);
                 return Ok(asset);
             }
-            else
+            catch (KeyNotFoundException)
             {
-                return NotFound($"Asset with ID {id} not found.");
+                return NotFound();
             }
         }
 

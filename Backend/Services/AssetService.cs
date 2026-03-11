@@ -80,15 +80,10 @@ namespace Backend.Services
             return await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<Asset> GetAssetById(int id)
+        public async Task<Asset> GetAsset(int id)
         {
-            var asset = await _dbContext.Assets.FindAsync(id);
-            if (asset == null)
-            {
-                Console.WriteLine($"Error | Asset with ID {id} not found.");
-                return null;
-            }
-            return asset;
+            return await _dbContext.Assets.FindAsync(id)
+                ?? throw new KeyNotFoundException($"Asset with ID {id} not found.");
         }
     
     }
