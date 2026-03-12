@@ -17,8 +17,15 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAssets()
         {
-            var assets = await _assetsService.ListAssets();
-            return Ok(assets);
+            try
+            {
+                var assets = await _assetsService.ListAssets();
+                return Ok(assets);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("{id:int}")]
@@ -38,56 +45,55 @@ namespace Backend.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> AddAsset([FromBody] Asset asset)
         {
-            Asset a = new Asset
+            try
             {
-                Id = asset.Id,
-                Name = asset.Name,
-                MaxHeat = asset.MaxHeat,
-                ProductionCost = asset.ProductionCost,
-                CO2Emission = asset.CO2Emission,
-                GasConsumption = asset.GasConsumption,
-                OilConsumption = asset.OilConsumption,
-                MaxElectricity = asset.MaxElectricity,
-                ImageId = asset.ImageId,
-                Image = asset.Image
-            };
-            var result = await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageId, a.Image);
-            if (result > 0)
-            {
+                Asset a = new Asset
+                {
+                    Id = asset.Id,
+                    Name = asset.Name,
+                    MaxHeat = asset.MaxHeat,
+                    ProductionCost = asset.ProductionCost,
+                    CO2Emission = asset.CO2Emission,
+                    GasConsumption = asset.GasConsumption,
+                    OilConsumption = asset.OilConsumption,
+                    MaxElectricity = asset.MaxElectricity,
+                    ImageId = asset.ImageId,
+                    Image = asset.Image
+                };
+                await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageId, a.Image);
                 return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption, MaxElectricity = a.MaxElectricity, ImageId = a.ImageId });
             }
-            else
+            catch (ArgumentException)
             {
-                return BadRequest("Failed to add Asset.");
+                return BadRequest();
             }
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAsset(int id)
         {
-            var result = await _assetsService.DeleteAsset(id);
-            if (result > 0)
+            try
             {
+                await _assetsService.DeleteAsset(id);
                 return NoContent();
             }
-            else
+            catch (KeyNotFoundException)
             {
-                return NotFound($"Asset with ID {id} not found.");
+                return NotFound();
             }
         }
 
         [HttpPut("{id:int}")]
-
         public async Task<IActionResult> UpdateAsset(int id, [FromBody] Asset asset)
         {
-            var result = await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageId, asset.Image);
-            if (result > 0)
+            try
             {
-                return Ok($"Asset with ID {id} updated successfully.");
+                await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageId, asset.Image);
+                return Ok();
             }
-            else
+            catch (KeyNotFoundException)
             {
-                return NotFound($"Asset with ID {id} not found.");
+                return NotFound();
             }
         }
     }

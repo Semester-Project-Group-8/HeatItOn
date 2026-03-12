@@ -18,11 +18,8 @@ namespace Backend.Services
 
         public async Task<int> AddAssets(List<Asset> assets)
         {
-            if(assets == null || assets.Count==0)
-            {
-                Console.WriteLine("Error |  No Assets sent.");
-                return 0;
-            }
+            if (assets == null || assets.Count == 0)
+                throw new ArgumentException("No assets sent.");
             await _dbContext.Assets.AddRangeAsync(assets);
             return await _dbContext.SaveChangesAsync();
         }
@@ -48,24 +45,16 @@ namespace Backend.Services
 
         public async Task<int> DeleteAsset(int id)
         {
-            var asset = await _dbContext.Assets.FindAsync(id);
-            if (asset == null)
-            {
-                Console.WriteLine($"Error | Asset with ID {id} not found.");
-                return 0;
-            }
+            var asset = await _dbContext.Assets.FindAsync(id)
+                ?? throw new KeyNotFoundException($"Asset with ID {id} not found.");
             _dbContext.Assets.Remove(asset);
             return await _dbContext.SaveChangesAsync();
         }
         
         public async Task<int> UpdateAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, int imageId, Image image)
         {
-            var asset = await _dbContext.Assets.FindAsync(id);
-            if (asset == null)
-            {
-                Console.WriteLine($"Error | Asset with ID {id} not found.");
-                return 0;
-            }
+            var asset = await _dbContext.Assets.FindAsync(id)
+                ?? throw new KeyNotFoundException($"Asset with ID {id} not found.");
             asset.Name = name;
             asset.MaxHeat = maxHeat;
             asset.ProductionCost = productionCost;
