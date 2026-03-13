@@ -17,6 +17,10 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetAllSources()
         {
             var Sources = await _sourceService.ListSources();
+            if (Sources == null)
+            {
+                return NotFound("No sources found.");
+            }
             return Ok(Sources);
         }
 
@@ -48,5 +52,37 @@ namespace Backend.Controllers
             var Sources = await _sourceService.ListByMonth(month);
             return Ok(Sources);
         }
+
+        [HttpPut("Update/{id:int}")]
+        public async Task<IActionResult> UpdateSource(int id, [FromBody] Source source)
+        {
+            var result = await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);
+            if (result > 0)
+            {
+                return Ok(new { Message = "Source updated successfully." });
+            }
+            else
+            {
+                return BadRequest("Failed to update Source.");
+            }
+        }
+
+        [HttpDelete("Delete/{id:int}")]
+        public async Task<IActionResult> DeleteSource(int id)
+        {
+            var result = await _sourceService.DeleteSource(id);
+            if (result > 0)
+            {
+                return Ok(new { Message = "Source deleted successfully." });
+            }
+            else
+            {
+                return BadRequest("Failed to delete Source.");
+            }
+        }
     }
 }
+
+
+//update controler, delete controler, listadd, error handling
+
