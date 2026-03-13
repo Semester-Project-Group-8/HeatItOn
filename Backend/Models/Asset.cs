@@ -18,7 +18,7 @@ namespace Backend.Models
         [Required]
         public float OilConsumption { get; set; }
         [Required]
-        public float MaxElectricicty { get; set; }
+        public float MaxElectricity { get; set; }
         [Required]
         public int ImageId { get; set; }
         [Required]
