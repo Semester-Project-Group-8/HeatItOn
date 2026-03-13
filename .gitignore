@@ -410,3 +410,9 @@ _UpgradeReport_Files/: 2
 
 Backend/obj
 Frontend/obj
+
+# Postman local workspace config
+.postman/
+
+# Local dev connection string override
+Backend/appsettings.Development.json
