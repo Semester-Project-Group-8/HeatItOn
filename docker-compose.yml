@@ -10,7 +10,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       #- ConnectionStrings__DatabaseConnectionString=Host=db;username=mysql;password=alma;database=heat_db;
     depends_on:
-        - db
+      db:
+        condition: service_healthy
   db:
     image: mysql
     container_name: heat_db_container
@@ -22,6 +23,11 @@ services:
     ports:
       - "3306:3306"
       - "3307:3307"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-palma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:
