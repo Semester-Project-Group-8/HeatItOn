@@ -15,6 +15,16 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+    <StackPanel>
+        <ListBox 
+            Name="resultBox"
+            Width="780"
+            Height="350"
+            Margin="10"
+            Background="Gray">
+        </ListBox>
+        <Button Click="RequestAllButtonClick">
+            Request all
+        </Button>
+    </StackPanel>
 </Window>
