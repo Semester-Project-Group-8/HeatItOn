@@ -23,8 +23,9 @@
             Margin="10"
             Background="Gray">
         </ListBox>
-        <Button Click="RequestAllButtonClick">
-            Request all
+        <Button Click="RequestAllSourceButtonClick">
+            Request all source
         </Button>
+        <Button Click="RequestAllAssetButtonClick">Request all assets</Button>
     </StackPanel>
 </Window>
