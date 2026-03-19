@@ -37,17 +37,18 @@ public class SourceClient
     public async Task<string> Post(Source source)
     {
         HttpResponseMessage response = await _httpClient.PostAsync("", JsonContent.Create(source));
-        return !response.IsSuccessStatusCode ? "Upload failed!" : "Source uploaded succesfully!";
+        return await response.Content.ReadAsStringAsync();
     }
 
-    public Task<Source> Patch()
+    public async Task<Source?> Patch(Source source)
     {
-        throw new System.NotImplementedException();
+        HttpResponseMessage response = await _httpClient.PostAsync("", JsonContent.Create(source));
+        return await response.Content.ReadFromJsonAsync<Source>();
     }
 
-    public async Task<string> Delete<T>(int id)
+    public async Task<Source?> Delete<T>(int id)
     {
         HttpResponseMessage response = await _httpClient.DeleteAsync(id.ToString() );
-        return !response.IsSuccessStatusCode ? "Upload failed!" : "Source uploaded succesfully!";
+        return await response.Content.ReadFromJsonAsync<Source>();
     }
 }
