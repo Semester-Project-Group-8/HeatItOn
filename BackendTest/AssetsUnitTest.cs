@@ -74,6 +74,27 @@ public class AssetServiceTests : IDisposable
         Assert.NotEqual("MashaBoss", savedAsset.Name);
     }
 
+    // [Fact]
+    // public async Task AddAsset_EdgeCase()
+    // {
+    //     var image = new Image { Id = 1, ImageLink = "test.png" };
+    //     _context.Images.Add(image);
+    //     await _context.SaveChangesAsync();
+
+    //     await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+    //         await _assetService.AddAsset(
+    //             id: 1,
+    //             name: null!,
+    //             maxHeat: 0,
+    //             productionCost: 0,
+    //             co2Emission: 0,
+    //             gasConsumption: 0,
+    //             oilConsumption: 0,
+    //             maxElectricity: 0f,
+    //             imageId: 1,
+    //             image: image));
+    // }
+
     [Fact]
     public async Task ListAssets_Multiple()
     {
@@ -108,6 +129,19 @@ public class AssetServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetExistingAsset_NegativeTest()
+    {
+        var image = new Image { Id = 1, ImageLink = "test.png" };
+        _context.Images.Add(image);
+        await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50, 1, image);
+
+        var result = await _assetService.GetAsset(1);
+
+        Assert.NotEqual("Test Asset1111", result.Name);
+        Assert.NotEqual(1000, result.MaxHeat);
+    }
+
+    [Fact]
     public async Task UpdateAsset()
     {
         var image = new Image { Id = 1, ImageLink = "test.png" };
@@ -123,7 +157,22 @@ public class AssetServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateNonExistentAsset()
+    public async Task UpdateAsset_NegativeCase()
+    {
+        var image = new Image { Id = 1, ImageLink = "test.png" };
+        _context.Images.Add(image);
+        await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50, 1, image);
+
+        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55, 1, image);
+
+        Assert.NotEqual(2, result);
+        var updatedAsset = await _assetService.GetAsset(1);
+        Assert.NotEqual("Masha star", updatedAsset.Name);
+        Assert.NotEqual(1, updatedAsset.MaxHeat);
+    }
+
+    [Fact]
+    public async Task UpdateNonExistentAsset_EdgeCase()
     {
         var image = new Image { Id = 1, ImageLink = "test.png" };
 
