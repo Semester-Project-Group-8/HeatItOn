@@ -22,9 +22,9 @@ namespace Backend.Controllers
                 var assets = await _assetsService.ListAssets();
                 return Ok(assets);
             }
-            catch (Exception)
+            catch (InvalidOperationException ex)
             {
-                return StatusCode(500);
+                return StatusCode(503, new { message = ex.Message });
             }
         }
 
@@ -63,9 +63,9 @@ namespace Backend.Controllers
                 await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageId, a.Image);
                 return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption, MaxElectricity = a.MaxElectricity, ImageId = a.ImageId });
             }
-            catch (ArgumentException)
+            catch (InvalidOperationException ex)
             {
-                return BadRequest();
+                return Conflict(new { message = ex.Message });
             }
         }
 
@@ -81,6 +81,10 @@ namespace Backend.Controllers
             {
                 return NotFound();
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -94,6 +98,10 @@ namespace Backend.Controllers
             catch (KeyNotFoundException)
             {
                 return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
         }
     }
