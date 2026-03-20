@@ -36,6 +36,10 @@ namespace Backend.Data.Migrations
                     b.Property<float>("GasConsumption")
                         .HasColumnType("float");
 
+                    b.Property<int>("ImageId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("MaxElectricity")
                     b.Property<float>("MaxElectricity")
                         .HasColumnType("float");
 

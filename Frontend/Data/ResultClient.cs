@@ -9,26 +9,23 @@ namespace Frontend.Data;
 
 public class ResultClient
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _client;
 
-    public ResultClient()
+    public ResultClient(HttpClient httpClient)
     {
-        _httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri("http://localhost:8080/Result")
-        };
+        _client = httpClient;
     }
 
     public async Task<Result?> Get(int id)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync(id.ToString());
+        HttpResponseMessage response = await _client.GetAsync(id.ToString());
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
     public async Task<List<Result>?> GetAll()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync("");
+        HttpResponseMessage response = await _client.GetAsync("");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Result>>();
         return result;
@@ -36,19 +33,19 @@ public class ResultClient
 
     public async Task<string> Post(Result result)
     {
-        HttpResponseMessage response = await _httpClient.PostAsync("", JsonContent.Create(result));
+        HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
         return await response.Content.ReadAsStringAsync();
     }
 
     public async Task<Result?> Patch(Result result)
     {
-        HttpResponseMessage response = await _httpClient.PostAsync("", JsonContent.Create(result));
+        HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
     public async Task<Result?> Delete<T>(int id)
     {
-        HttpResponseMessage response = await _httpClient.DeleteAsync(id.ToString() );
+        HttpResponseMessage response = await _client.DeleteAsync(id.ToString() );
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 }

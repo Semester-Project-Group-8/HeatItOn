@@ -9,26 +9,24 @@ namespace Frontend.Data;
 
 public class SourceClient
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _client;
+    private const string UrlExtension = "Source";
 
-    public SourceClient()
+    public SourceClient(HttpClient httpClient)
     {
-        _httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri("http://localhost:8080/Source")
-        };
+        _client = httpClient;
     }
 
     public async Task<Source?> Get(int id)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync(id.ToString());
+        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Source>();
     }
 
     public async Task<List<Source>?> GetAll()
     {
-        HttpResponseMessage response = await _httpClient.GetAsync("");
+        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Source>>();
         return result;
@@ -36,19 +34,19 @@ public class SourceClient
 
     public async Task<string> Post(Source source)
     {
-        HttpResponseMessage response = await _httpClient.PostAsync("", JsonContent.Create(source));
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
         return await response.Content.ReadAsStringAsync();
     }
 
     public async Task<Source?> Patch(Source source)
     {
-        HttpResponseMessage response = await _httpClient.PostAsync("", JsonContent.Create(source));
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(source));
         return await response.Content.ReadFromJsonAsync<Source>();
     }
 
-    public async Task<Source?> Delete<T>(int id)
+    public async Task<Source?> Delete(int id)
     {
-        HttpResponseMessage response = await _httpClient.DeleteAsync(id.ToString() );
+        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}" );
         return await response.Content.ReadFromJsonAsync<Source>();
     }
 }

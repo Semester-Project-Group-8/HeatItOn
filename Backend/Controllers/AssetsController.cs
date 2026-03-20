@@ -17,15 +17,8 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAssets()
         {
-            try
-            {
-                var assets = await _assetsService.ListAssets();
-                return Ok(assets);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500);
-            }
+            var assets = await _assetsService.ListAssets();
+            return Ok(assets);
         }
 
         [HttpGet("{id:int}")]
@@ -81,7 +74,7 @@ namespace Backend.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPatch("{id:int}")]
         public async Task<IActionResult> UpdateAsset(int id, [FromBody] Asset asset)
         {
             try
