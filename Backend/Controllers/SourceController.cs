@@ -53,6 +53,13 @@ namespace Backend.Controllers
             return Ok(Sources);
         }
 
+        [HttpGet("{date:DateTime}")]
+        public async Task<IActionResult> GetByHour(DateTime date)
+        {
+            var Sources = await _sourceService.ListByHour(date);
+            return Ok(Sources);
+        }
+
         [HttpPut("Update/{id:int}")]
         public async Task<IActionResult> UpdateSource(int id, [FromBody] Source source)
         {
