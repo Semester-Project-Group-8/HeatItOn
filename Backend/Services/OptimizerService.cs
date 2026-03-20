@@ -20,7 +20,7 @@ namespace Backend.Services
 
         public async Task<float> CalculateNetProductionCost(int assetId,DateTime date)
         {
-            Asset asset= await _assetService.GetAsset(assetId);
+            Asset asset = await _assetService.GetAsset(assetId);
             float netProductionCost = asset.ProductionCost;
             if(asset.MaxElectricity<0)
             {
