@@ -3,9 +3,12 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System.Net.Http;
 using Avalonia.Markup.Xaml;
+using Frontend.Data;
 using Frontend.ViewModels;
 using Frontend.Views;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Frontend;
 
@@ -18,14 +21,21 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        HttpClient client = new HttpClient()
+        {
+            BaseAddress = new System.Uri("http://localhost:8080/")
+        };
+        DisableAvaloniaDataAnnotationValidation();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = new MainWindowViewModel(
+                    new AssetClient(client),
+                    new SourceClient(client)
+                )
             };
         }
 

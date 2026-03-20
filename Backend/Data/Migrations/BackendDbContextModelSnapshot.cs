@@ -39,7 +39,7 @@ namespace Backend.Migrations
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
 
-                    b.Property<float>("MaxElectricicty")
+                    b.Property<float>("MaxElectricity")
                         .HasColumnType("float");
 
                     b.Property<float>("MaxHeat")

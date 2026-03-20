@@ -8,19 +8,16 @@ namespace Frontend.Data;
 
 public class OptimizerClient
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _client;
     
     public OptimizerClient(HttpClient httpClient)
     {
-        _httpClient = new HttpClient()
-        {
-            BaseAddress = new Uri("http://localhost:8080/Optimizer")
-        };
+        _client = httpClient;
     }
 
     public async Task<HttpResponseMessage> Optimize(List<int> assetIds)
     {
-        var result = await _httpClient.PostAsync("Optimize", JsonContent.Create(assetIds));
+        var result = await _client.PostAsync("Optimize", JsonContent.Create(assetIds));
         return result;
     }
 }

@@ -53,7 +53,7 @@ namespace Backend.Controllers
             return Ok(Sources);
         }
 
-        [HttpPut("Update/{id:int}")]
+        [HttpPatch("Update/{id:int}")]
         public async Task<IActionResult> UpdateSource(int id, [FromBody] Source source)
         {
             var result = await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);

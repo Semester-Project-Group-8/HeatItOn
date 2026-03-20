@@ -23,9 +23,21 @@
             Margin="10"
             Background="Gray">
         </ListBox>
-        <Button Click="RequestAllSourceButtonClick">
-            Request all source
-        </Button>
-        <Button Click="RequestAllAssetButtonClick">Request all assets</Button>
+        <Grid ColumnDefinitions="*,*,*" RowDefinitions="*,*">
+            <Button Click="RequestAllSourceButtonClick" Grid.Column="0" Grid.Row="0">
+                Request all source
+            </Button>
+            <Button Click="RequestAllAssetButtonClick" Grid.Column="0" Grid.Row="1">Request all assets</Button>
+            
+            <Button Click="AddSourceButtonClick" Grid.Column="1" Grid.Row="0">
+                 Add source
+            </Button>
+            <Button Click="AddAssetButtonClick" Grid.Column="1" Grid.Row="1">Add assets</Button>
+            
+            <Button Click="DeleteButtonClick" Grid.Column="2" Grid.Row="0">
+                Delete source
+            </Button>
+            <Button Click="DeleteAssetButtonClick" Grid.Column="2" Grid.Row="1">Delete assets</Button>
+        </Grid>
     </StackPanel>
 </Window>
