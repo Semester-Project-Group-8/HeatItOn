@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-namespace Backend.Models
+﻿namespace Frontend.Models
 {
     public class Asset
     {
