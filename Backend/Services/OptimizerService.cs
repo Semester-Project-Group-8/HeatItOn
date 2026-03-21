@@ -1,6 +1,7 @@
 ﻿using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Backend.Services
 {
@@ -19,16 +20,16 @@ namespace Backend.Services
             //_resultListService = resultListService;
         }
 
-        public async Task<float> CalculateNetProductionCost(int assetId,DateTime date)
+        public async Task<float> CalculateNetProductionCost(int assetId, DateTime date)
         {
             Asset asset = await _assetService.GetAsset(assetId);
             float netProductionCost = asset.ProductionCost * asset.MaxHeat;
-            if(asset.MaxElectricity<0)
+            if (asset.MaxElectricity < 0)
             {
                 Source source = await _sourceService.ListByHour(date);
-                netProductionCost += source.ElectricityPrice*asset.MaxElectricity*-1;
+                netProductionCost += source.ElectricityPrice * asset.MaxElectricity * -1;
             }
-            if(asset.MaxElectricity>0)
+            if (asset.MaxElectricity > 0)
             {
                 Source source = await _sourceService.ListByHour(date);
                 netProductionCost -= source.ElectricityPrice * asset.MaxElectricity;
@@ -36,7 +37,7 @@ namespace Backend.Services
             return netProductionCost;
         }
 
-        public Task<IActionResult> Optimize(List<Source> AllSources,List<Asset> ScenarioAssets)
+        public async Task<IActionResult> Optimize(List<Source> AllSources, List<Asset> ScenarioAssets)
         {
             Dictionary<Asset, Task<float>> price = new();
             foreach (var asset in ScenarioAssets)
@@ -49,8 +50,12 @@ namespace Backend.Services
                 {
                     price[asset] = CalculateNetProductionCost(asset.Id, source.TimeFrom);
                 }
-                price.Order<KeyValuePair<Asset,Task<float>>>;
             }
+            var sorted = (await Task.WhenAll(
+                price.Select(async kvp => new KeyValuePair<Asset, float>(kvp.Key, await kvp.Value))
+            ))
+            .OrderBy(kvp => kvp.Value)
+            .ToList();
             return null;
         }
     }
