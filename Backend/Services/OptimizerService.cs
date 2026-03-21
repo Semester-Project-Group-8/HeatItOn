@@ -1,5 +1,6 @@
 ﻿using Backend.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace Backend.Services
 {
@@ -21,17 +22,35 @@ namespace Backend.Services
         public async Task<float> CalculateNetProductionCost(int assetId,DateTime date)
         {
             Asset asset = await _assetService.GetAsset(assetId);
-            float netProductionCost = asset.ProductionCost;
+            float netProductionCost = asset.ProductionCost * asset.MaxHeat;
             if(asset.MaxElectricity<0)
             {
                 Source source = await _sourceService.ListByHour(date);
-                netProductionCost += source.ElectricityPrice*asset.MaxElectricity*1;
+                netProductionCost += source.ElectricityPrice*asset.MaxElectricity*-1;
+            }
+            if(asset.MaxElectricity>0)
+            {
+                Source source = await _sourceService.ListByHour(date);
+                netProductionCost -= source.ElectricityPrice * asset.MaxElectricity;
             }
             return netProductionCost;
         }
 
-        public Task<IActionResult> Optimize()
+        public Task<IActionResult> Optimize(List<Source> AllSources,List<Asset> ScenarioAssets)
         {
+            Dictionary<Asset, Task<float>> price = new();
+            foreach (var asset in ScenarioAssets)
+            {
+                price.Add(asset, Task.FromResult(0f));
+            }
+            foreach (var source in AllSources)
+            {
+                foreach (var asset in ScenarioAssets)
+                {
+                    price[asset] = CalculateNetProductionCost(asset.Id, source.TimeFrom);
+                }
+                price.Order<KeyValuePair<Asset,Task<float>>>;
+            }
             return null;
         }
     }
