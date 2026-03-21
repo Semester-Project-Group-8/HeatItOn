@@ -39,23 +39,21 @@ namespace Backend.Services
 
         public async Task<IActionResult> Optimize(List<Source> AllSources, List<Asset> ScenarioAssets)
         {
-            Dictionary<Asset, Task<float>> price = new();
-            foreach (var asset in ScenarioAssets)
-            {
-                price.Add(asset, Task.FromResult(0f));
-            }
+            List<(Asset asset, float cost)> prices = new();
+
             foreach (var source in AllSources)
             {
+                prices.Clear();
+
                 foreach (var asset in ScenarioAssets)
                 {
-                    price[asset] = CalculateNetProductionCost(asset.Id, source.TimeFrom);
+                    float cost = await CalculateNetProductionCost(asset.Id, source.TimeFrom);
+                    prices.Add((asset, cost));
                 }
+
+                prices.Sort((a, b) => a.cost.CompareTo(b.cost));
             }
-            var sorted = (await Task.WhenAll(
-                price.Select(async kvp => new KeyValuePair<Asset, float>(kvp.Key, await kvp.Value))
-            ))
-            .OrderBy(kvp => kvp.Value)
-            .ToList();
+
             return null;
         }
     }
