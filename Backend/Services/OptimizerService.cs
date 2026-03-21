@@ -37,21 +37,36 @@ namespace Backend.Services
             return netProductionCost;
         }
 
-        public async Task<IActionResult> Optimize(List<Source> AllSources, List<Asset> ScenarioAssets)
+        public async Task<IActionResult> Optimize(List<Source> AllSources, List<Asset> ScenarioAssets)//Task<List<ResultList>>
         {
             List<(Asset asset, float cost)> prices = new();
-
+            int maintencance = 45;
             foreach (var source in AllSources)
             {
                 prices.Clear();
 
                 foreach (var asset in ScenarioAssets)
                 {
+                    //if (asset.Id == 2 && maintencance != 0)//if generator no.2 under maintenance period skip
+                    {
+                        //continue;
+                    }
                     float cost = await CalculateNetProductionCost(asset.Id, source.TimeFrom);
                     prices.Add((asset, cost));
                 }
-
                 prices.Sort((a, b) => a.cost.CompareTo(b.cost));
+                float metEnergy = 0;
+                int usedGenerators = 0;
+                while(metEnergy < source.HeatDemand)
+                {
+                    metEnergy += prices[usedGenerators].asset.MaxHeat;
+                    usedGenerators++;
+                    //create result
+                }
+
+                //create result list
+                //add resultlist to list of result list
+                maintencance--;
             }
 
             return null;
