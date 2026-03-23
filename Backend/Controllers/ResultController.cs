@@ -63,10 +63,12 @@ namespace Backend.Controllers
         {
             var rowsAffected = await _resultService.AddResult(
                 incomingResult.Id,
-                incomingResult.TimeFrom,
-                incomingResult.TimeTo,
-                incomingResult.HeatDemand,
-                incomingResult.ElectricityPrice
+                incomingResult.HeatProduction,
+                incomingResult.Electricity,
+                incomingResult.ProductionCost,
+                incomingResult.PrimaryEnergyConsumed,
+                incomingResult.CO2Produced,
+                incomingResult.AssetId
             );
 
             if (rowsAffected > 0)
@@ -97,11 +99,13 @@ namespace Backend.Controllers
             try
             {
                 var rowsAffected = await _resultService.UpdateResult(
-                    id,
-                    incomingResult.TimeFrom,
-                    incomingResult.TimeTo,
-                    incomingResult.HeatDemand,
-                    incomingResult.ElectricityPrice
+                    incomingResult.Id,
+                    incomingResult.HeatProduction,
+                    incomingResult.Electricity,
+                    incomingResult.ProductionCost,
+                    incomingResult.PrimaryEnergyConsumed,
+                    incomingResult.CO2Produced,
+                    incomingResult.AssetId
                 );
 
                 if (rowsAffected > 0)

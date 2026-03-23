@@ -47,7 +47,7 @@ namespace Backend.Services
 			var result = await _dbContext.Results.FirstOrDefaultAsync(r => r.AssetId == assetId);
 			if (result == null)
 			{
-				throw new KeyNotFoundException($"Error | Result with Asset id {AssetId} not found.");
+				throw new KeyNotFoundException($"Error | Result with Asset id {assetId} not found.");
 			}
 			return result;
 		}
@@ -58,10 +58,12 @@ namespace Backend.Services
 			Result result = new Result
 			{
 				Id = id,
-				TimeFrom = From,
-				TimeTo = Til,
-				HeatDemand = Heat,
-				ElectricityPrice = Electro
+				HeatProduction = heatProduction,
+				Electricity = electricity,
+				ProductionCost = productionCost,
+				PrimaryEnergyConsumed = primaryEnergyConsumed,
+				CO2Produced = co2Produced,
+				AssetId = assetId
 			};
 			await _dbContext.Results.AddAsync(result);
 			return await _dbContext.SaveChangesAsync();
@@ -75,11 +77,13 @@ namespace Backend.Services
 			{
 				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
 			}
-			result.TimeFrom = From;
-			result.TimeTo = Til;
-			result.HeatDemand = Heat;
-			result.ElectricityPrice = Electro;
-			return await _dbContext.SaveChangesAsync();
+
+			result.HeatProduction = heatProduction;
+			result.Electricity = electricity;
+			result.ProductionCost = productionCost;
+			result.PrimaryEnergyConsumed = primaryEnergyConsumed;
+			result.CO2Produced = co2Produced;
+			result.AssetId = assetId;
 		}
 
 		// DeleteResult
