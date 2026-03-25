@@ -1,18 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Nodes;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Frontend.Data;
 using Frontend.Models;
 using Frontend.ViewModels;
 
 namespace Frontend.Views;
 
-public partial class MainWindow : Window
+public partial class TestConnectionWindow : Window
 {
     MainWindowViewModel? ViewModel => (MainWindowViewModel)DataContext!;
-    public MainWindow()
+    public TestConnectionWindow()
     {
         InitializeComponent();
     }
@@ -84,19 +82,25 @@ public partial class MainWindow : Window
 
     private void AddAssetButtonClick(object? sender, RoutedEventArgs e)
     {
+        Asset asset = new Asset();
+        asset.Id = 6001;
+        asset.Name = "TestAsset";
+        asset.MaxHeat = 10.0f;
+        asset.ProductionCost = 100;
+        asset.CO2Emission = 50;
+        asset.GasConsumption = 50;
+        asset.OilConsumption = 0;
+        asset.MaxElectricity = 20;
     }
 
     private async void AddSourceButtonClick(object? sender, RoutedEventArgs e)
     {
-        Source source = new Source
-        (
-            6001,
-            DateTime.Parse("2026-02-12T16:00Z"),
-            DateTime.Parse("2026-02-12T17:00Z"),
-            8.6f,
-            730
-        );
-        
+        Source source = new Source();
+        source.Id = 6001;
+        source.TimeFrom = DateTime.Parse("2026-02-12T16:00Z");
+        source.TimeTo = DateTime.Parse("2026-02-12T17:00Z");
+        source.HeatDemand = 8.6f;
+        source.ElectricityPrice = 730;
         var result = await ViewModel.SourceClient.Post(source);
         GetSources();
     }
