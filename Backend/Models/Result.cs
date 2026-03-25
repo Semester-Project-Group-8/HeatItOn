@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models
 {
@@ -17,8 +18,9 @@ namespace Backend.Models
         [Required]
         public int CO2Produced { get; set; }
         [Required]
+        [ForeignKey("Asset")]
         public int AssetId { get; set; }
-        [Required]
-        public Asset Asset { get; set; }
+        
+        public Asset? Asset { get; set; }
     }
 }

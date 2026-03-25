@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace Backend.Data.Migrations
 {
     [DbContext(typeof(BackendDbContext))]
-    [Migration("20260227084335_Fifth")]
-    partial class Fifth
+    [Migration("20260325115914_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,10 +39,7 @@ namespace Backend.Migrations
                     b.Property<float>("GasConsumption")
                         .HasColumnType("float");
 
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<float>("MaxElectricicty")
+                    b.Property<float>("MaxElectricity")
                         .HasColumnType("float");
 
                     b.Property<float>("MaxHeat")
@@ -59,8 +56,6 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
 
                     b.ToTable("Assets");
                 });
@@ -138,17 +133,6 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Sources");
-                });
-
-            modelBuilder.Entity("Backend.Models.Asset", b =>
-                {
-                    b.HasOne("Backend.Models.Image", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Image");
                 });
 
             modelBuilder.Entity("Backend.Models.Result", b =>
