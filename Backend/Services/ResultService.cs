@@ -53,7 +53,7 @@ namespace Backend.Services
 		}
 
 		// AddResult ( for a single result )
-		public async Task<int> AddResult(int id, float heatProduction, float electricity , float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
+		public async Task<int> AddResult(int id, float heatProduction, float electricity , float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId, Asset asset)
 		{
 			Result result = new Result
 			{
@@ -63,14 +63,15 @@ namespace Backend.Services
 				ProductionCost = productionCost,
 				PrimaryEnergyConsumed = primaryEnergyConsumed,
 				CO2Produced = co2Produced,
-				AssetId = assetId
-			};
+				AssetId = assetId,
+				Asset = asset
+            };
 			await _dbContext.Results.AddAsync(result);
 			return await _dbContext.SaveChangesAsync();
 		}
 
 		// UpdateResult
-		public async Task<int> UpdateResult(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
+		public async Task<int> UpdateResult(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId, Asset asset)
         {
 			var result = await _dbContext.Results.FindAsync(id);
 			if (result == null)
@@ -84,6 +85,7 @@ namespace Backend.Services
 			result.PrimaryEnergyConsumed = primaryEnergyConsumed;
 			result.CO2Produced = co2Produced;
 			result.AssetId = assetId;
+			result.Asset = asset;
 
             return await _dbContext.SaveChangesAsync();
         }

@@ -68,7 +68,8 @@ namespace Backend.Controllers
                 incomingResult.ProductionCost,
                 incomingResult.PrimaryEnergyConsumed,
                 incomingResult.CO2Produced,
-                incomingResult.AssetId
+                incomingResult.AssetId,
+                incomingResult.Asset
             );
 
             if (rowsAffected > 0)
@@ -105,7 +106,8 @@ namespace Backend.Controllers
                     incomingResult.ProductionCost,
                     incomingResult.PrimaryEnergyConsumed,
                     incomingResult.CO2Produced,
-                    incomingResult.AssetId
+                    incomingResult.AssetId,
+                    incomingResult.Asset
                 );
 
                 if (rowsAffected > 0)
