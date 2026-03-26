@@ -24,7 +24,7 @@ namespace Backend.Services
             return await _dbContext.SaveChangesAsync();
         }
         
-        public async Task<int> AddAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, int imageId, Image image)
+        public async Task<int> AddAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity)
         {
             Asset asset = new Asset
             {
@@ -36,8 +36,6 @@ namespace Backend.Services
                 GasConsumption= gasConsumption,
                 OilConsumption= oilConsumption,
                 MaxElectricity= maxElectricity,
-                ImageId= imageId,
-                Image= image
             };
             await _dbContext.Assets.AddAsync(asset);
             return await _dbContext.SaveChangesAsync();
@@ -51,7 +49,7 @@ namespace Backend.Services
             return await _dbContext.SaveChangesAsync();
         }
         
-        public async Task<int> UpdateAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, int imageId, Image image)
+        public async Task<int> UpdateAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity)
         {
             var asset = await _dbContext.Assets.FindAsync(id)
                 ?? throw new KeyNotFoundException($"Asset with ID {id} not found.");
@@ -62,8 +60,6 @@ namespace Backend.Services
             asset.GasConsumption = gasConsumption;
             asset.OilConsumption = oilConsumption;
             asset.MaxElectricity = maxElectricity;
-            asset.ImageId = imageId;
-            asset.Image = image;
 
             _dbContext.Assets.Update(asset);
             return await _dbContext.SaveChangesAsync();

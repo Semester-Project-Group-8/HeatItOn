@@ -1,16 +1,41 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace Backend.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Third : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "Assets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MaxHeat = table.Column<float>(type: "float", nullable: false),
+                    ProductionCost = table.Column<int>(type: "int", nullable: false),
+                    CO2Emission = table.Column<int>(type: "int", nullable: false),
+                    GasConsumption = table.Column<float>(type: "float", nullable: false),
+                    OilConsumption = table.Column<float>(type: "float", nullable: false),
+                    MaxElectricity = table.Column<float>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assets", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "Images",
                 columns: table => new
@@ -27,30 +52,19 @@ namespace Backend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Assets",
+                name: "Sources",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MaxHeat = table.Column<float>(type: "float", nullable: false),
-                    ProductionCost = table.Column<int>(type: "int", nullable: false),
-                    CO2Emission = table.Column<int>(type: "int", nullable: false),
-                    GasConsumption = table.Column<float>(type: "float", nullable: false),
-                    OilConsumption = table.Column<float>(type: "float", nullable: false),
-                    MaxElectricicty = table.Column<float>(type: "float", nullable: false),
-                    ImageId = table.Column<int>(type: "int", nullable: false)
+                    TimeFrom = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    TimeTo = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    HeatDemand = table.Column<float>(type: "float", nullable: false),
+                    ElectricityPrice = table.Column<float>(type: "float", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Assets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Assets_Images_ImageId",
-                        column: x => x.ImageId,
-                        principalTable: "Images",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Sources", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -80,11 +94,6 @@ namespace Backend.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assets_ImageId",
-                table: "Assets",
-                column: "ImageId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Results_AssetId",
                 table: "Results",
                 column: "AssetId");
@@ -94,13 +103,16 @@ namespace Backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Images");
+
+            migrationBuilder.DropTable(
                 name: "Results");
 
             migrationBuilder.DropTable(
-                name: "Assets");
+                name: "Sources");
 
             migrationBuilder.DropTable(
-                name: "Images");
+                name: "Assets");
         }
     }
 }
