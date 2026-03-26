@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Frontend.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Frontend.Views.ResultsTabView"
+             x:DataType="vm:ResultsTabViewModel">
+
+    <Design.DataContext>
+        <vm:ResultsTabViewModel/>
+    </Design.DataContext>
+
+    <!-- Example content -->
+    <StackPanel Margin="10">
+        <TextBlock Text="Results Tab" FontSize="20"/>
+    </StackPanel>
+
+</UserControl>
