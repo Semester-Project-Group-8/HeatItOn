@@ -7,14 +7,13 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Frontend.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
         Title="Frontend">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TabControl Margin="5">
+    <TabControl Margin="0" Padding = "0">
 
         <TabItem Header="Assets">
             <views:AssetsTabView/>

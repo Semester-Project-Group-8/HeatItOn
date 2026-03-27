@@ -6,6 +6,6 @@ public partial class AssetsTabView : UserControl
 {
     public AssetsTabView()
     {
-        InitializeComponent(); 
+        InitializeComponent();
     }
 }
