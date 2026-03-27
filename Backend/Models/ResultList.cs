@@ -9,6 +9,8 @@ namespace Backend.Models
         [Required]
         [DataType(DataType.DateTime)]
         public DateTime TimeFrom { get; set; }
+        [DataType(DataType.DateTime)]
+        public DateTime TimeTo { get; set; }
         [Required]
         public List<Result> Results { get; set; } = new List<Result>();
     }
