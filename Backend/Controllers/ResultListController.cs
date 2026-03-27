@@ -43,16 +43,34 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateResultList(List<Result> resultList)
+        public async Task<IActionResult> CreateResultList([FromQuery] DateTime timeFrom, [FromBody] List<Result> resultList)
         {
             try
             {
-                await _resultListService.CreateResultList(resultList);
-                return Ok();
+                var createdId = await _resultListService.CreateResultList(timeFrom, resultList);
+                return Created($"/ResultList/{createdId}", new { id = createdId });
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
             }
             catch (Exception)
             {
                 return StatusCode(500);
+            }
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteResultList(int id)
+        {
+            try
+            {
+                await _resultListService.DeleteResultList(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
             }
         }
     }

@@ -8,5 +8,6 @@ namespace Backend.Data
         public DbSet<Models.Asset> Assets{ get; set; }
         public DbSet<Models.Image> Images { get; set; }
         public DbSet<Models.Result> Results{ get; set; }
+        public DbSet<Models.ResultList> ResultList { get; set; }
     }
 }

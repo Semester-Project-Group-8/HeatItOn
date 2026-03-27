@@ -22,5 +22,10 @@ namespace Backend.Models
         public int AssetId { get; set; }
         
         public Asset? Asset { get; set; }
+
+        [ForeignKey("ResultList")]
+        public int? ResultListId { get; set; }
+
+        public ResultList? ResultList { get; set; }
     }
 }
