@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace Backend.Data.Migrations
 {
     [DbContext(typeof(BackendDbContext))]
-    [Migration("20260227082128_Fourth")]
-    partial class Fourth
+    [Migration("20260325120437_asd")]
+    partial class asd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,10 +39,7 @@ namespace Backend.Migrations
                     b.Property<float>("GasConsumption")
                         .HasColumnType("float");
 
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<float>("MaxElectricicty")
+                    b.Property<float>("MaxElectricity")
                         .HasColumnType("float");
 
                     b.Property<float>("MaxHeat")
@@ -59,8 +56,6 @@ namespace Backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
 
                     b.ToTable("Assets");
                 });
@@ -117,38 +112,27 @@ namespace Backend.Migrations
 
             modelBuilder.Entity("Backend.Models.Source", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ID"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<float>("ElectricityPrice")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<float>("HeatDemand")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime>("TimeFrom")
                         .HasColumnType("datetime(6)");
 
-                    b.HasKey("ID");
+                    b.Property<DateTime>("TimeTo")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Sources");
-                });
-
-            modelBuilder.Entity("Backend.Models.Asset", b =>
-                {
-                    b.HasOne("Backend.Models.Image", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Image");
                 });
 
             modelBuilder.Entity("Backend.Models.Result", b =>
