@@ -16,41 +16,50 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllSources()
         {
-            var Sources = await _sourceService.ListSources();
-            if (Sources == null)
+            try
             {
-                return NotFound("No sources found.");
+                var Sources = await _sourceService.ListSources();
+                return Ok(Sources);
             }
-            return Ok(Sources);
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(503, new { message = ex.Message });
+            }
         }
 
         [HttpPost("Add")]
         public async Task<IActionResult> AddSource([FromBody] Source source)
         {
-            Source s = new Source
+            try
             {
-                Id = source.Id,
-                TimeFrom = source.TimeFrom,
-                TimeTo = source.TimeTo,
-                HeatDemand = source.HeatDemand,
-                ElectricityPrice = source.ElectricityPrice
-            };
-            var result = await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
-            if (result > 0)
-            {
+                Source s = new Source
+                {
+                    Id = source.Id,
+                    TimeFrom = source.TimeFrom,
+                    TimeTo = source.TimeTo,
+                    HeatDemand = source.HeatDemand,
+                    ElectricityPrice = source.ElectricityPrice
+                };
+                await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
                 return Created($"/Source/{s.Id}", new { Id = s.Id, TimeFrom = s.TimeFrom, TimeTo = s.TimeTo, HeatDemand = s.HeatDemand, ElectricityPrice = s.ElectricityPrice });
             }
-            else
+            catch (InvalidOperationException ex)
             {
-                return BadRequest("Failed to add Source.");
-
+                return Conflict(new { message = ex.Message });
             }
         }
         [HttpGet("{month:int}")]
         public async Task<IActionResult> GetByMonth(int month)
         {
-            var Sources = await _sourceService.ListByMonth(month);
-            return Ok(Sources);
+            try
+            {
+                var Sources = await _sourceService.ListByMonth(month);
+                return Ok(Sources);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(503, new { message = ex.Message });
+            }
         }
 
         [HttpGet("{date:DateTime}")]
@@ -63,33 +72,38 @@ namespace Backend.Controllers
         [HttpPut("Update/{id:int}")]
         public async Task<IActionResult> UpdateSource(int id, [FromBody] Source source)
         {
-            var result = await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);
-            if (result > 0)
+            try
             {
+                await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);
                 return Ok(new { Message = "Source updated successfully." });
             }
-            else
+            catch (KeyNotFoundException)
             {
-                return BadRequest("Failed to update Source.");
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
         }
 
         [HttpDelete("Delete/{id:int}")]
         public async Task<IActionResult> DeleteSource(int id)
         {
-            var result = await _sourceService.DeleteSource(id);
-            if (result > 0)
+            try
             {
+                await _sourceService.DeleteSource(id);
                 return Ok(new { Message = "Source deleted successfully." });
             }
-            else
+            catch (KeyNotFoundException)
             {
-                return BadRequest("Failed to delete Source.");
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
         }
     }
 }
-
-
-//update controler, delete controler, listadd, error handling
 
