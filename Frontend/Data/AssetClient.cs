@@ -45,9 +45,8 @@ public class AssetClient
         return await response.Content.ReadFromJsonAsync<Asset>();
     }
 
-    public async Task<Asset?> Delete<T>(int id)
+    public async void Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/{id.ToString()}");
-        return await response.Content.ReadFromJsonAsync<Asset>();
+        HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
     }
 }

@@ -69,9 +69,10 @@ public partial class TestConnectionWindow : Window
         GetAssets();
     }
 
-    private void DeleteAssetButtonClick(object? sender, RoutedEventArgs e)
+    private async void DeleteAssetButtonClick(object? sender, RoutedEventArgs e)
     {
-        
+        ViewModel.AssetClient.Delete(6001);
+        GetAssets();
     }
 
     private async void DeleteButtonClick(object? sender, RoutedEventArgs e)
@@ -80,7 +81,7 @@ public partial class TestConnectionWindow : Window
         GetSources();
     }
 
-    private void AddAssetButtonClick(object? sender, RoutedEventArgs e)
+    private async void AddAssetButtonClick(object? sender, RoutedEventArgs e)
     {
         Asset asset = new Asset();
         asset.Id = 6001;
@@ -91,6 +92,8 @@ public partial class TestConnectionWindow : Window
         asset.GasConsumption = 50;
         asset.OilConsumption = 0;
         asset.MaxElectricity = 20;
+        var result = await ViewModel.AssetClient.Post(asset);
+        GetAssets();
     }
 
     private async void AddSourceButtonClick(object? sender, RoutedEventArgs e)
