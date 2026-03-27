@@ -23,6 +23,7 @@ builder.Services.AddDbContext<BackendDbContext>(
 builder.Services.AddScoped<SourceService>();
 builder.Services.AddScoped<AssetsService>();
 builder.Services.AddScoped<ResultService>();
+builder.Services.AddScoped<ResultListService>();
 
 var app = builder.Build();
 
