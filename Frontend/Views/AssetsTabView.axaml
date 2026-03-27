@@ -7,13 +7,192 @@
              x:Class="Frontend.Views.AssetsTabView"
              x:DataType="vm:AssetsTabViewModel">
 
+    <UserControl.Styles>
+        <Style Selector="ToggleButton.asset-card">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="308"/>
+            <Setter Property="Height" Value="300"/>
+            <Setter Property="Padding" Value="10"/>
+
+        </Style>
+        <Style Selector="Button.card-corner-btn">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Panel.ZIndex" Value="10"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Content" Value="  ..."/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="StackPanel.asset-card-content">
+            <Setter Property="Margin" Value="0,24,0,0"/>
+        </Style>
+    </UserControl.Styles>
+
     <Design.DataContext>
         <vm:AssetsTabViewModel/>
     </Design.DataContext>
 
-    <!-- Your tab UI goes here -->
-    <StackPanel Margin="10">
-        <TextBlock Text="Assets Tab" FontSize="20"/>
-    </StackPanel>
+    <SplitView IsPaneOpen = "True" OpenPaneLength="200" PanePlacement="Left"
+    DisplayMode="Inline">
+        <SplitView.Pane>
+            <DockPanel LastChildFill="False">
+                <RadioButton DockPanel.Dock = "Top"
+                FontSize = "18"
+                Margin = "15,15,15,7.5" Content = "Scenario 1"/>
 
+                <RadioButton DockPanel.Dock = "Top"
+                FontSize = "18"
+                Margin = "15,7.5,15,7.5" Content = "Scenario 2"/>
+
+                <RadioButton DockPanel.Dock = "Top"
+                FontSize = "18"
+                Margin = "15,7.5,15,15" Content = "Custom"/>
+            </DockPanel>
+        </SplitView.Pane>
+        <SplitView.Content>
+            <Grid RowDefinitions="*,Auto" Margin="5">
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+                    <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"/>
+                    <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                </Grid>
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto,*" ColumnSpacing="10" RowSpacing="10">
+                    
+                    <ToggleButton Classes="asset-card"
+                                  Grid.Row="0"
+                                  Grid.Column="0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  HorizontalContentAlignment="Left"
+                                  VerticalContentAlignment="Top">
+                        <Grid>
+                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                <Image Source="/Assets/gb1.png"
+                                       Height="100"
+                                       Stretch="UniformToFill"/>
+                                <TextBlock Text = "GB1"/>
+                                <TextBlock Text = "Max heat: 3,0 MW"/>
+                                <TextBlock Text = "Production costs: 510 DKK/MWh(th)"/>
+                                <TextBlock Text = "CO2 emissions: 132 kg/MWh(th)"/>
+                                <TextBlock Text = "Gas consumption: 1,05 MWh(gas)/MWh(th)"/>
+                            </StackPanel>
+                            <Button Classes="card-corner-btn"/>
+                        </Grid>
+                    </ToggleButton>
+                    <ToggleButton Classes="asset-card"
+                                  Grid.Row="0"
+                                  Grid.Column="1"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  HorizontalContentAlignment="Left"
+                                  VerticalContentAlignment="Top">
+                        <Grid>
+                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                <Image Source="/Assets/gb1.png"
+                                       Height="100"
+                                       Stretch="UniformToFill"/>
+                                <TextBlock Text = "GB2"/>
+                                <TextBlock Text = "Max heat: 2,0 MW"/>
+                                <TextBlock Text = "Production costs: 540 DKK/MWh(th)"/>
+                                <TextBlock Text = "CO2 emissions: 134 kg/MWh(th)"/>
+                                <TextBlock Text = "Gas consumption: 1,08 MWh(gas)/MWh(th)"/>
+                            </StackPanel>
+                            <Button Classes="card-corner-btn"/>
+                        </Grid>
+                    </ToggleButton>
+                    <ToggleButton Classes="asset-card"
+                                  Grid.Row="0"
+                                  Grid.Column="2"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  HorizontalContentAlignment="Left"
+                                  VerticalContentAlignment="Top">
+                        <Grid>
+                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                <Image Source="/Assets/gb1.png"
+                                       Height="100"
+                                       Stretch="UniformToFill"/>
+                                <TextBlock Text = "GB3"/>
+                                <TextBlock Text = "Max heat: 4,0 MW"/>
+                                <TextBlock Text = "Production costs: 580 DKK/MWh(th)"/>
+                                <TextBlock Text = "CO2 emissions: 136 kg/MWh(th)"/>
+                                <TextBlock Text = "Gas consumption: 1,09 MWh(gas)/MWh(th)"/>
+                            </StackPanel>
+                            <Button Classes="card-corner-btn"/>
+                        </Grid>
+                    </ToggleButton>
+                    <ToggleButton Classes="asset-card"
+                                  Grid.Row="1"
+                                  Grid.Column="0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  HorizontalContentAlignment="Left"
+                                  VerticalContentAlignment="Top">
+                        <Grid>
+                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                <Image Source="/Assets/ob1.png"
+                                       Height="100"
+                                       Stretch="UniformToFill"/>
+                                <TextBlock Text = "OB1"/>
+                                <TextBlock Text = "Max heat: 6,0 MW"/>
+                                <TextBlock Text = "Production costs: 690 DKK/MWh(th)"/>
+                                <TextBlock Text = "CO2 emissions: 147 kg/MWh(th)"/>
+                                <TextBlock Text = "Gas consumption: 1,18 MWh(oil)/MWh(th)"/>
+                            </StackPanel>
+                            <Button Classes="card-corner-btn"/>
+                        </Grid>
+                    </ToggleButton>
+                    <ToggleButton Classes="asset-card"
+                                  Grid.Row="1"
+                                  Grid.Column="1"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  HorizontalContentAlignment="Left"
+                                  VerticalContentAlignment="Top">
+                        <Grid>
+                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                <Image Source="/Assets/gm1.png"
+                                       Height="100"
+                                       Stretch="UniformToFill"/>
+                                <TextBlock Text = "GM1"/>
+                                <TextBlock Text = "Max heat: 5,3 MW"/>
+                                <TextBlock Text = "Max electricity: 3,9 MW"/>
+                                <TextBlock Text = "Production costs: 975 DKK/MWh(th)"/>
+                                <TextBlock Text = "CO2 emissions: 227 kg/MWh(th)"/>
+                                <TextBlock Text = "Gas consumption: 1,82 MWh(gas)/MWh(th)"/>
+                            </StackPanel>
+                            <Button Classes="card-corner-btn"/>
+                        </Grid>
+                    </ToggleButton>
+                    <ToggleButton Classes="asset-card"
+                                  Grid.Row="1"
+                                  Grid.Column="2"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  HorizontalContentAlignment="Left"
+                                  VerticalContentAlignment="Top">
+                        <Grid>
+                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                <Image Source="/Assets/eb1.png"
+                                       Height="100"
+                                       Stretch="UniformToFill"/>
+                                <TextBlock Text = "EB1"/>
+                                <TextBlock Text = "Max heat: 6,0 MW"/>
+                                <TextBlock Text = "Max electricity: -6,0 MW"/>
+                                <TextBlock Text = "Production costs: 15 DKK/MWh(th)"/>
+                            </StackPanel>
+                            <Button Classes="card-corner-btn"/>
+                        </Grid>
+                    </ToggleButton>
+                </Grid>
+            </Grid>
+        </SplitView.Content>
+    </SplitView>
 </UserControl>
