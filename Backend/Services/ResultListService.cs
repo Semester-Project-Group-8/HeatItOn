@@ -31,7 +31,7 @@ namespace Backend.Services
             return resultList;
         }
 
-        public async Task<int> CreateResultList(DateTime timeFrom, List<Result> resultList)
+        public async Task<int> CreateResultList(DateTime timeFrom, DateTime timeTo, List<Result> resultList)
         {
             if (resultList == null || resultList.Count == 0)
             {
@@ -46,12 +46,12 @@ namespace Backend.Services
             foreach (var result in resultList)
             {
                 result.Id = 0;
-                result.ResultListId = null;
             }
 
             var newResultList = new ResultList
             {
                 TimeFrom = timeFrom,
+                TimeTo = timeTo,
                 Results = resultList
             };
 

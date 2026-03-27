@@ -43,11 +43,11 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> CreateResultList([FromQuery] DateTime timeFrom, [FromBody] List<Result> resultList)
+        public async Task<IActionResult> CreateResultList([FromQuery] DateTime timeFrom, [FromQuery] DateTime timeTo, [FromBody] List<Result> resultList)
         {
             try
             {
-                var createdId = await _resultListService.CreateResultList(timeFrom, resultList);
+                var createdId = await _resultListService.CreateResultList(timeFrom, timeTo, resultList);
                 return Created($"/ResultList/{createdId}", new { id = createdId });
             }
             catch (ArgumentException)
