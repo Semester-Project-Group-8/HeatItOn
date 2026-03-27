@@ -40,7 +40,6 @@ namespace Backend.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<float>("MaxElectricity")
-                    b.Property<float>("MaxElectricity")
                         .HasColumnType("float");
 
                     b.Property<float>("MaxHeat")
