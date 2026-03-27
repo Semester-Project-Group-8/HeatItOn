@@ -23,7 +23,7 @@ public class ResultClient
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<List<Result>?> GetAll()
+    public async Task<List<Result>> GetAll()
     {
         HttpResponseMessage response = await _client.GetAsync("");
         response.EnsureSuccessStatusCode();
@@ -43,7 +43,7 @@ public class ResultClient
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result?> Delete<T>(int id)
+    public async Task<Result?> Delete(int id)
     {
         HttpResponseMessage response = await _client.DeleteAsync(id.ToString() );
         return await response.Content.ReadFromJsonAsync<Result>();
