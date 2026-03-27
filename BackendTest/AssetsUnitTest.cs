@@ -27,10 +27,6 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task AddAsset()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _context.SaveChangesAsync();
-
         var result = await _assetService.AddAsset(
             id: 1,
             name: "Boiler",
@@ -39,9 +35,7 @@ public class AssetServiceTests : IDisposable
             co2Emission: 50,
             gasConsumption: 10f,
             oilConsumption: 5f,
-            maxElectricity: 50f,
-            imageId: 1,
-            image: image
+            maxElectricity: 50f
         );
 
         Assert.Equal(1, result);
@@ -52,10 +46,6 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task AddAsset_NegativeCase()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _context.SaveChangesAsync();
-
         var result = await _assetService.AddAsset(
             id: 1,
             name: "Boiler",
@@ -64,9 +54,7 @@ public class AssetServiceTests : IDisposable
             co2Emission: 50,
             gasConsumption: 10f,
             oilConsumption: 5f,
-            maxElectricity: 50f,
-            imageId: 1,
-            image: image
+            maxElectricity: 50f
         );
 
         Assert.NotEqual(3, result);
@@ -98,14 +86,10 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task ListAssets_Multiple()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _context.SaveChangesAsync();
-
         var assets = new List<Asset>
         {
-            new Asset { Id = 1, Name = "Asset1", MaxHeat = 100, ProductionCost = 1000, CO2Emission = 10, GasConsumption = 1f, OilConsumption = 0.5f, MaxElectricity = 20f, ImageId = 1, Image = image },
-            new Asset { Id = 2, Name = "Asset2", MaxHeat = 200, ProductionCost = 2000, CO2Emission = 20, GasConsumption = 2f, OilConsumption = 1f, MaxElectricity = 40f, ImageId = 1, Image = image }
+            new Asset { Id = 1, Name = "Asset1", MaxHeat = 100, ProductionCost = 1000, CO2Emission = 10, GasConsumption = 1f, OilConsumption = 0.5f, MaxElectricity = 20f },
+            new Asset { Id = 2, Name = "Asset2", MaxHeat = 200, ProductionCost = 2000, CO2Emission = 20, GasConsumption = 2f, OilConsumption = 1f, MaxElectricity = 40f }
         };
         await _assetService.AddAssets(assets);
 
@@ -117,9 +101,7 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task GetExistingAsset()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50, 1, image);
+        await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50);
 
         var result = await _assetService.GetAsset(1);
 
@@ -131,9 +113,7 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task GetExistingAsset_NegativeTest()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50, 1, image);
+        await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50);
 
         var result = await _assetService.GetAsset(1);
 
@@ -144,11 +124,9 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task UpdateAsset()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50, 1, image);
+        await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50);
 
-        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55, 1, image);
+        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55);
 
         Assert.Equal(1, result);
         var updatedAsset = await _assetService.GetAsset(1);
@@ -159,11 +137,9 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task UpdateAsset_NegativeCase()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50, 1, image);
+        await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50);
 
-        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55, 1, image);
+        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55);
 
         Assert.NotEqual(2, result);
         var updatedAsset = await _assetService.GetAsset(1);
@@ -174,18 +150,14 @@ public class AssetServiceTests : IDisposable
     [Fact]
     public async Task UpdateNonExistentAsset_EdgeCase()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await _assetService.UpdateAsset(999, "Name", 100, 5000, 50, 10, 5, 50, 1, image));
+            await _assetService.UpdateAsset(999, "Name", 100, 5000, 50, 10, 5, 50));
     }
 
     [Fact]
     public async Task DeleteExistingAsset()
     {
-        var image = new Image { Id = 1, ImageLink = "test.png" };
-        _context.Images.Add(image);
-        await _assetService.AddAsset(1, "Test", 100, 5000, 50, 10, 5, 50, 1, image);
+        await _assetService.AddAsset(1, "Test", 100, 5000, 50, 10, 5, 50);
 
         await _assetService.DeleteAsset(1);
 
