@@ -1,20 +1,21 @@
 using System;
 using System.Collections.Generic;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
 using Frontend.Models;
 using Frontend.ViewModels;
 
 namespace Frontend.Views;
 
-public partial class TestConnectionWindow : Window
+public partial class TestConnections : Window
 {
-    MainWindowViewModel? ViewModel => (MainWindowViewModel)DataContext!;
-    public TestConnectionWindow()
+    TestViewModel? ViewModel => (TestViewModel)DataContext!;
+    public TestConnections()
     {
         InitializeComponent();
     }
-
     private async void GetSources()
     {
         ListBox list = this.FindControl<ListBox>("resultBox");

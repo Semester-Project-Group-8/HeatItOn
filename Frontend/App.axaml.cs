@@ -30,9 +30,9 @@ public partial class App : Application
         {
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
-            desktop.MainWindow = new TestConnectionWindow
+            desktop.MainWindow = new TestConnections
             {
-                DataContext = new MainWindowViewModel(
+                DataContext = new TestViewModel(
                     new AssetClient(client),
                     new SourceClient(client)
                 )
