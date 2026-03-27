@@ -10,7 +10,7 @@ namespace Backend.Services
         {
             _dbContext=dbContext;
         }
-        public async Task<IEnumerable<Source>> ListSources() 
+        public async Task<IEnumerable<Source>> ListSources()
         {
             try
             {
@@ -82,6 +82,13 @@ namespace Backend.Services
                 throw new InvalidOperationException("Sources could not be loaded.");
             }
 
+        }
+        public async Task<Source> ListByHour(DateTime date)
+        {
+            return await _dbContext.Sources
+                    .FirstOrDefaultAsync(d =>
+                        d.TimeFrom.Date == date.Date &&
+                        d.TimeFrom.Hour == date.Hour);
         }
         //update function - get item by id, update item, save changes
         public async Task<int> UpdateSource(int id, DateTime From, DateTime Til, float Heat, float Electro)
