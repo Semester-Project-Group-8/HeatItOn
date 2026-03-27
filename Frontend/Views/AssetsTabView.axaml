@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Frontend.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Frontend.Views.AssetsTabView"
+             x:DataType="vm:AssetsTabViewModel">
+
+    <Design.DataContext>
+        <vm:AssetsTabViewModel/>
+    </Design.DataContext>
+
+    <!-- Your tab UI goes here -->
+    <StackPanel Margin="10">
+        <TextBlock Text="Assets Tab" FontSize="20"/>
+    </StackPanel>
+
+</UserControl>
