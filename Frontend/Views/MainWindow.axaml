@@ -9,10 +9,6 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Frontend">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
     <TabControl Margin="0" Padding = "0">
 
         <TabItem Header="Assets">
@@ -24,7 +20,8 @@
         </TabItem>
 
         <TabItem Header="Source">
-            <views:SourceTabView/>
+            <views:SourceTabView
+                DataContext="{Binding SourceTab}"/>
         </TabItem>
 
     </TabControl>

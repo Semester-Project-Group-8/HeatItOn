@@ -3,17 +3,129 @@
              xmlns:vm="using:Frontend.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              mc:Ignorable="d"
              x:Class="Frontend.Views.SourceTabView"
              x:DataType="vm:SourceTabViewModel">
+    <DockPanel>
 
-    <Design.DataContext>
-        <vm:SourceTabViewModel/>
-    </Design.DataContext>
+        <!-- LEFT SIDEBAR -->
+        <Border DockPanel.Dock="Left"
+                Width="220"
+                Padding="8"
+                BorderBrush="Gray"
+                BorderThickness="0,0,1,0">
 
-    <!-- Example content -->
-    <StackPanel Margin="10">
-        <TextBlock Text="Source Tab" FontSize="20"/>
-    </StackPanel>
+            <StackPanel>
+                <TextBlock Text="Uploaded files"
+                           FontWeight="Bold"
+                           Margin="0,0,0,8"/>
+
+                
+                <Grid>
+
+                    <!-- File list -->
+                    <ListBox
+                        ItemsSource="{Binding Files}"
+                        SelectedItem="{Binding SelectedFile}"
+                        IsVisible="{Binding Files.Count}" />
+
+                    <!-- Empty state -->
+                    <Border IsVisible="{Binding !Files.Count}">
+                        <TextBlock Text="No file uploaded yet"
+                                   Opacity="0.6"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center"/>
+                    </Border>
+
+                </Grid>
+
+            </StackPanel>
+        </Border>
+
+        <!-- BOTTOM BAR -->
+        <Border DockPanel.Dock="Bottom"
+                Padding="8"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0">
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <!-- Placeholder only -->
+                <Button Content="Upload" />
+            </StackPanel>
+        </Border>
+
+        <!-- MAIN CONTENT -->
+        <Grid Margin="8" ColumnDefinitions="*, *">
+
+            <!-- DATA GRID -->
+            <DataGrid
+                Grid.Column="0" 
+                ItemsSource="{Binding Sources}"
+                HeadersVisibility="Column"
+                AutoGenerateColumns="False"
+                IsVisible="{Binding HasSources}"
+                MinHeight="200"
+                MinWidth="200"
+                GridLinesVisibility="All">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Id"
+                                           Binding="{Binding Id}" />
+
+                    <DataGridTextColumn Header="From"
+                                           Binding="{Binding TimeFrom}" />
+
+                    <DataGridTextColumn Header="To"
+                                           Binding="{Binding TimeTo}" />
+
+                    <DataGridTextColumn Header="Heat demand"
+                                           Binding="{Binding HeatDemand}" />
+
+                    <DataGridTextColumn Header="Price"
+                                           Binding="{Binding ElectricityPrice}" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel 
+                Grid.Column="1"
+                Opacity="{Binding HasSources, Converter={StaticResource BoolToOpacity}}"
+                IsHitTestVisible="{Binding HasSources}"
+                Spacing="20">
+                <avalonia:CartesianChart 
+                    Series="{Binding WinterSeries}"
+                    XAxes="{Binding TimeAxis}"
+                    YAxes="{Binding DualAxes}"
+                    Height="200"/>
+                
+                <avalonia:CartesianChart 
+                    Series="{Binding SummerSeries}"
+                    XAxes="{Binding TimeAxis}"
+                    YAxes="{Binding DualAxes}"
+                    Height="200"/>
+            </StackPanel>
+            <!-- EMPTY STATE -->
+            <Border Grid.ColumnSpan="2" Background="#10AAAAAA"
+                    IsVisible="{Binding !Sources.Count}">
+
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="8">
+
+                    <TextBlock Text="No data to display"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center" />
+
+                    <TextBlock
+                        Text="Select a file on the left to view its sources."
+                        Opacity="0.7"
+                        HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+    </DockPanel>
 
 </UserControl>
