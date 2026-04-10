@@ -11,9 +11,12 @@
         <vm:ResultsTabViewModel/>
     </Design.DataContext>
 
-    <!-- Example content -->
     <StackPanel Margin="10">
         <TextBlock Text="Results Tab" FontSize="20"/>
+        <ComboBox ItemsSource="{Binding ResultLists}"
+				  SelectedItem="{Binding SelectedResultListId}"
+				  Width="300"
+				  MaxDropDownHeight="250"/>
     </StackPanel>
 
 </UserControl>
