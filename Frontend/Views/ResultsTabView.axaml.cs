@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Frontend.Data;
 using Frontend.ViewModels;
 using System;
@@ -21,5 +22,21 @@ public partial class ResultsTabView : UserControl
             new OptimizerClient(httpClient),
             new ResultClient(httpClient),
             new ResultListClient(httpClient));
+    }
+
+    private void OnSearchClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ResultsTabViewModel viewModel)
+        {
+            viewModel.ApplySearch();
+        }
+    }
+
+    private void OnClearClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ResultsTabViewModel viewModel)
+        {
+            viewModel.ClearSearch();
+        }
     }
 }
