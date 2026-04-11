@@ -12,11 +12,10 @@ namespace Backend.Services
         ResultService _resultService;//do i need theese?
         ResultListService _resultListService;//and this?
 
-        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultListService resultListService)
+        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultListService resultListService)
         {
             _assetService = assetService;
             _sourceService = sourceService;
-            _resultService = resultService;
             _resultListService = resultListService;
         }
 
