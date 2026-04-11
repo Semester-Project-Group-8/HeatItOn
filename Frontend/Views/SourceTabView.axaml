@@ -14,6 +14,9 @@
     <!-- Example content -->
     <StackPanel Margin="10">
         <TextBlock Text="Source Tab" FontSize="20"/>
-    </StackPanel>
+        <Button Content="Import CSV" Command ="{Binding ImportCsvCommand}" Margin="10"/>
+        <Button Content="Export CSV" Command="{Binding ExportCsvCommand}" Margin="10"/>
 
+    </StackPanel>
+    
 </UserControl>

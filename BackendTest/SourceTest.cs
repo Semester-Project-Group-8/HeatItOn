@@ -93,6 +93,39 @@ public class SourceServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task AddSources_ShouldAddMultipleItems()
+    {
+        var sources = new List<Source>
+        {
+            new Source { Id = 1, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 10, ElectricityPrice = 5 },
+            new Source { Id = 2, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 20, ElectricityPrice = 10 }
+        };
+
+        await _sourceService.AddSources(sources);
+
+        var result = await _sourceService.ListSources();
+
+        Assert.Equal(2, result.Count());
+    }
+
+    [Fact]
+    public async Task AddSources_ShouldThrow_WhenListIsEmpty()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _sourceService.AddSources(new List<Source>())
+        );
+    }
+
+    [Fact]
+    public async Task AddSources_ShouldThrow_WhenListIsNull()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _sourceService.AddSources(null)
+        );
+    }
+
+
+    [Fact]
     public async Task UpdateSource_ShouldUpdateCorrectly()
     {
         await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
