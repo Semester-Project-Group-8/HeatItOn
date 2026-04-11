@@ -9,15 +9,15 @@ namespace Backend.Services
     {
         AssetsService _assetService;
         SourceService _sourceService;
-        //ResultService _resultService;
-        //ResultListService _resultListService
+        ResultService _resultService;//do i need theese?
+        ResultListService _resultListService;//and this?
 
-        public OptimizerService(AssetsService assetService, SourceService sourceService)
+        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultListService resultListService)
         {
             _assetService = assetService;
             _sourceService = sourceService;
-            //_resultService = resultService;
-            //_resultListService = resultListService;
+            _resultService = resultService;
+            _resultListService = resultListService;
         }
 
         public async Task<float> CalculateNetProductionCost(int assetId, DateTime date)
@@ -37,19 +37,25 @@ namespace Backend.Services
             return netProductionCost;
         }
 
-        public async Task<IActionResult> Optimize(List<Source> AllSources, List<Asset> ScenarioAssets)//Task<List<ResultList>>
+        public async Task<ActionResult<List<ResultList>>> Optimize()//Task<List<ResultList>>
         {
+            var AllSources = await _sourceService.ListSources();
+            var ScenarioAssets = await _assetService.ListAssets();
             List<(Asset asset, float cost)> prices = new();
+            List<ResultList> optimizedData = new List<ResultList>();
             int maintencance = 45;
             foreach (var source in AllSources)
             {
+                ResultList resultOfHour=new ResultList();
+                resultOfHour.TimeFrom = source.TimeFrom;
+                resultOfHour.TimeTo = source.TimeTo;
                 prices.Clear();
 
                 foreach (var asset in ScenarioAssets)
                 {
-                    //if (asset.Id == 2 && maintencance != 0)//if generator no.2 under maintenance period skip
+                    if (asset.Id == 2 && maintencance != 0)//if generator no.2 under maintenance period skip
                     {
-                        //continue;
+                        continue;
                     }
                     float cost = await CalculateNetProductionCost(asset.Id, source.TimeFrom);
                     prices.Add((asset, cost));
@@ -57,19 +63,30 @@ namespace Backend.Services
                 prices.Sort((a, b) => a.cost.CompareTo(b.cost));
                 float metEnergy = 0;
                 int usedGenerators = 0;
-                while(metEnergy < source.HeatDemand)
+                while (metEnergy < source.HeatDemand)
                 {
                     metEnergy += prices[usedGenerators].asset.MaxHeat;
+                    Result result = new Result
+                    {
+                        //Id = prices[usedGenerators].asset.Id,
+                        HeatProduction = prices[usedGenerators].asset.MaxHeat,
+                        Electricity = prices[usedGenerators].asset.MaxElectricity,
+                        ProductionCost = prices[usedGenerators].cost,
+                        PrimaryEnergyConsumed = //0 gas 1 oil 2 electricity 3 other
+                            prices[usedGenerators].asset.GasConsumption != 0 ? 0 :
+                            prices[usedGenerators].asset.OilConsumption != 0 ? 1 :
+                            prices[usedGenerators].asset.MaxElectricity > 0 ? 2 : 3,
+                        CO2Produced = prices[usedGenerators].asset.CO2Emission,
+                        AssetId = prices[usedGenerators].asset.Id
+                    };
                     usedGenerators++;
-                    //create result
+                    resultOfHour.Results.Add(result);
                 }
-
-                //create result list
-                //add resultlist to list of result list
+                optimizedData.Add(resultOfHour);
                 maintencance--;
             }
-
-            return null;
+            await _resultListService.AddResultList(optimizedData);
+            return optimizedData;
         }
     }
 }
