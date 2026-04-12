@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Backend.Data;
-using Backend.Models;
 using Backend.Services;
-using Xunit;
 
 namespace BackendTest;
 
