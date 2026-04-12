@@ -10,20 +10,23 @@ namespace Frontend.Data;
 public class ResultListClient
 {
     private readonly HttpClient _client;
+    private const string UrlExtension = "ResultList";
     
     public ResultListClient(HttpClient httpClient)
     {
         _client = httpClient;
     }
-    public async Task<List<int>?> ListResultLists()
+    public async Task<List<ResultList>?> ListResultLists()
     {
-        var response = await _client.GetAsync("");
-        return await response.Content.ReadFromJsonAsync<List<int>>();
+        var response = await _client.GetAsync(UrlExtension);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<ResultList>>();
     }
     
     public async Task<ResultList?> GetResultListById(int id)
     {
-        var response = await _client.GetAsync($"{id}");
+        var response = await _client.GetAsync($"{UrlExtension}/{id}");
+        response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ResultList>();
     }
 }
