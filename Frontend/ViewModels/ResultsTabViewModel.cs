@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Frontend.ViewModels;
@@ -123,24 +124,12 @@ public class ResultsTabViewModel : ViewModelBase
             return;
         }
 
-        IEnumerable<ResultList> filtered = ResultLists;
+        var filtered = FilterByPeriod(ResultLists, from, to).ToList();
+        TableRows = BuildRowsForPeriod(filtered);
 
-        if (from.HasValue)
-        {
-            filtered = filtered.Where(resultList => resultList.TimeFrom >= from.Value);
-        }
-
-        if (to.HasValue)
-        {
-            filtered = filtered.Where(resultList => resultList.TimeTo <= to.Value);
-        }
-
-        TableRows = filtered
-            .OrderBy(resultList => resultList.TimeFrom)
-            .Select(BuildRow)
-            .ToList();
-
-        StatusMessage = string.Empty;
+        StatusMessage = filtered.Count == 0
+            ? "No data in selected period."
+            : $"Showing {TableRows.Count} hour(s).";
     }
 
     public void ClearSearch()
@@ -156,10 +145,60 @@ public class ResultsTabViewModel : ViewModelBase
         if (SelectedResultList is null)
         {
             TableRows = new List<ResultTableRow>();
+            StatusMessage = "No result list selected.";
             return;
         }
 
         TableRows = new List<ResultTableRow> { BuildRow(SelectedResultList) };
+        StatusMessage = string.Empty;
+    }
+
+    private static IEnumerable<ResultList> FilterByPeriod(IEnumerable<ResultList> source, DateTime? from, DateTime? to)
+    {
+        return source.Where(resultList =>
+        {
+            var rowFrom = resultList.TimeFrom;
+            var rowTo = resultList.TimeTo == default ? resultList.TimeFrom.AddHours(1) : resultList.TimeTo;
+
+            var fromCheck = !to.HasValue || rowFrom <= to.Value;
+            var toCheck = !from.HasValue || rowTo >= from.Value;
+
+            return fromCheck && toCheck;
+        });
+    }
+
+    private static List<ResultTableRow> BuildRowsForPeriod(IEnumerable<ResultList> resultLists)
+    {
+        return resultLists
+            .GroupBy(resultList => new DateTime(resultList.TimeFrom.Year, resultList.TimeFrom.Month, resultList.TimeFrom.Day, resultList.TimeFrom.Hour, 0, 0))
+            .OrderBy(group => group.Key)
+            .Select(group => BuildGroupedRow(group.Key, group.SelectMany(list => list.Results).ToList()))
+            .ToList();
+    }
+
+    private static ResultTableRow BuildGroupedRow(DateTime hour, List<Result> results)
+    {
+        var activeGenerators = results
+            .Where(result => result.HeatProduction > 0 || result.Electricity != 0)
+            .Select(result => string.IsNullOrWhiteSpace(result.Asset?.Name)
+                ? $"Asset {result.AssetId}"
+                : result.Asset.Name)
+            .Distinct()
+            .ToList();
+
+        var electricityConsumed = results
+            .Where(result => result.Electricity < 0)
+            .Sum(result => -result.Electricity);
+
+        var totalNetPrice = results.Sum(result => result.ProductionCost);
+
+        return new ResultTableRow
+        {
+            Hour = hour.ToString("yyyy-MM-dd HH:mm"),
+            ActiveGenerators = string.Join(", ", activeGenerators),
+            ElectricityConsumed = electricityConsumed,
+            TotalNetPrice = totalNetPrice
+        };
     }
 
     private static ResultTableRow BuildRow(ResultList resultList)
@@ -197,13 +236,21 @@ public class ResultsTabViewModel : ViewModelBase
             return true;
         }
 
-        if (DateTime.TryParseExact(value.Trim(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var exact))
+        var trimmed = value.Trim();
+
+        if (Regex.IsMatch(trimmed, @"^\d{4}-\d{2}-\d{2}$") && DateTime.TryParseExact(trimmed, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateOnly))
+        {
+            parsed = dateOnly;
+            return true;
+        }
+
+        if (DateTime.TryParseExact(trimmed, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var exact))
         {
             parsed = exact;
             return true;
         }
 
-        if (DateTime.TryParse(value.Trim(), out var fallback))
+        if (DateTime.TryParse(trimmed, out var fallback))
         {
             parsed = fallback;
             return true;
