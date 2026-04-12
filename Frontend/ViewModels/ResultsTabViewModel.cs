@@ -2,7 +2,6 @@ using Frontend.Data;
 using Frontend.Models;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,11 +10,6 @@ namespace Frontend.ViewModels;
 public class ResultsTabViewModel : ViewModelBase
 {
     private readonly ResultListClient _resultListClient;
-    private static readonly string[] SupportedDateFormats =
-    {
-        "yyyy-MM-dd HH:mm",
-        "yyyy-MM-dd"
-    };
 
     private List<ResultList> _resultLists = new();
     public List<ResultList> ResultLists
@@ -36,32 +30,7 @@ public class ResultsTabViewModel : ViewModelBase
         {
             _selectedResultList = value;
             OnPropertyChanged();
-            if (string.IsNullOrWhiteSpace(SearchFrom) && string.IsNullOrWhiteSpace(SearchTo))
-            {
-                RebuildTableForSelection();
-            }
-        }
-    }
-
-    private string _searchFrom = string.Empty;
-    public string SearchFrom
-    {
-        get => _searchFrom;
-        set
-        {
-            _searchFrom = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private string _searchTo = string.Empty;
-    public string SearchTo
-    {
-        get => _searchTo;
-        set
-        {
-            _searchTo = value;
-            OnPropertyChanged();
+            RebuildTableForSelection();
         }
     }
 
@@ -114,15 +83,9 @@ public class ResultsTabViewModel : ViewModelBase
         }
     }
 
-    public void ApplySearch()
+    public void ApplySearch(DateTime from, DateTime to)
     {
-        if (!TryParseDateTime(SearchFrom, out var from) || !TryParseDateTime(SearchTo, out var to))
-        {
-            StatusMessage = "Use format: yyyy-MM-dd HH:mm";
-            return;
-        }
-
-        if (from.HasValue && to.HasValue && from.Value > to.Value)
+        if (from > to)
         {
             StatusMessage = "From must be earlier than To.";
             return;
@@ -138,8 +101,6 @@ public class ResultsTabViewModel : ViewModelBase
 
     public void ClearSearch()
     {
-        SearchFrom = string.Empty;
-        SearchTo = string.Empty;
         StatusMessage = string.Empty;
         RebuildTableForSelection();
     }
@@ -157,17 +118,14 @@ public class ResultsTabViewModel : ViewModelBase
         StatusMessage = string.Empty;
     }
 
-    private static IEnumerable<ResultList> FilterByPeriod(IEnumerable<ResultList> source, DateTime? from, DateTime? to)
+    private static IEnumerable<ResultList> FilterByPeriod(IEnumerable<ResultList> source, DateTime from, DateTime to)
     {
         return source.Where(resultList =>
         {
             var rowFrom = resultList.TimeFrom;
             var rowTo = resultList.TimeTo == default ? resultList.TimeFrom.AddHours(1) : resultList.TimeTo;
 
-            var fromCheck = !to.HasValue || rowFrom <= to.Value;
-            var toCheck = !from.HasValue || rowTo >= from.Value;
-
-            return fromCheck && toCheck;
+            return rowFrom <= to && rowTo >= from;
         });
     }
 
@@ -217,32 +175,6 @@ public class ResultsTabViewModel : ViewModelBase
                 : result.Asset.Name)
             .Distinct()
             .ToList();
-    }
-
-    private static bool TryParseDateTime(string value, out DateTime? parsed)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            parsed = null;
-            return true;
-        }
-
-        var trimmed = value.Trim();
-
-        if (DateTime.TryParseExact(trimmed, SupportedDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exact))
-        {
-            parsed = exact;
-            return true;
-        }
-
-        if (DateTime.TryParse(trimmed, out var fallback))
-        {
-            parsed = fallback;
-            return true;
-        }
-
-        parsed = null;
-        return false;
     }
 
 }

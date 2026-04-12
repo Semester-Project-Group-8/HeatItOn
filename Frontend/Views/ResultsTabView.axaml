@@ -35,12 +35,22 @@
             <TextBlock Grid.Row="0" Text="Results" FontSize="20"/>
 
             <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-                <TextBox Width="170"
-                         Watermark="From yyyy-MM-dd HH:mm"
-                         Text="{Binding SearchFrom}"/>
-                <TextBox Width="170"
-                         Watermark="To yyyy-MM-dd HH:mm"
-                         Text="{Binding SearchTo}"/>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="From"/>
+                    <CalendarDatePicker x:Name="SearchFromDatePicker"
+                                        Width="170"/>
+                    <TimePicker x:Name="SearchFromTimePicker"
+                                Width="170"/>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="To"/>
+                    <CalendarDatePicker x:Name="SearchToDatePicker"
+                                        Width="170"/>
+                    <TimePicker x:Name="SearchToTimePicker"
+                                Width="170"/>
+                </StackPanel>
+
                 <Button Content="Search" Click="OnSearchClick"/>
                 <Button Content="Clear" Click="OnClearClick"/>
                 <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
