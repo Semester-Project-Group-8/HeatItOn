@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Frontend.ViewModels;
@@ -12,6 +11,11 @@ namespace Frontend.ViewModels;
 public class ResultsTabViewModel : ViewModelBase
 {
     private readonly ResultListClient _resultListClient;
+    private static readonly string[] SupportedDateFormats =
+    {
+        "yyyy-MM-dd HH:mm",
+        "yyyy-MM-dd"
+    };
 
     private List<ResultList> _resultLists = new();
     public List<ResultList> ResultLists
@@ -83,7 +87,7 @@ public class ResultsTabViewModel : ViewModelBase
         }
     }
 
-    public ResultsTabViewModel(OptimizerClient optimizerClient, ResultClient resultClient, ResultListClient resultListClient)
+    public ResultsTabViewModel(ResultListClient resultListClient)
     {
         _resultListClient = resultListClient;
 
@@ -149,7 +153,7 @@ public class ResultsTabViewModel : ViewModelBase
             return;
         }
 
-        TableRows = new List<ResultTableRow> { BuildRow(SelectedResultList) };
+        TableRows = new List<ResultTableRow> { BuildRowFromResultList(SelectedResultList) };
         StatusMessage = string.Empty;
     }
 
@@ -172,60 +176,47 @@ public class ResultsTabViewModel : ViewModelBase
         return resultLists
             .GroupBy(resultList => new DateTime(resultList.TimeFrom.Year, resultList.TimeFrom.Month, resultList.TimeFrom.Day, resultList.TimeFrom.Hour, 0, 0))
             .OrderBy(group => group.Key)
-            .Select(group => BuildGroupedRow(group.Key, group.SelectMany(list => list.Results).ToList()))
+            .Select(group => BuildRowFromResults(group.Key.ToString("yyyy-MM-dd HH:mm"), group.SelectMany(list => list.Results)))
             .ToList();
     }
 
-    private static ResultTableRow BuildGroupedRow(DateTime hour, List<Result> results)
+    private static ResultTableRow BuildRowFromResultList(ResultList resultList)
     {
-        var activeGenerators = results
+        var hour = resultList.TimeFrom == default
+            ? $"ResultList #{resultList.Id}"
+            : resultList.TimeFrom.ToString("yyyy-MM-dd HH:mm");
+
+        return BuildRowFromResults(hour, resultList.Results);
+    }
+
+    private static ResultTableRow BuildRowFromResults(string hour, IEnumerable<Result> results)
+    {
+        var resultItems = results.ToList();
+
+        var electricityConsumed = resultItems
+            .Where(result => result.Electricity < 0)
+            .Sum(result => -result.Electricity);
+
+        var totalNetPrice = resultItems.Sum(result => result.ProductionCost);
+
+        return new ResultTableRow
+        {
+            Hour = hour,
+            ActiveGenerators = string.Join(", ", GetActiveGeneratorNames(resultItems)),
+            ElectricityConsumed = electricityConsumed,
+            TotalNetPrice = totalNetPrice
+        };
+    }
+
+    private static List<string> GetActiveGeneratorNames(IEnumerable<Result> results)
+    {
+        return results
             .Where(result => result.HeatProduction > 0 || result.Electricity != 0)
             .Select(result => string.IsNullOrWhiteSpace(result.Asset?.Name)
                 ? $"Asset {result.AssetId}"
                 : result.Asset.Name)
             .Distinct()
             .ToList();
-
-        var electricityConsumed = results
-            .Where(result => result.Electricity < 0)
-            .Sum(result => -result.Electricity);
-
-        var totalNetPrice = results.Sum(result => result.ProductionCost);
-
-        return new ResultTableRow
-        {
-            Hour = hour.ToString("yyyy-MM-dd HH:mm"),
-            ActiveGenerators = string.Join(", ", activeGenerators),
-            ElectricityConsumed = electricityConsumed,
-            TotalNetPrice = totalNetPrice
-        };
-    }
-
-    private static ResultTableRow BuildRow(ResultList resultList)
-    {
-        var activeGenerators = resultList.Results
-            .Where(result => result.HeatProduction > 0 || result.Electricity != 0)
-            .Select(result => string.IsNullOrWhiteSpace(result.Asset?.Name)
-                ? $"Asset {result.AssetId}"
-                : result.Asset.Name)
-            .Distinct()
-            .ToList();
-
-        var electricityConsumed = resultList.Results
-            .Where(result => result.Electricity < 0)
-            .Sum(result => -result.Electricity);
-
-        var totalNetPrice = resultList.Results.Sum(result => result.ProductionCost);
-
-        return new ResultTableRow
-        {
-            Hour = resultList.TimeFrom == default
-                ? $"ResultList #{resultList.Id}"
-                : resultList.TimeFrom.ToString("yyyy-MM-dd HH:mm"),
-            ActiveGenerators = string.Join(", ", activeGenerators),
-            ElectricityConsumed = electricityConsumed,
-            TotalNetPrice = totalNetPrice
-        };
     }
 
     private static bool TryParseDateTime(string value, out DateTime? parsed)
@@ -238,13 +229,7 @@ public class ResultsTabViewModel : ViewModelBase
 
         var trimmed = value.Trim();
 
-        if (Regex.IsMatch(trimmed, @"^\d{4}-\d{2}-\d{2}$") && DateTime.TryParseExact(trimmed, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateOnly))
-        {
-            parsed = dateOnly;
-            return true;
-        }
-
-        if (DateTime.TryParseExact(trimmed, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var exact))
+        if (DateTime.TryParseExact(trimmed, SupportedDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var exact))
         {
             parsed = exact;
             return true;

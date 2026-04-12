@@ -19,8 +19,6 @@ public partial class ResultsTabView : UserControl
         };
 
         DataContext = new ResultsTabViewModel(
-            new OptimizerClient(httpClient),
-            new ResultClient(httpClient),
             new ResultListClient(httpClient));
     }
 
