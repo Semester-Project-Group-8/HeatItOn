@@ -410,3 +410,5 @@ _UpgradeReport_Files/: 2
 
 Backend/obj
 Frontend/obj
+/BackendTest/dotnet
+/Frontend/exported_heating.csv
