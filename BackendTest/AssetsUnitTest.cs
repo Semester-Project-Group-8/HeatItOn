@@ -107,8 +107,8 @@ public class AssetServiceTests : IDisposable
 
         var assets = new List<Asset>
         {
-            new Asset { Id = 1, Name = "Asset1", MaxHeat = 100, ProductionCost = 1000, CO2Emission = 10, GasConsumption = 1f, OilConsumption = 0.5f, MaxElectricity = 20f }, //ImageId = 1, Image = image },
-            new Asset { Id = 2, Name = "Asset2", MaxHeat = 200, ProductionCost = 2000, CO2Emission = 20, GasConsumption = 2f, OilConsumption = 1f, MaxElectricity = 40f }//, ImageId = 1, Image = image }
+            new Asset { Id = 1, Name = "Asset1", MaxHeat = 100, ProductionCost = 1000, CO2Emission = 10, GasConsumption = 1f, OilConsumption = 0.5f, MaxElectricity = 20f},
+            new Asset { Id = 2, Name = "Asset2", MaxHeat = 200, ProductionCost = 2000, CO2Emission = 20, GasConsumption = 2f, OilConsumption = 1f, MaxElectricity = 40f}
         };
         await _assetService.AddAssets(assets);
 

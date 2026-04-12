@@ -7,10 +7,6 @@
              x:Class="Frontend.Views.ResultsTabView"
              x:DataType="vm:ResultsTabViewModel">
 
-    <Design.DataContext>
-        <vm:ResultsTabViewModel/>
-    </Design.DataContext>
-
     <!-- Example content -->
     <StackPanel Margin="10">
         <TextBlock Text="Results Tab" FontSize="20"/>
