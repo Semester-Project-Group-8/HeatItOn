@@ -7,10 +7,9 @@ namespace Backend.Services
 {
     public class OptimizerService
     {
-        AssetsService _assetService;
-        SourceService _sourceService;
-        ResultService _resultService;//do i need theese?
-        ResultListService _resultListService;//and this?
+        readonly AssetsService _assetService;
+        readonly SourceService _sourceService;
+        readonly ResultListService _resultListService;
 
         public OptimizerService(AssetsService assetService, SourceService sourceService,ResultListService resultListService)
         {
