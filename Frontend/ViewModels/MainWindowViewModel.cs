@@ -1,6 +1,20 @@
-﻿namespace Frontend.ViewModels;
+﻿using System;
+using Frontend.Data;
 
-public partial class MainWindowViewModel : ViewModelBase
+namespace Frontend.ViewModels;
+
+public class MainWindowViewModel : ViewModelBase
 {
-    public string Greeting { get; } = "Welcome to Avalonia!";
+    public SourceTabViewModel SourceTab { get; }
+
+    public MainWindowViewModel(SourceClient sourceClient)
+    {
+        System.Diagnostics.Debug.WriteLine(">>> MainWindowViewModel(SourceClient) ctor");
+        SourceTab = new SourceTabViewModel(sourceClient);
+    }
+    public MainWindowViewModel()
+    {
+        throw new Exception("DEFAULT MainWindowViewModel ctor CALLED");
+    }
+
 }

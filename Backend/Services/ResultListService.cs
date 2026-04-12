@@ -79,6 +79,14 @@ namespace Backend.Services
             await _dbContext.SaveChangesAsync();
             return newResultList.Id;
         }
+        public async Task<int> AddResultList(List<ResultList> results)
+        {
+            foreach (var result in results)
+            {
+                await _dbContext.ResultList.AddAsync(result);
+            }
+            return await _dbContext.SaveChangesAsync();
+        }
 
         public async Task<int> DeleteResultList(int id)
         {
