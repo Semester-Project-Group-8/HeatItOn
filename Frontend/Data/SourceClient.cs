@@ -49,19 +49,4 @@ public class SourceClient
         HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}" );
         return await response.Content.ReadFromJsonAsync<Source>();
     }
-
-    public async Task ImportCsv()
-    {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/ImportCsv", null);
-        response.EnsureSuccessStatusCode();
-    }
-
-    public async Task<string> ExportCsv()
-    {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/ExportCsv");
-        response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadAsStringAsync();
-        return (result);
-    }
-
 }

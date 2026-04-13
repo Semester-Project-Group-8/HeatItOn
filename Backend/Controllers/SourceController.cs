@@ -1,8 +1,6 @@
 ﻿using Backend.Models;
 using Backend.Services;
-using Backend.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Text;
 namespace Backend.Controllers
 {
     [Route("Source")]
@@ -10,20 +8,9 @@ namespace Backend.Controllers
     public class SourceController : ControllerBase
     {
         private readonly SourceService _sourceService;
-        private readonly IWebHostEnvironment _IWebHostEnvironment;
-        public SourceController(SourceService SourceService, IWebHostEnvironment IWebHostEnvironment)
+        public SourceController(SourceService SourceService)
         {
             _sourceService = SourceService;
-            _IWebHostEnvironment = IWebHostEnvironment;
-        }
-
-        [HttpPost("ImportCsv")]
-        public async Task<IActionResult> ImportCsv()
-        {
-            string csvPath = Path.Combine(_IWebHostEnvironment.ContentRootPath, "Data", "heating.csv");
-            ReadCsv importer = new ReadCsv(_sourceService, csvPath);
-            var inserted = await importer.ImportCsv();
-            return Ok(inserted);
         }
 
         [HttpGet]
@@ -33,27 +20,6 @@ namespace Backend.Controllers
             {
                 var Sources = await _sourceService.ListSources();
                 return Ok(Sources);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(503, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("ExportCsv")]
-        public async Task<IActionResult> ExportCsv()
-        {
-            try
-            {
-                var Sources = await _sourceService.ListSources();
-                var csv = new StringBuilder();
-                csv.AppendLine("TimeFrom,TimeTo,HeatDemand,ElectricityPrice"); // header row
-                foreach (var source in Sources)
-                {
-                    csv.AppendLine($"{source.TimeFrom},{source.TimeTo},{source.HeatDemand},{source.ElectricityPrice}");
-                }
-                var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-                return File(bytes, "text/csv", "heating.csv");
             }
             catch (InvalidOperationException ex)
             {
