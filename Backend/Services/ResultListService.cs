@@ -23,6 +23,7 @@ namespace Backend.Services
             var resultList = await _dbContext.ResultList
                 .Include(rl => rl.Results)
                 .FirstOrDefaultAsync(rl => rl.Id == id);
+
             if (resultList == null)
             {
                 throw new KeyNotFoundException($"Result list with id {id} not found.");
@@ -43,6 +44,25 @@ namespace Backend.Services
                 throw new ArgumentException("Only one result per asset is allowed in a single result list.");
             }
 
+            var requestedAssetIds = resultList
+                .Select(result => result.AssetId)
+                .Distinct()
+                .ToList();
+
+            var existingAssetIds = await _dbContext.Assets
+                .Where(asset => requestedAssetIds.Contains(asset.Id))
+                .Select(asset => asset.Id)
+                .ToListAsync();
+
+            var missingAssetIds = requestedAssetIds
+                .Except(existingAssetIds)
+                .ToList();
+
+            if (missingAssetIds.Count > 0)
+            {
+                throw new ArgumentException($"Unknown asset id(s): {string.Join(", ", missingAssetIds)}");
+            }
+
             foreach (var result in resultList)
             {
                 result.Id = 0;
@@ -58,6 +78,14 @@ namespace Backend.Services
             await _dbContext.ResultList.AddAsync(newResultList);
             await _dbContext.SaveChangesAsync();
             return newResultList.Id;
+        }
+        public async Task<int> AddResultList(List<ResultList> results)
+        {
+            foreach (var result in results)
+            {
+                await _dbContext.ResultList.AddAsync(result);
+            }
+            return await _dbContext.SaveChangesAsync();
         }
 
         public async Task<int> DeleteResultList(int id)

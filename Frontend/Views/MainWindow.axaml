@@ -1,7 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Frontend.ViewModels"
-        xmlns:views="using:Frontend.Views"
+    xmlns:views="using:Frontend.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -9,22 +9,17 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Frontend">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
-
     <TabControl Margin="0" Padding = "0">
 
         <TabItem Header="Assets">
             <views:AssetsTabView/>
         </TabItem>
 
-        <TabItem Header="Results">
-            <views:ResultsTabView/>
-        </TabItem>
+        <TabItem x:Name="ResultsTabItem" Header="Results"/>
 
         <TabItem Header="Source">
-            <views:SourceTabView/>
+            <views:SourceTabView
+                DataContext="{Binding SourceTab}"/>
         </TabItem>
 
     </TabControl>

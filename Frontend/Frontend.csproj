@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.3.9"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.9" />
         <PackageReference Include="Avalonia.Desktop" Version="11.3.9"/>
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.9"/>
@@ -22,5 +23,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1"/>
+        <PackageReference Include="LiveChartsCore" Version="2.0.0" />
+        <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0" />
     </ItemGroup>
 </Project>

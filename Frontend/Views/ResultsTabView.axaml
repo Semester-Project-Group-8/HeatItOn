@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Frontend.ViewModels"
+             xmlns:models="using:Frontend.Models"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
@@ -11,9 +12,74 @@
         <vm:ResultsTabViewModel/>
     </Design.DataContext>
 
-    <!-- Example content -->
-    <StackPanel Margin="10">
-        <TextBlock Text="Results Tab" FontSize="20"/>
-    </StackPanel>
+    <Grid Margin="10" ColumnDefinitions="260,*" ColumnSpacing="12">
+        <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Result Lists" FontSize="18" Margin="0,0,0,8"/>
+                <ListBox ItemsSource="{Binding ResultLists}"
+                         SelectedItem="{Binding SelectedResultList}"
+                         MaxHeight="600">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:ResultList">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="{Binding Id, StringFormat='#{0}'}"/>
+                                <TextBlock Text="{Binding TimeFrom, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*" RowSpacing="10">
+            <TextBlock Grid.Row="0" Text="Results" FontSize="20"/>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="From"/>
+                    <CalendarDatePicker x:Name="SearchFromDatePicker"
+                                        Width="170"/>
+                    <TimePicker x:Name="SearchFromTimePicker"
+                                Width="170"/>
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="To"/>
+                    <CalendarDatePicker x:Name="SearchToDatePicker"
+                                        Width="170"/>
+                    <TimePicker x:Name="SearchToTimePicker"
+                                Width="170"/>
+                </StackPanel>
+
+                <Button Content="Search" Click="OnSearchClick"/>
+                <Button Content="Clear" Click="OnClearClick"/>
+                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="6">
+                <Grid Grid.Row="0" ColumnDefinitions="220,*,170,150" ColumnSpacing="8">
+                    <TextBlock Grid.Column="0" Text="Hour" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="1" Text="Active Generators" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="2" Text="Electricity Consumed" FontWeight="Bold"/>
+                    <TextBlock Grid.Column="3" Text="Total Net Price" FontWeight="Bold"/>
+                </Grid>
+
+                <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="4">
+                    <ListBox ItemsSource="{Binding TableRows}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ResultTableRow">
+                                <Grid ColumnDefinitions="220,*,170,150" ColumnSpacing="8">
+                                    <TextBlock Grid.Column="0" Text="{Binding Hour}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding ActiveGenerators}" TextWrapping="Wrap"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding ElectricityConsumed}"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding TotalNetPrice}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
 
 </UserControl>
