@@ -1,0 +1,7 @@
+Name,MaxHeat,ProductionCost,CO2Emission,GasConsumption,OilConsumption,MaxElectricity
+GB1,3.0,510,132,1.05,0,0
+GB2,2.0,540,134,1.08,0,0
+GB3,4.0,580,136,1.09,0,0
+OB1,6.0,690,147,0,1.18,0
+GM1,5.3,975,227,1.82,0,3.9
+EB1,6.0,15,0,0,0,-6.0
