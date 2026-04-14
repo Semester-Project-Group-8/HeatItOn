@@ -9,12 +9,14 @@ namespace Backend.Services
     {
         readonly AssetsService _assetService;
         readonly SourceService _sourceService;
+        readonly ResultService _resultService;
         readonly ResultListService _resultListService;
 
-        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultListService resultListService)
+        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultListService resultListService)
         {
             _assetService = assetService;
             _sourceService = sourceService;
+            _resultService = resultService;
             _resultListService = resultListService;
         }
 
@@ -41,7 +43,7 @@ namespace Backend.Services
             var ScenarioAssets = await _assetService.ListAssets();
             List<(Asset asset, float cost)> prices = new();
             List<ResultList> optimizedData = new List<ResultList>();
-            int maintencance = 45;
+            int maintencance = 0;
             foreach (var source in AllSources)
             {
                 ResultList resultOfHour=new ResultList();
@@ -51,7 +53,7 @@ namespace Backend.Services
 
                 foreach (var asset in ScenarioAssets)
                 {
-                    if (asset.Id == 2 && maintencance != 0)//if generator no.2 under maintenance period skip
+                    if (asset.Id == 2 && maintencance > 0)//if generator no.2 under maintenance period skip
                     {
                         continue;
                     }
@@ -61,7 +63,7 @@ namespace Backend.Services
                 prices.Sort((a, b) => a.cost.CompareTo(b.cost));
                 float metEnergy = 0;
                 int usedGenerators = 0;
-                while (metEnergy < source.HeatDemand)
+                while (metEnergy < source.HeatDemand && usedGenerators<=prices.Count())
                 {
                     metEnergy += prices[usedGenerators].asset.MaxHeat;
                     Result result = new Result
@@ -80,6 +82,7 @@ namespace Backend.Services
                     usedGenerators++;
                     resultOfHour.Results.Add(result);
                 }
+                await _resultService.AddResult(resultOfHour.Results);//change when AddResult exists
                 optimizedData.Add(resultOfHour);
                 maintencance--;
             }
