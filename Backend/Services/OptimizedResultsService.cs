@@ -15,7 +15,7 @@ public class OptimizedResultsService
     
     public async Task<IEnumerable<OptimizedResults>> ListOptimizedResults()
     {
-        return await _dbContext.OptimizedResults.ToListAsync();
+        return await _dbContext.OptimizedResults.Include(results => results.ResultsForHours).ThenInclude(list => list.Results).ThenInclude(r => r.Asset).ToListAsync();
     }
     
     public async Task<OptimizedResults?> GetOptimizedResults(int id)
