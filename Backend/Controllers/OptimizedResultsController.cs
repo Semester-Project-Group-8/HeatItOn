@@ -1,3 +1,4 @@
+using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,13 @@ public class OptimizedResultsController : ControllerBase
     public async Task<IActionResult> Get(int id)
     {
         var result = await _optimizedResultsService.GetOptimizedResults(id);
+        return Ok(result);
+    }
+
+    [HttpPost("Add")]
+    public async Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
+    { 
+        var result = await _optimizedResultsService.AddOptimizedResults(optimizedResults);
         return Ok(result);
     }
 

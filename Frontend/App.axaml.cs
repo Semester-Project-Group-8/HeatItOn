@@ -1,7 +1,6 @@
 using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using System.Net.Http;
@@ -9,8 +8,6 @@ using Avalonia.Markup.Xaml;
 using Frontend.Data;
 using Frontend.ViewModels;
 using Frontend.Views;
-using System;
-using System.Net.Http;
 
 namespace Frontend;
 
@@ -25,21 +22,22 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            HttpClient httpClient = new HttpClient();
+            var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("http://localhost:8080/");
-            SourceClient sourceClient = new SourceClient(httpClient);
-            AssetClient assetClient = new AssetClient(httpClient);
-            OptimizerClient optimizerClient = new OptimizerClient(httpClient);
-            ResultListClient resultList = new ResultListClient(httpClient);
-
+            var sourceClient = new SourceClient(httpClient);
+            var assetClient = new AssetClient(httpClient);
+            var optimizerClient = new OptimizerClient(httpClient);
+            var resultList = new ResultListClient(httpClient);
+            var optimizedResultsClient = new OptimizedResultsClient(httpClient);
 
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
 
-            desktop.MainWindow = new MainWindow(new ResultListClient(httpClient))
+            desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(sourceClient,assetClient,optimizerClient,resultList),
+                DataContext =
+                    new MainWindowViewModel(sourceClient, assetClient, optimizerClient, optimizedResultsClient)
             };
         }
 
@@ -53,9 +51,6 @@ public partial class App : Application
             BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 
         // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
-        {
-            BindingPlugins.DataValidators.Remove(plugin);
-        }
+        foreach (var plugin in dataValidationPluginsToRemove) BindingPlugins.DataValidators.Remove(plugin);
     }
 }

@@ -9,18 +9,21 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Frontend">
 
-    <TabControl Margin="0" Padding = "0">
+    <TabControl Margin="0" Padding="0">
 
         <TabItem Header="Assets">
             <views:AssetsTabView
                 DataContext="{Binding AssetsTab}"/>
         </TabItem>
 
-        <TabItem x:Name="ResultsTabItem" Header="Results"/>
+        <TabItem Header="Results">
+            <views:ResultsTabView
+                DataContext="{Binding ResultTab}" />
+        </TabItem>
 
         <TabItem Header="Source">
             <views:SourceTabView
-                DataContext="{Binding SourceTab}"/>
+                DataContext="{Binding SourceTab}" />
         </TabItem>
 
     </TabControl>

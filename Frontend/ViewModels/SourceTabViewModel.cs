@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Frontend.Data;
 using Frontend.Models;
 using LiveChartsCore;
@@ -14,19 +15,19 @@ public partial class SourceTabViewModel : ViewModelBase
 {
     // Api connection
     private readonly SourceClient _client;
-    
+
     // Sources
-    private readonly ObservableCollection<Source> _allSources = new();
-    public ObservableCollection<Source> Sources { get; } = new();
+    private readonly ObservableCollection<Source> _allSources = [];
+    public ObservableCollection<Source> Sources { get; } = [];
     private Source? _selectedSource;
-    
+
     // Uploaded files
-    public ObservableCollection<string> Files { get; } = new();
+    public ObservableCollection<string> Files { get; } = [];
     private string? _selectedFile;
-    
+
     // Charts
-    public ObservableCollection<ISeries> WinterSeries { get; } = new();
-    public ObservableCollection<ISeries> SummerSeries { get; } = new();
+    public ObservableCollection<ISeries> WinterSeries { get; } = [];
+    public ObservableCollection<ISeries> SummerSeries { get; } = [];
     public Axis[] TimeAxis { get; }
     public Axis[] DualAxes { get; }
     public bool HasSources => Sources.Count > 0;
@@ -57,7 +58,7 @@ public partial class SourceTabViewModel : ViewModelBase
             new Axis
             {
                 Name = "Time",
-                
+
                 Labeler = value =>
                 {
                     var ticks = (long)value;
@@ -72,12 +73,12 @@ public partial class SourceTabViewModel : ViewModelBase
                         .ToString("dd.MM HH:mm");
                 },
                 UnitWidth = TimeSpan.FromHours(1).Ticks,
-                MinStep  = TimeSpan.FromHours(20).Ticks,
+                MinStep = TimeSpan.FromHours(20).Ticks,
                 ForceStepToMin = true,
-                MinZoomDelta  = TimeSpan.FromHours(3).Ticks,
+                MinZoomDelta = TimeSpan.FromHours(3).Ticks,
                 LabelsRotation = -90,
                 TextSize = 11,
-                NameTextSize = 10,
+                NameTextSize = 10
             }
         ];
         DualAxes =
@@ -90,7 +91,6 @@ public partial class SourceTabViewModel : ViewModelBase
                 NameTextSize = 10,
                 MinLimit = null,
                 MaxLimit = null
-                
             },
             new Axis
             {
@@ -102,18 +102,14 @@ public partial class SourceTabViewModel : ViewModelBase
                 MaxLimit = null
             }
         ];
-        LoadFromBackend();
+        _ = LoadFromBackend();
     }
 
-    private async void LoadFromBackend()
+    private async Task LoadFromBackend()
     {
         try
         {
             var sources = await _client.GetAll();
-
-            _allSources.Clear();
-            Sources.Clear();
-            Files.Clear();
 
             foreach (var source in sources)
             {
@@ -123,9 +119,10 @@ public partial class SourceTabViewModel : ViewModelBase
                 if (!Files.Contains(source.FileName))
                     Files.Add(source.FileName);
             }
-        } catch (Exception ex)
+        }
+        catch (Exception e)
         {
-            Console.WriteLine($"Error loading sources: {ex.Message}");
+            Console.WriteLine(e);
         }
     }
 
@@ -143,11 +140,15 @@ public partial class SourceTabViewModel : ViewModelBase
         BuildSummerSeries();
     }
 
-    private static bool IsWinter(Source s) =>
-        s.TimeFrom.Month is <= 3 or >= 10;
+    private static bool IsWinter(Source s)
+    {
+        return s.TimeFrom.Month is <= 3 or >= 10;
+    }
 
-    private static bool IsSummer(Source s) =>
-        s.TimeFrom.Month is >= 4 and <= 9;
+    private static bool IsSummer(Source s)
+    {
+        return s.TimeFrom.Month is >= 4 and <= 9;
+    }
 
     private void BuildWinterSeries()
     {
