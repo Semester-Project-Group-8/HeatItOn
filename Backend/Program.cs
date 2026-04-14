@@ -25,6 +25,7 @@ builder.Services.AddScoped<AssetsService>();
 builder.Services.AddScoped<OptimizerService>();
 builder.Services.AddScoped<ResultService>();
 builder.Services.AddScoped<ResultListService>();
+builder.Services.AddScoped<OptimizedResultsService>();
 
 var app = builder.Build();
 
