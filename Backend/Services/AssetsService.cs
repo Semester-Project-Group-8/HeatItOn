@@ -131,6 +131,31 @@ namespace Backend.Services
                 throw new KeyNotFoundException($"Asset with ID {id} not found.");
             return asset;
         }
-    
+
+        public async Task<string> ExportAssetsToCsv()
+        {
+            var assets = await _dbContext.Assets.ToListAsync();
+            var csvBuilder = new System.Text.StringBuilder();
+
+            csvBuilder.AppendLine("Name,MaxHeat MW,Production Cost DKK/MWh(th),CO2 Emissions kg/MWh(th),Gas Consumption MW(th),Oil Consumption MW(th),Max Electricity MW(e)");
+
+            foreach (var asset in assets)
+            {
+                var line = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    "{0},{1},{2},{3},{4},{5},{6}",
+                    asset.Name,
+                    asset.MaxHeat,
+                    asset.ProductionCost,
+                    asset.CO2Emission,
+                    asset.GasConsumption,
+                    asset.OilConsumption,
+                    asset.MaxElectricity);
+
+                csvBuilder.AppendLine(line);
+            }
+
+            return csvBuilder.ToString();
+        }
+
     }
 }

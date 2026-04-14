@@ -102,6 +102,23 @@ namespace Backend.Controllers
                 return Conflict(new { message = ex.Message });
             }
         }
+
+        [HttpGet("Export")]
+        public async Task<IActionResult> ExportAssets()
+        {
+            try
+            {
+                var csvData = await _assetsService.ExportAssetsToCsv();
+
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csvData);
+
+                return File(bytes, "text/csv", "assets.csv");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while exporting the CSV.", details = ex.Message });
+            }
+        }
     }
 
 
