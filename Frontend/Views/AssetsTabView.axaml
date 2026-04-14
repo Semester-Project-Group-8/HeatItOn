@@ -61,7 +61,7 @@
             <Grid RowDefinitions="*,Auto" Margin="5">
                 <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
                     <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"/>
-                    <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                    <Button Click="startOptimize" Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
                 </Grid>
                 <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto,*" ColumnSpacing="10" RowSpacing="10">
                     
