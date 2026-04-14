@@ -5,9 +5,9 @@ namespace Backend.Models;
 public class OptimizedResults
 {
     [Required]
-    public int Id;
+    public int Id  { get; set; }
     [Required]
-    public string Name;
+    public string Name  { get; set; }
     [Required]
-    public List<ResultList>  ResultsForHours;
+    public List<ResultList>  ResultsForHours  { get; set; }
 }

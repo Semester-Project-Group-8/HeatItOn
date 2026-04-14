@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
+[Route("OptimizedResults")]
+[ApiController]
 public class OptimizedResultsController : ControllerBase
 {
     private readonly OptimizedResultsService _optimizedResultsService;
@@ -19,14 +21,14 @@ public class OptimizedResultsController : ControllerBase
         return Ok(result);
     }
     
-    [HttpGet]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
         var result = await _optimizedResultsService.GetOptimizedResults(id);
         return Ok(result);
     }
 
-    [HttpDelete]
+    [HttpDelete("Delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         await _optimizedResultsService.DeleteOptimizedResult(id);
