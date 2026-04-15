@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Frontend.ViewModels"
+             xmlns:v="using:Frontend.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
@@ -36,73 +37,102 @@
         </Style>
     </UserControl.Styles>
 
-    <SplitView IsPaneOpen = "True" OpenPaneLength="200" PanePlacement="Left"
-    DisplayMode="Inline">
-        <SplitView.Pane>
-            <DockPanel LastChildFill="False">
-                <RadioButton DockPanel.Dock = "Top"
-                FontSize = "18"
-                Margin = "15,15,15,7.5" Content = "Scenario 1"/>
+    <Grid RowDefinitions="*">
+        <SplitView Grid.Row="0" IsPaneOpen="True" OpenPaneLength="200" PanePlacement="Left"
+                   DisplayMode="Inline"
+                   IsEnabled="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNull}}">
+            <SplitView.Pane>
+                <DockPanel LastChildFill="False">
+                    <RadioButton DockPanel.Dock="Top"
+                                 FontSize="18"
+                                 Margin="15,15,15,7.5"
+                                 Content="Scenario 1"
+                                 GroupName="Scenarios"
+                                 IsChecked="{Binding IsScenario1Selected}"/>
 
-                <RadioButton DockPanel.Dock = "Top"
-                FontSize = "18"
-                Margin = "15,7.5,15,7.5" Content = "Scenario 2"/>
+                    <RadioButton DockPanel.Dock="Top"
+                                 FontSize="18"
+                                 Margin="15,7.5,15,7.5"
+                                 Content="Scenario 2"
+                                 GroupName="Scenarios"
+                                 IsChecked="{Binding IsScenario2Selected}"/>
 
-                <RadioButton DockPanel.Dock = "Top"
-                FontSize = "18"
-                Margin = "15,7.5,15,15" Content = "Custom"/>
-            </DockPanel>
-        </SplitView.Pane>
-        <SplitView.Content>
-            <Grid RowDefinitions="Auto,*,Auto" Margin="5">
-                <TextBlock Grid.Row="0"
-                           IsVisible="{Binding HasStatusMessage}"
-                           Text="{Binding StatusMessage}"
-                           Margin="0,0,0,8"
-                           Opacity="0.8"/>
-                <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
-                    <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"/>
-                    <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                    <RadioButton DockPanel.Dock="Top"
+                                 FontSize="18"
+                                 Margin="15,7.5,15,15"
+                                 Content="Custom"
+                                 GroupName="Scenarios"
+                                 IsChecked="{Binding IsCustomScenarioSelected}"/>
+                </DockPanel>
+            </SplitView.Pane>
+            <SplitView.Content>
+                <Grid RowDefinitions="Auto,*,Auto" Margin="5">
+                    <TextBlock Grid.Row="0"
+                               IsVisible="{Binding HasStatusMessage}"
+                               Text="{Binding StatusMessage}"
+                               Margin="0,0,0,8"
+                               Opacity="0.8"/>
+                    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+                        <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"
+                                Command="{Binding OpenAddAssetDialogCommand}"/>
+                        <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding AssetItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" ItemWidth="318" ItemHeight="310"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton Classes="asset-card"
+                                                  Margin="0,0,10,10"
+                                                  HorizontalAlignment="Left"
+                                                  VerticalAlignment="Top"
+                                                  HorizontalContentAlignment="Stretch"
+                                                  VerticalContentAlignment="Stretch"
+                                                  IsChecked="{Binding IsSelected}">
+                                        <Grid>
+                                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                                <Image Source="{Binding ImagePath}"
+                                                       Height="100"
+                                                       Stretch="UniformToFill"/>
+                                                <TextBlock Text="{Binding Name}"/>
+                                                <ItemsControl ItemsSource="{Binding Details}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding}"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                            <Button Classes="card-corner-btn"
+                                                    Command="{Binding EditCommand}"/>
+                                        </Grid>
+                                    </ToggleButton>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
-                <ScrollViewer Grid.Row="1"
-                              HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto">
-                    <ItemsControl ItemsSource="{Binding AssetItems}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" ItemWidth="318" ItemHeight="310"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <ToggleButton Classes="asset-card"
-                                              Margin="0,0,10,10"
-                                              HorizontalAlignment="Left"
-                                              VerticalAlignment="Top"
-                                              HorizontalContentAlignment="Left"
-                                              VerticalContentAlignment="Top">
-                                    <Grid>
-                                        <StackPanel Classes="asset-card-content" Spacing="8">
-                                            <Image Source="{Binding ImagePath}"
-                                                   Height="100"
-                                                   Stretch="UniformToFill"/>
-                                            <TextBlock Text="{Binding Name}"/>
-                                            <ItemsControl ItemsSource="{Binding Details}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding}"/>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                        <Button Classes="card-corner-btn"/>
-                                    </Grid>
-                                </ToggleButton>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Grid>
-        </SplitView.Content>
-    </SplitView>
+            </SplitView.Content>
+        </SplitView>
+
+        <Panel Grid.Row="0" 
+               Background="Black"
+               Opacity="0.3"
+               IsVisible="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNotNull}}"
+               IsHitTestVisible="True"/>
+
+        <Panel Grid.Row="0"
+               IsVisible="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNotNull}}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               IsHitTestVisible="True">
+            <v:AddAssetDialog DataContext="{Binding CurrentDialog}"/>
+        </Panel>
+    </Grid>
 </UserControl>

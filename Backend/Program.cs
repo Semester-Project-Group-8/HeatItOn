@@ -43,15 +43,11 @@ using (var scope = app.Services.CreateScope())
     db.Database.Migrate();
 
     string csvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "heating.csv");
-    string assetCsvPath = Path.Combine(builder.Environment.ContentRootPath, "Data", "assets.csv");
 
     var demandService = scope.ServiceProvider.GetRequiredService<SourceService>();
-    var assetsService = scope.ServiceProvider.GetRequiredService<AssetsService>();
     ReadCsv importer = new ReadCsv(demandService, csvPath);
-    ReadAssetCsv assetImporter = new ReadAssetCsv(assetsService, assetCsvPath);
 
     var insertedSources = await importer.ImportCsv();
-    var insertedAssets = await assetImporter.ImportCsv();
 }
 
 app.Run();
