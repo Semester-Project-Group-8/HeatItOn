@@ -1,7 +1,7 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Frontend.ViewModels;
-using System;
 
 namespace Frontend.Views;
 
