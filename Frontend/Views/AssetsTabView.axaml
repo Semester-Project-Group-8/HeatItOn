@@ -59,9 +59,15 @@
         </SplitView.Pane>
         <SplitView.Content>
             <Grid RowDefinitions="*,Auto" Margin="5">
-                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto" Margin="0,8,0,0" ColumnSpacing="10">
                     <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"/>
-                    <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                    
+                    <Button Grid.Column="1" Content="Import CSV" Command="{Binding ImportCsv}" Height="50" FontSize="20"/>
+                    <Button Grid.Column="2" Content="Export CSV" Command="{Binding ExportCsv}" Height="50" FontSize="20"/>
+                    
+                    <TextBlock Grid.Column="3" Text="{Binding StatusMessage}" VerticalAlignment="Center" Foreground="Green"/>
+
+                    <Button Grid.Column="5" Content="Done" Width="100" Height="50" FontSize="30"/>
                 </Grid>
                 <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto,*" ColumnSpacing="10" RowSpacing="10">
                     
