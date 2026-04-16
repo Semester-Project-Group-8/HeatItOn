@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Models;
 using LiveChartsCore;
@@ -136,8 +138,11 @@ public partial class SourceTabViewModel : ViewModelBase
         foreach (var source in _allSources.Where(s => s.FileName == SelectedFile))
             Sources.Add(source);
 
-        BuildWinterSeries();
-        BuildSummerSeries();
+        Dispatcher.UIThread.Post(() =>
+        {
+            BuildWinterSeries();
+            BuildSummerSeries();
+        });
     }
 
     private static bool IsWinter(Source s)
