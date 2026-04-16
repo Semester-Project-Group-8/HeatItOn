@@ -12,7 +12,8 @@
     <TabControl Margin="0" Padding = "0">
 
         <TabItem Header="Assets">
-            <views:AssetsTabView/>
+            <views:AssetsTabView
+                DataContext="{Binding AssetsTab}"/>
         </TabItem>
 
         <TabItem x:Name="ResultsTabItem" Header="Results"/>
