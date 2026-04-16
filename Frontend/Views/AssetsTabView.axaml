@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Frontend.ViewModels"
+             xmlns:v="using:Frontend.Views"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
@@ -36,163 +37,110 @@
         </Style>
     </UserControl.Styles>
 
-    <Design.DataContext>
-        <vm:AssetsTabViewModel/>
-    </Design.DataContext>
+    <Grid RowDefinitions="*">
+        <SplitView Grid.Row="0" IsPaneOpen="True" OpenPaneLength="200" PanePlacement="Left"
+                   DisplayMode="Inline"
+                   IsEnabled="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNull}}">
+            <SplitView.Pane>
+                <DockPanel LastChildFill="False">
+                    <RadioButton DockPanel.Dock="Top"
+                                 FontSize="18"
+                                 Margin="15,15,15,7.5"
+                                 Content="Scenario 1"
+                                 GroupName="Scenarios"
+                                 IsChecked="{Binding IsScenario1Selected}"/>
 
-    <SplitView IsPaneOpen = "True" OpenPaneLength="200" PanePlacement="Left"
-    DisplayMode="Inline">
-        <SplitView.Pane>
-            <DockPanel LastChildFill="False">
-                <RadioButton DockPanel.Dock = "Top"
-                FontSize = "18"
-                Margin = "15,15,15,7.5" Content = "Scenario 1"/>
+                    <RadioButton DockPanel.Dock="Top"
+                                 FontSize="18"
+                                 Margin="15,7.5,15,7.5"
+                                 Content="Scenario 2"
+                                 GroupName="Scenarios"
+                                 IsChecked="{Binding IsScenario2Selected}"/>
 
-                <RadioButton DockPanel.Dock = "Top"
-                FontSize = "18"
-                Margin = "15,7.5,15,7.5" Content = "Scenario 2"/>
-
-                <RadioButton DockPanel.Dock = "Top"
-                FontSize = "18"
-                Margin = "15,7.5,15,15" Content = "Custom"/>
-            </DockPanel>
-        </SplitView.Pane>
-        <SplitView.Content>
-            <Grid RowDefinitions="*,Auto" Margin="5">
-                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
-                    <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"/>
-                    <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                    <RadioButton DockPanel.Dock="Top"
+                                 FontSize="18"
+                                 Margin="15,7.5,15,15"
+                                 Content="Custom"
+                                 GroupName="Scenarios"
+                                 IsChecked="{Binding IsCustomScenarioSelected}"/>
+                </DockPanel>
+            </SplitView.Pane>
+            <SplitView.Content>
+                <Grid RowDefinitions="Auto,*,Auto" Margin="5">
+                    <TextBlock Grid.Row="0"
+                               IsVisible="{Binding HasStatusMessage}"
+                               Text="{Binding StatusMessage}"
+                               Margin="0,0,0,8"
+                               Opacity="0.8"/>
+                    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+                        <Button Grid.Column="0" Content="+Add" Width="100" Height="50" FontSize="30"
+                                Command="{Binding OpenAddAssetDialogCommand}"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Button Content="Import Assets" Height="50" FontSize="18" Padding="16,0"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"/>
+                            <Button Content="Export Assets" Height="50" FontSize="18" Padding="16,0"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="Done" Width="100" Height="50" FontSize="30"/>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding AssetItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" ItemWidth="318" ItemHeight="310"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton Classes="asset-card"
+                                                  Margin="0,0,10,10"
+                                                  HorizontalAlignment="Left"
+                                                  VerticalAlignment="Top"
+                                                  HorizontalContentAlignment="Stretch"
+                                                  VerticalContentAlignment="Stretch"
+                                                  IsChecked="{Binding IsSelected}">
+                                        <Grid>
+                                            <StackPanel Classes="asset-card-content" Spacing="8">
+                                                <Image Source="{Binding ImagePath}"
+                                                       Height="100"
+                                                       Stretch="UniformToFill"/>
+                                                <TextBlock Text="{Binding Name}"/>
+                                                <ItemsControl ItemsSource="{Binding Details}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding}"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                            <Button Classes="card-corner-btn"
+                                                    Command="{Binding EditCommand}"/>
+                                        </Grid>
+                                    </ToggleButton>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Grid>
-                <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*" RowDefinitions="Auto,Auto,*" ColumnSpacing="10" RowSpacing="10">
-                    
-                    <ToggleButton Classes="asset-card"
-                                  Grid.Row="0"
-                                  Grid.Column="0"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  HorizontalContentAlignment="Left"
-                                  VerticalContentAlignment="Top">
-                        <Grid>
-                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                <Image Source="/Assets/gb1.png"
-                                       Height="100"
-                                       Stretch="UniformToFill"/>
-                                <TextBlock Text = "GB1"/>
-                                <TextBlock Text = "Max heat: 3,0 MW"/>
-                                <TextBlock Text = "Production costs: 510 DKK/MWh(th)"/>
-                                <TextBlock Text = "CO2 emissions: 132 kg/MWh(th)"/>
-                                <TextBlock Text = "Gas consumption: 1,05 MWh(gas)/MWh(th)"/>
-                            </StackPanel>
-                            <Button Classes="card-corner-btn"/>
-                        </Grid>
-                    </ToggleButton>
-                    <ToggleButton Classes="asset-card"
-                                  Grid.Row="0"
-                                  Grid.Column="1"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  HorizontalContentAlignment="Left"
-                                  VerticalContentAlignment="Top">
-                        <Grid>
-                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                <Image Source="/Assets/gb1.png"
-                                       Height="100"
-                                       Stretch="UniformToFill"/>
-                                <TextBlock Text = "GB2"/>
-                                <TextBlock Text = "Max heat: 2,0 MW"/>
-                                <TextBlock Text = "Production costs: 540 DKK/MWh(th)"/>
-                                <TextBlock Text = "CO2 emissions: 134 kg/MWh(th)"/>
-                                <TextBlock Text = "Gas consumption: 1,08 MWh(gas)/MWh(th)"/>
-                            </StackPanel>
-                            <Button Classes="card-corner-btn"/>
-                        </Grid>
-                    </ToggleButton>
-                    <ToggleButton Classes="asset-card"
-                                  Grid.Row="0"
-                                  Grid.Column="2"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  HorizontalContentAlignment="Left"
-                                  VerticalContentAlignment="Top">
-                        <Grid>
-                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                <Image Source="/Assets/gb1.png"
-                                       Height="100"
-                                       Stretch="UniformToFill"/>
-                                <TextBlock Text = "GB3"/>
-                                <TextBlock Text = "Max heat: 4,0 MW"/>
-                                <TextBlock Text = "Production costs: 580 DKK/MWh(th)"/>
-                                <TextBlock Text = "CO2 emissions: 136 kg/MWh(th)"/>
-                                <TextBlock Text = "Gas consumption: 1,09 MWh(gas)/MWh(th)"/>
-                            </StackPanel>
-                            <Button Classes="card-corner-btn"/>
-                        </Grid>
-                    </ToggleButton>
-                    <ToggleButton Classes="asset-card"
-                                  Grid.Row="1"
-                                  Grid.Column="0"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  HorizontalContentAlignment="Left"
-                                  VerticalContentAlignment="Top">
-                        <Grid>
-                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                <Image Source="/Assets/ob1.png"
-                                       Height="100"
-                                       Stretch="UniformToFill"/>
-                                <TextBlock Text = "OB1"/>
-                                <TextBlock Text = "Max heat: 6,0 MW"/>
-                                <TextBlock Text = "Production costs: 690 DKK/MWh(th)"/>
-                                <TextBlock Text = "CO2 emissions: 147 kg/MWh(th)"/>
-                                <TextBlock Text = "Gas consumption: 1,18 MWh(oil)/MWh(th)"/>
-                            </StackPanel>
-                            <Button Classes="card-corner-btn"/>
-                        </Grid>
-                    </ToggleButton>
-                    <ToggleButton Classes="asset-card"
-                                  Grid.Row="1"
-                                  Grid.Column="1"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  HorizontalContentAlignment="Left"
-                                  VerticalContentAlignment="Top">
-                        <Grid>
-                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                <Image Source="/Assets/gm1.png"
-                                       Height="100"
-                                       Stretch="UniformToFill"/>
-                                <TextBlock Text = "GM1"/>
-                                <TextBlock Text = "Max heat: 5,3 MW"/>
-                                <TextBlock Text = "Max electricity: 3,9 MW"/>
-                                <TextBlock Text = "Production costs: 975 DKK/MWh(th)"/>
-                                <TextBlock Text = "CO2 emissions: 227 kg/MWh(th)"/>
-                                <TextBlock Text = "Gas consumption: 1,82 MWh(gas)/MWh(th)"/>
-                            </StackPanel>
-                            <Button Classes="card-corner-btn"/>
-                        </Grid>
-                    </ToggleButton>
-                    <ToggleButton Classes="asset-card"
-                                  Grid.Row="1"
-                                  Grid.Column="2"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  HorizontalContentAlignment="Left"
-                                  VerticalContentAlignment="Top">
-                        <Grid>
-                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                <Image Source="/Assets/eb1.png"
-                                       Height="100"
-                                       Stretch="UniformToFill"/>
-                                <TextBlock Text = "EB1"/>
-                                <TextBlock Text = "Max heat: 6,0 MW"/>
-                                <TextBlock Text = "Max electricity: -6,0 MW"/>
-                                <TextBlock Text = "Production costs: 15 DKK/MWh(th)"/>
-                            </StackPanel>
-                            <Button Classes="card-corner-btn"/>
-                        </Grid>
-                    </ToggleButton>
-                </Grid>
-            </Grid>
-        </SplitView.Content>
-    </SplitView>
+            </SplitView.Content>
+        </SplitView>
+
+        <Panel Grid.Row="0" 
+               Background="Black"
+               Opacity="0.3"
+               IsVisible="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNotNull}}"
+               IsHitTestVisible="True"/>
+
+        <Panel Grid.Row="0"
+               IsVisible="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNotNull}}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               IsHitTestVisible="True">
+            <v:AddAssetDialog DataContext="{Binding CurrentDialog}"/>
+        </Panel>
+    </Grid>
 </UserControl>

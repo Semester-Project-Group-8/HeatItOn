@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Frontend.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Frontend.Views.AddAssetDialog"
+             x:DataType="vm:AddAssetDialogViewModel"
+             Background="White"
+             BorderBrush="Black"
+             BorderThickness="2"
+             Padding="20">
+
+    <UserControl.Styles>
+        <Style Selector="TextBox:error">
+            <Setter Property="BorderBrush" Value="Red"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="*,Auto" MinWidth="500" MinHeight="600">
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="15" Margin="0,0,0,20">
+                <TextBlock Text="{Binding DialogTitle}" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+                
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Name *" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding Name}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter asset name"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Max Heat" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding MaxHeat}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter max heat"
+                             ToolTip.Tip="Numbers only"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Production Cost" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding ProductionCost}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter production cost"
+                             ToolTip.Tip="Numbers only"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="CO2 Emission" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding CO2Emission}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter CO2 emission"
+                             ToolTip.Tip="Numbers only"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Gas Consumption" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding GasConsumption}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter gas consumption"
+                             ToolTip.Tip="Numbers only"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Oil Consumption" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding OilConsumption}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter oil consumption"
+                             ToolTip.Tip="Numbers only"/>
+                </StackPanel>
+
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Max Electricity" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding MaxElectricity}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="Enter max electricity"
+                             ToolTip.Tip="Numbers only"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,10,*,10,*" RowDefinitions="Auto" Margin="0,20,0,0">
+            <Button Grid.Column="0"
+                    Content="Cancel"
+                    Height="50"
+                    FontSize="16"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="2"
+                    Content="{Binding SubmitButtonText}"
+                    Height="50"
+                    FontSize="16"
+                    Command="{Binding SubmitCommand}"/>
+            <Button Grid.Column="4"
+                    Content="Delete"
+                    Height="50"
+                    FontSize="16"
+                    Command="{Binding DeleteCommand}"
+                    IsVisible="{Binding IsEditMode}"
+                    Background="Red"
+                    Foreground="White"/>
+        </Grid>
+    </Grid>
+</UserControl>

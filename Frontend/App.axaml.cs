@@ -9,8 +9,6 @@ using Avalonia.Markup.Xaml;
 using Frontend.Data;
 using Frontend.ViewModels;
 using Frontend.Views;
-using System;
-using System.Net.Http;
 
 namespace Frontend;
 
@@ -41,7 +39,7 @@ public partial class App : Application
 
             desktop.MainWindow = new MainWindow(new ResultListClient(httpClient))
             {
-                DataContext = new MainWindowViewModel(sourceClient),
+                DataContext = new MainWindowViewModel(sourceClient, assetClient),
             };
         }
 

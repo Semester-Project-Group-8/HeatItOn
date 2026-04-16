@@ -10,7 +10,7 @@ using LiveChartsCore.Defaults;
 
 namespace Frontend.ViewModels;
 
-public class SourceTabViewModel : ViewModelBase
+public partial class SourceTabViewModel : ViewModelBase  
 {
     // Api connection
     private readonly SourceClient _client;
