@@ -137,6 +137,8 @@ public class AssetsTabViewModelTests
         vm.OpenEditAssetDialog(original!);
         vm.CurrentDialog!.DeleteCommand.Execute(null);
 
+        await WaitForAsync(() => vm.AssetItems.Count == 0);
+
         Assert.Null(vm.CurrentDialog);
         Assert.Empty(vm.AssetItems);
         Assert.False(vm.HasAssets);
@@ -153,6 +155,13 @@ public class AssetsTabViewModelTests
                 {
                     Content = new StringContent(json, Encoding.UTF8, "application/json")
                 };
+            }
+
+            if (request.Method == HttpMethod.Delete && request.RequestUri is not null && request.RequestUri.AbsolutePath.StartsWith("/Asset/", StringComparison.OrdinalIgnoreCase))
+            {
+                assets.RemoveAll(a => request.RequestUri.AbsolutePath.EndsWith($"/{a.Id}", StringComparison.OrdinalIgnoreCase));
+                json = JsonSerializer.Serialize(assets);
+                return new HttpResponseMessage(HttpStatusCode.NoContent);
             }
 
             return new HttpResponseMessage(HttpStatusCode.NotFound);

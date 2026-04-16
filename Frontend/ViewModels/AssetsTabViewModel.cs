@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Frontend.Data;
 using Frontend.Models;
@@ -81,13 +82,18 @@ public class AssetsTabViewModel : ViewModelBase
     private void OpenAddAssetDialog()
     {
         var dialogVm = new AddAssetDialogViewModel();
-        dialogVm.OnAssetAdded += (asset) =>
+        dialogVm.OnAssetAdded += async (asset) =>
         {
-            var cardItem = MapAssetToCard(asset);
-            cardItem.EditCommand = new RelayCommand(() => OpenEditAssetDialog(asset));
-            _allAssetItems.Add(cardItem);
-            AssetItems.Add(cardItem);
-            CurrentDialog = null;
+            try
+            {
+                await _assetClient.Post(asset);
+                await LoadFromBackendAsync();
+                CurrentDialog = null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating asset: {ex.Message}");
+            }
         };
         dialogVm.OnCanceled += () =>
         {
@@ -101,19 +107,18 @@ public class AssetsTabViewModel : ViewModelBase
         var dialogVm = new AddAssetDialogViewModel();
         dialogVm.InitializeForEdit(asset);
         
-        dialogVm.OnAssetAdded += (editedAsset) =>
+        dialogVm.OnAssetAdded += async (editedAsset) =>
         {
-            var cardItem = MapAssetToCard(editedAsset);
-            cardItem.EditCommand = new RelayCommand(() => OpenEditAssetDialog(editedAsset));
-            var index = _allAssetItems.FindIndex(x => x.Name == asset.Name);
-            if (index >= 0)
+            try
             {
-                _allAssetItems[index] = cardItem;
-                var uiIndex = AssetItems.ToList().FindIndex(x => x.Name == asset.Name);
-                if (uiIndex >= 0)
-                    AssetItems[uiIndex] = cardItem;
+                await _assetClient.Put(editedAsset);
+                await LoadFromBackendAsync();
+                CurrentDialog = null;
             }
-            CurrentDialog = null;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating asset: {ex.Message}");
+            }
         };
         
         dialogVm.OnCanceled += () =>
@@ -121,19 +126,29 @@ public class AssetsTabViewModel : ViewModelBase
             CurrentDialog = null;
         };
         
-        dialogVm.OnAssetDeleted += () =>
+        dialogVm.OnAssetDeleted += async () =>
         {
-            _allAssetItems.RemoveAll(x => x.Name == asset.Name);
-            var itemToRemove = AssetItems.FirstOrDefault(x => x.Name == asset.Name);
-            if (itemToRemove != null)
-                AssetItems.Remove(itemToRemove);
-            CurrentDialog = null;
+            try
+            {
+                await _assetClient.Delete(asset.Id);
+                await LoadFromBackendAsync();
+                CurrentDialog = null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting asset: {ex.Message}");
+            }
         };
         
         CurrentDialog = dialogVm;
     }
 
     private async void LoadFromBackend()
+    {
+        await LoadFromBackendAsync();
+    }
+
+    private async Task LoadFromBackendAsync()
     {
         try
         {
