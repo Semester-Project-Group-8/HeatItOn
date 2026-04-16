@@ -11,13 +11,15 @@ namespace Backend.Services
         readonly SourceService _sourceService;
         readonly ResultService _resultService;
         readonly ResultListService _resultListService;
+        readonly OptimizedResultsService _optimizedResultsService;
 
-        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultListService resultListService)
+        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultListService resultListService, OptimizedResultsService optimizedResultsService)
         {
             _assetService = assetService;
             _sourceService = sourceService;
             _resultService = resultService;
             _resultListService = resultListService;
+            _optimizedResultsService = optimizedResultsService;
         }
 
         public async Task<float> CalculateNetProductionCost(int assetId, DateTime date)
