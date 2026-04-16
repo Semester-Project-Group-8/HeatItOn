@@ -1,30 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Frontend.Models;
 
 namespace Frontend.Data.CSV
 {
     public static class ResultCsvHandler
     {
-        public static async void ExportCsv(string location, ResultClient resultClient)
+        public static async void ExportCsv(string location, ResultListClient resultListClient)
         {
-            List<Result>? results = await resultClient.GetAll();
+            List<ResultList>? resultLists = await resultListClient.ListResultLists();
 
-            if (results != null && results.Count > 0)
+            if (resultLists != null && resultLists.Count > 0)
             {
                 List<string> lines = new List<string>();
 
-                lines.Add("AssetId,HeatProduction MW,Electricity MW,ProductionCost DKK,PrimaryEnergyConsumed MW,CO2Produced kg");
+                lines.Add("Hour,ActiveAssets,HeatProduced MW,Electricity MW,Co2Produced kg");
 
-                foreach (var result in results)
+                foreach (var resultList in resultLists)
                 {
-                    string csvLine = $"{result.AssetId},{result.HeatProduction.ToString(CultureInfo.InvariantCulture)},{result.Electricity.ToString(CultureInfo.InvariantCulture)},{result.ProductionCost.ToString(CultureInfo.InvariantCulture)},{result.PrimaryEnergyConsumed.ToString(CultureInfo.InvariantCulture)},{result.CO2Produced}";
+                    string hour = resultList.TimeFrom.ToString("yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture);
+
+                    string activeAssets = string.Join(" | ", resultList.Results.Select(r => r.AssetId.ToString()));
+
+                    float heatProduced = resultList.Results.Sum(r => r.HeatProduction);
+                    float electricity = resultList.Results.Sum(r => r.Electricity);
+                    int co2Produced = resultList.Results.Sum(r => r.CO2Produced);
+
+                    string csvLine = $"{hour},{activeAssets},{heatProduced.ToString(CultureInfo.InvariantCulture)},{electricity.ToString(CultureInfo.InvariantCulture)},{co2Produced}";
                     lines.Add(csvLine);
                 }
 
                 System.IO.File.WriteAllLines(location, lines);
-                Console.WriteLine("completed | result csv file export");
+                Console.WriteLine("completed | optimized result csv file export");
             }
             else
             {
