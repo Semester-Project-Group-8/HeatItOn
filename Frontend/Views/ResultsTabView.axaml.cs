@@ -1,18 +1,15 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Frontend.Data;
 using Frontend.ViewModels;
-using System;
 
 namespace Frontend.Views;
 
 public partial class ResultsTabView : UserControl
 {
-    public ResultsTabView(ResultListClient resultListClient)
+    public ResultsTabView()
     {
         InitializeComponent();
-
-        DataContext = new ResultsTabViewModel(resultListClient);
     }
 
     private void OnSearchClick(object? sender, RoutedEventArgs e)
