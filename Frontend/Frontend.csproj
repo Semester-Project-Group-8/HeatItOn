@@ -26,4 +26,10 @@
         <PackageReference Include="LiveChartsCore" Version="2.0.0" />
         <PackageReference Include="LiveChartsCore.SkiaSharpView.Avalonia" Version="2.0.0" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\AddAssetDialog.axaml.cs">
+        <DependentUpon>AddAssetDialog.axaml</DependentUpon>
+      </Compile>
+    </ItemGroup>
 </Project>
