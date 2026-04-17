@@ -1,5 +1,4 @@
-﻿using System;
-using Frontend.Data;
+﻿using Frontend.Data;
 
 namespace Frontend.ViewModels;
 
@@ -8,7 +7,6 @@ public class MainWindowViewModel : ViewModelBase
     public SourceTabViewModel SourceTab { get; }
     public AssetsTabViewModel AssetsTab { get; }
     public ResultsTabViewModel ResultTab { get; }
-    public OptimizedResultsClient OptimizedResultsClient { get; }
 
     public MainWindowViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient,
         OptimizedResultsClient optimizedResultsClient)
@@ -18,6 +16,5 @@ public class MainWindowViewModel : ViewModelBase
         
         AssetsTab = new AssetsTabViewModel(sourceClient, assetClient, optimizerClient);
         ResultTab = new ResultsTabViewModel(optimizedResultsClient);
-        OptimizedResultsClient = optimizedResultsClient;
     }
 }

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Frontend.Data;
 using Frontend.Models;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
