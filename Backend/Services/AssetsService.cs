@@ -42,7 +42,7 @@ namespace Backend.Services
             }
         }
         
-        public async Task<int> AddAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity)
+        public async Task<int> AddAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, string? imageName = null)
         {
             var exists = await _dbContext.Assets.AnyAsync(a => a.Id == id);
             if (exists)
@@ -58,6 +58,7 @@ namespace Backend.Services
                 GasConsumption= gasConsumption,
                 OilConsumption= oilConsumption,
                 MaxElectricity= maxElectricity,
+                ImageName = imageName
             };
             try
             {
@@ -95,7 +96,7 @@ namespace Backend.Services
             }
         }
         
-        public async Task<int> UpdateAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity)
+        public async Task<int> UpdateAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, string? imageName = null)
         {
             var asset = await _dbContext.Assets.FindAsync(id);
             if (asset == null)
@@ -108,6 +109,7 @@ namespace Backend.Services
             asset.GasConsumption = gasConsumption;
             asset.OilConsumption = oilConsumption;
             asset.MaxElectricity = maxElectricity;
+            asset.ImageName = imageName;
 
             try 
             {

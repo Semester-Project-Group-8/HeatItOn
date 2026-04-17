@@ -15,6 +15,7 @@ public class AddAssetDialogViewModel : ViewModelBase
     private float _maxElectricity;
     private bool _isEditMode;
     private Asset? _originalAsset;
+    private string? _image;
 
     public Action<Asset>? OnAssetAdded;
     public Action? OnCanceled;
@@ -68,6 +69,12 @@ public class AddAssetDialogViewModel : ViewModelBase
         private set => SetProperty(ref _isEditMode, value);
     }
 
+    public string Image
+    {
+        get => _image;
+        set => SetProperty(ref _image, value);
+    }
+
     public string DialogTitle => IsEditMode ? "Edit Asset" : "Add New Asset";
     public string SubmitButtonText => IsEditMode ? "Save Changes" : "Add Asset";
 
@@ -93,6 +100,7 @@ public class AddAssetDialogViewModel : ViewModelBase
         GasConsumption = asset.GasConsumption;
         OilConsumption = asset.OilConsumption;
         MaxElectricity = asset.MaxElectricity;
+        Image = asset.ImageName;
     }
 
     private void Submit()
@@ -109,7 +117,8 @@ public class AddAssetDialogViewModel : ViewModelBase
             CO2Emission = CO2Emission,
             GasConsumption = GasConsumption,
             OilConsumption = OilConsumption,
-            MaxElectricity = MaxElectricity
+            MaxElectricity = MaxElectricity,
+            ImageName = Image
         };
 
         OnAssetAdded?.Invoke(asset);

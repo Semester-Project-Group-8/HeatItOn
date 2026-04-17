@@ -10,5 +10,6 @@
         public float GasConsumption { get; set; }
         public float OilConsumption { get; set; }
         public float MaxElectricity { get; set; }
+        public string ImageName { get; set; }
     }
 }

@@ -85,6 +85,13 @@
                              Watermark="Enter max electricity"
                              ToolTip.Tip="Numbers only"/>
                 </StackPanel>
+                <StackPanel Spacing="5">
+                    <TextBlock Text="Image" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Text="{Binding Image}"
+                             Padding="10"
+                             Height="40"
+                             Watermark="example.jpg"/>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
 

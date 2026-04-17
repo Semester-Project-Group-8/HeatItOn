@@ -96,13 +96,14 @@
                     Series="{Binding WinterSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    Height="200"/>
+                    ZoomMode="X"
+                    Height="400"/>
                 
                 <avalonia:CartesianChart 
                     Series="{Binding SummerSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    Height="200"/>
+                    Height="400"/>
             </StackPanel>
             <!-- EMPTY STATE -->
             <Border Grid.ColumnSpan="2" Background="#10AAAAAA"
@@ -123,9 +124,6 @@
                         HorizontalAlignment="Center" />
                 </StackPanel>
             </Border>
-
         </Grid>
-
     </DockPanel>
-
 </UserControl>

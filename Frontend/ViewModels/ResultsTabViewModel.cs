@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 
 namespace Frontend.ViewModels;
 
@@ -194,6 +196,7 @@ public class ResultsTabViewModel : ViewModelBase
             .Distinct()
             .ToList();
     }
+
 
 }
 

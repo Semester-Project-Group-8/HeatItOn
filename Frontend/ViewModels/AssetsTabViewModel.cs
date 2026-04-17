@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Frontend.Data;
 using Frontend.Models;
 
@@ -190,11 +191,11 @@ public class AssetsTabViewModel : ViewModelBase
 
         if (IsScenario1Selected)
         {
-            selectedNames = new HashSet<string>(new[] { "GB1", "GB2", "GB3", "OB1" }, StringComparer.OrdinalIgnoreCase);
+            selectedNames = new HashSet<string>(new[] { "Gas Boiler 1", "Gas Boiler 2", "Gas Boiler 3", "Oil Boiler 1" }, StringComparer.OrdinalIgnoreCase);
         }
         else if (IsScenario2Selected)
         {
-            selectedNames = new HashSet<string>(new[] { "GM1", "EB1", "GB1", "GB3" }, StringComparer.OrdinalIgnoreCase);
+            selectedNames = new HashSet<string>(new[] { "Gas Motor 1", "Electric Boiler 1", "Gas Boiler 1", "Gas Boiler 3" }, StringComparer.OrdinalIgnoreCase);
         }
 
         foreach (var item in _allAssetItems)
@@ -223,22 +224,10 @@ public class AssetsTabViewModel : ViewModelBase
 
         var cardItem = new AssetCardItem(
             string.IsNullOrWhiteSpace(asset.Name) ? $"Asset {asset.Id}" : asset.Name,
-            ResolveImagePath(asset.Name),
-            details,
-            asset);
+                LoadFromResource(string.IsNullOrWhiteSpace(asset.ImageName) ? "placeholder.png" : asset.ImageName),
+                details,
+                asset);
         return cardItem;
-    }
-
-    private static string ResolveImagePath(string? assetName)
-    {
-        var key = (assetName ?? string.Empty).Trim().ToLowerInvariant();
-
-        if (key.StartsWith("gb", StringComparison.Ordinal)) return "/Assets/gb1.png";
-        if (key.StartsWith("ob", StringComparison.Ordinal)) return "/Assets/ob1.png";
-        if (key.StartsWith("gm", StringComparison.Ordinal)) return "/Assets/gm1.png";
-        if (key.StartsWith("eb", StringComparison.Ordinal)) return "/Assets/eb1.png";
-
-        return "/Assets/gb1.png";
     }
 
     private static string FormatDecimal(float value)
@@ -247,6 +236,10 @@ public class AssetsTabViewModel : ViewModelBase
             .ToString("0.##", CultureInfo.InvariantCulture)
             .Replace('.', ',');
     }
+    private static Bitmap LoadFromResource(string resourceName)
+    {
+        return new Bitmap(AssetLoader.Open(new Uri($"avares://Frontend/Assets/{resourceName}")));
+    }
 }
 
 public class AssetCardItem : ViewModelBase
@@ -254,7 +247,7 @@ public class AssetCardItem : ViewModelBase
     private bool _isSelected;
 
     public string Name { get; }
-    public string ImagePath { get; }
+    public Bitmap ImagePath { get; }
     public IReadOnlyList<string> Details { get; }
     public Asset? OriginalAsset { get; }
     public ICommand? EditCommand { get; set; }
@@ -265,7 +258,7 @@ public class AssetCardItem : ViewModelBase
         set => SetProperty(ref _isSelected, value);
     }
 
-    public AssetCardItem(string name, string imagePath, IReadOnlyList<string> details, Asset? originalAsset = null)
+    public AssetCardItem(string name, Bitmap imagePath, IReadOnlyList<string> details, Asset? originalAsset = null)
     {
         Name = name;
         ImagePath = imagePath;
