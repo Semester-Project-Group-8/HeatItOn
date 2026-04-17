@@ -1,3 +1,5 @@
+using Frontend.Data;
+using Frontend.Data.CSV;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -72,7 +74,7 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
 
-    public AssetsTabViewModel(AssetClient assetClient)
+    public AssetsTabViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient)
     {
         _assetClient = assetClient;
         AssetItems.CollectionChanged += (_, __) => OnPropertyChanged(nameof(HasAssets));

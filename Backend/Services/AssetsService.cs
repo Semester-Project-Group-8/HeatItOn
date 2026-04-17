@@ -133,6 +133,5 @@ namespace Backend.Services
                 throw new KeyNotFoundException($"Asset with ID {id} not found.");
             return asset;
         }
-    
     }
 }

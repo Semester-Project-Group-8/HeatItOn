@@ -30,7 +30,7 @@ namespace Backend.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         public async Task<ActionResult<List<ResultList>>> Optimize()
         {
             try

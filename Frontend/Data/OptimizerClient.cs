@@ -20,4 +20,9 @@ public class OptimizerClient
         var result = await _client.PostAsync("Optimize", JsonContent.Create(assetIds));
         return result;
     }
+    public async Task<HttpResponseMessage> Optimize()//remove before flight
+    {
+        var result = await _client.PostAsync("Optimize", null);
+        return result;
+    }
 }
