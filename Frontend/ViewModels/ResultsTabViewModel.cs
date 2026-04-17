@@ -105,6 +105,24 @@ public class ResultsTabViewModel : ViewModelBase
         RebuildTableForSelection();
     }
 
+    //test result export
+    public void ExportCsv()
+    {
+        try
+        {
+            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string filePath = System.IO.Path.Combine(desktopPath, "Optimized_Results_Export.csv");
+
+            Frontend.Data.CSV.ResultCsvHandler.ExportCsv(filePath, _resultListClient);
+
+            StatusMessage = "Exported successfully to Desktop!";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Export failed: " + ex.Message;
+        }
+    }
+
     private void RebuildTableForSelection()
     {
         if (SelectedResultList is null)

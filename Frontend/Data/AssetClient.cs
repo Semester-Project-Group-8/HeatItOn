@@ -9,9 +9,8 @@ namespace Frontend.Data;
 
 public class AssetClient
 {
-    
     private readonly HttpClient _client;
-    private const string urlExtension = "Asset";
+    private const string UrlExtension = "Asset";
 
     public AssetClient(HttpClient httpClient)
     {
@@ -20,33 +19,34 @@ public class AssetClient
 
     public async Task<Asset?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync($"{urlExtension}/{id.ToString()}");
+        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/{id}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Asset>();
     }
 
     public async Task<List<Asset>?> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync($"{urlExtension}");
+        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Asset>>();
         return result;
     }
 
-    public async Task<string> Post(Asset asset)
+    public async Task Post(Asset asset)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{urlExtension}/Add", JsonContent.Create(asset));
-        return await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(asset));
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<Asset?> Patch(Asset asset)
+    public async Task Put(Asset asset)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{urlExtension}/{asset.Id}", JsonContent.Create(asset));
-        return await response.Content.ReadFromJsonAsync<Asset>();
+        HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/{asset.Id}", JsonContent.Create(asset));
+        response.EnsureSuccessStatusCode();
     }
 
-    public async void Delete(int id)
+    public async Task Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
+        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/{id}");
+        response.EnsureSuccessStatusCode();
     }
 }

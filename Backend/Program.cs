@@ -46,7 +46,8 @@ using (var scope = app.Services.CreateScope())
 
     var demandService = scope.ServiceProvider.GetRequiredService<SourceService>();
     ReadCsv importer = new ReadCsv(demandService, csvPath);
-    var inserted = await importer.ImportCsv();
+
+    var insertedSources = await importer.ImportCsv();
 }
 
 app.Run();

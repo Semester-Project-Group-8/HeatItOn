@@ -53,6 +53,13 @@
 
                 <Button Content="Search" Click="OnSearchClick"/>
                 <Button Content="Clear" Click="OnClearClick"/>
+                
+
+                
+                <Button Content="Export CSV" Command="{Binding ExportCsv}"/>
+
+
+
                 <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
             </StackPanel>
 
