@@ -197,6 +197,7 @@
                         </Grid>
                     </ToggleButton>
                 </Grid>
+            </Grid>
             </SplitView.Content>
         </SplitView>
 

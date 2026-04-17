@@ -73,7 +73,7 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
 
-    public AssetsTabViewModel(AssetClient assetClient)
+    public AssetsTabViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient)
     {
         _assetClient = assetClient;
         AssetItems.CollectionChanged += (_, __) => OnPropertyChanged(nameof(HasAssets));
