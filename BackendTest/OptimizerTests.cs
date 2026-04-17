@@ -11,6 +11,7 @@ namespace BackendTest
         private readonly SourceService _sourceService;
         private readonly AssetsService _assetsService;
         private readonly ResultListService _resultListService;
+        private readonly ResultService _resultService;
         private readonly OptimizerService _optimizerService;
 
         public OptimizerTests()
@@ -22,8 +23,9 @@ namespace BackendTest
             _context = new BackendDbContext(options);
             _sourceService = new SourceService(_context);
             _assetsService = new AssetsService(_context);
+            _resultService = new ResultService(_context);
             _resultListService = new ResultListService(_context);
-            _optimizerService = new OptimizerService(_assetsService, _sourceService, _resultListService);
+            _optimizerService = new OptimizerService(_assetsService, _sourceService, _resultService,_resultListService);
         }
 
         public void Dispose()

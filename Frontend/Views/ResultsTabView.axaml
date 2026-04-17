@@ -1,92 +1,135 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Frontend.ViewModels"
-             xmlns:models="using:Frontend.Models"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
+             xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              x:Class="Frontend.Views.ResultsTabView"
              x:DataType="vm:ResultsTabViewModel">
-
-    <Design.DataContext>
-        <vm:ResultsTabViewModel/>
-    </Design.DataContext>
-
-    <Grid Margin="10" ColumnDefinitions="260,*" ColumnSpacing="12">
-        <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Padding="8">
-            <StackPanel>
-                <TextBlock Text="Result Lists" FontSize="18" Margin="0,0,0,8"/>
-                <ListBox ItemsSource="{Binding ResultLists}"
-                         SelectedItem="{Binding SelectedResultList}"
-                         MaxHeight="600">
+    <DockPanel>
+        <!-- LEFT SIDEBAR -->
+        <Border DockPanel.Dock="Left"
+                Width="240"
+                Padding="8"
+                BorderBrush="Gray"
+                BorderThickness="0,0,1,0">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Results"
+                           FontWeight="Bold" />
+                <ListBox
+                    ItemsSource="{Binding OptimizedResults}"
+                    SelectedItem="{Binding SelectedOptimizedResult}">
                     <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="models:ResultList">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="{Binding Id, StringFormat='#{0}'}"/>
-                                <TextBlock Text="{Binding TimeFrom, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"/>
-                            </StackPanel>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                <!-- Empty state -->
+                <TextBlock Text="No optimization results available yet"
+                           IsVisible="{Binding HasNoOptimizedResults}"
+                           Opacity="0.6"
+                           TextWrapping="Wrap" />
             </StackPanel>
         </Border>
-
-        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*" RowSpacing="10">
-            <TextBlock Grid.Row="0" Text="Results" FontSize="20"/>
-
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="From"/>
-                    <CalendarDatePicker x:Name="SearchFromDatePicker"
-                                        Width="170"/>
-                    <TimePicker x:Name="SearchFromTimePicker"
-                                Width="170"/>
+        <!-- TOP SEARCH BAR -->
+        <Border DockPanel.Dock="Top"
+                Padding="8"
+                BorderBrush="Gray"
+                BorderThickness="0,0,0,1"
+                IsVisible="{Binding IsResultSelected}">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <StackPanel>
+                    <TextBlock Text="From" />
+                    <CalendarDatePicker x:Name="SearchFromDatePicker" />
+                    <TimePicker x:Name="SearchFromTimePicker" />
                 </StackPanel>
 
-                <StackPanel Spacing="4">
-                    <TextBlock Text="To"/>
-                    <CalendarDatePicker x:Name="SearchToDatePicker"
-                                        Width="170"/>
-                    <TimePicker x:Name="SearchToTimePicker"
-                                Width="170"/>
+                <StackPanel>
+                    <TextBlock Text="To" />
+                    <CalendarDatePicker x:Name="SearchToDatePicker" />
+                    <TimePicker x:Name="SearchToTimePicker" />
                 </StackPanel>
 
-                <Button Content="Search" Click="OnSearchClick"/>
-                <Button Content="Clear" Click="OnClearClick"/>
-                
-
-                
-                <Button Content="Export CSV" Command="{Binding ExportCsv}"/>
-
-
-
-                <TextBlock Text="{Binding StatusMessage}" VerticalAlignment="Center"/>
+                <StackPanel VerticalAlignment="Bottom">
+                    <Button Content="Search" Click="OnSearchClick" />
+                    <Button Content="Clear" Click="OnClearClick" />
+                </StackPanel>
             </StackPanel>
+        </Border>
+        <!-- MAIN CONTENT -->
+        <Grid RowDefinitions="Auto,*">
 
-            <Grid Grid.Row="2" RowDefinitions="Auto,*" RowSpacing="6">
-                <Grid Grid.Row="0" ColumnDefinitions="220,*,170,150" ColumnSpacing="8">
-                    <TextBlock Grid.Column="0" Text="Hour" FontWeight="Bold"/>
-                    <TextBlock Grid.Column="1" Text="Active Generators" FontWeight="Bold"/>
-                    <TextBlock Grid.Column="2" Text="Electricity Consumed" FontWeight="Bold"/>
-                    <TextBlock Grid.Column="3" Text="Total Net Price" FontWeight="Bold"/>
-                </Grid>
+            <!-- DataGrid -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          IsVisible="{Binding IsResultSelected}">
+                <StackPanel Spacing="16">
+                    <DataGrid
+                        ItemsSource="{Binding Rows}"
+                        AutoGenerateColumns="False"
+                        GridLinesVisibility="All">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time" Binding="{Binding Hour}" />
+                            <DataGridTextColumn Header="Active Assets" Binding="{Binding ActiveAssets}" />
+                            <DataGridTextColumn Header="Heat (kW)" Binding="{Binding HeatProduced}" />
+                            <DataGridTextColumn Header="Electricity (kW)" Binding="{Binding Electricity}" />
+                            <DataGridTextColumn Header="CO2 (kg)" Binding="{Binding Co2Produced}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <!-- Charts -->
+                    <StackPanel>
+                        <TextBlock Text="Heat produced by hour"
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   FontSize="16" />
+                        <avalonia:CartesianChart
+                            MinHeight="400"
+                            MinWidth="400"
+                            Series="{Binding HeatChartSeries}"
+                            XAxes="{Binding TimeAxis}"
+                            ZoomMode="None" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Electricity used/Generated by hour"
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   FontSize="16" />
+                        <avalonia:CartesianChart
+                            MinHeight="400"
+                            MinWidth="400"
+                            Series="{Binding ElectricityChartSeries}"
+                            XAxes="{Binding TimeAxis}"
+                            ZoomMode="None" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="CO2 produced by hour"
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   FontSize="16" />
+                        <avalonia:CartesianChart
+                            MinHeight="400"
+                            MinWidth="400"
+                            Series="{Binding Co2ChartSeries}"
+                            XAxes="{Binding TimeAxis}"
+                            ZoomMode="None" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
 
-                <Border Grid.Row="1" BorderBrush="Black" BorderThickness="1" Padding="4">
-                    <ListBox ItemsSource="{Binding TableRows}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="vm:ResultTableRow">
-                                <Grid ColumnDefinitions="220,*,170,150" ColumnSpacing="8">
-                                    <TextBlock Grid.Column="0" Text="{Binding Hour}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding ActiveGenerators}" TextWrapping="Wrap"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding ElectricityConsumed}"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding TotalNetPrice}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Border>
-            </Grid>
+            <!-- Empty state -->
+            <Border Grid.Row="0" Grid.RowSpan="2"
+                    Background="#10AAAAAA"
+                    IsVisible="{Binding !IsResultSelected}">
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Spacing="8">
+                    <TextBlock Text="No data to display"
+                               FontSize="18"
+                               FontWeight="SemiBold" />
+                    <TextBlock Text="Select a run on the left to view its results."
+                               Opacity="0.7" />
+                </StackPanel>
+            </Border>
+
         </Grid>
-    </Grid>
-
+    </DockPanel>
 </UserControl>

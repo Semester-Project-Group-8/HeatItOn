@@ -5,20 +5,19 @@ namespace Frontend.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public AssetsTabViewModel AssetsTab { get; }
     public SourceTabViewModel SourceTab { get; }
     public AssetsTabViewModel AssetsTab { get; }
+    public ResultsTabViewModel ResultTab { get; }
+    public OptimizedResultsClient OptimizedResultsClient { get; }
 
-    public MainWindowViewModel(SourceClient sourceClient, AssetClient assetClient)
+    public MainWindowViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient,
+        OptimizedResultsClient optimizedResultsClient)
     {
-        System.Diagnostics.Debug.WriteLine(">>> MainWindowViewModel(SourceClient) ctor");
-        AssetsTab = new AssetsTabViewModel(assetClient);
+        System.Diagnostics.Debug.WriteLine(">>> MainWindowViewModel(SourceClient,AssetClient,OptimizerClient,ResultListClient) ctor");
         SourceTab = new SourceTabViewModel(sourceClient);
-        AssetsTab = new AssetsTabViewModel(assetClient);
+        
+        AssetsTab = new AssetsTabViewModel(sourceClient, assetClient, optimizerClient);
+        ResultTab = new ResultsTabViewModel(optimizedResultsClient);
+        OptimizedResultsClient = optimizedResultsClient;
     }
-    public MainWindowViewModel()
-    {
-        throw new Exception("DEFAULT MainWindowViewModel ctor CALLED");
-    }
-
 }

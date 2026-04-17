@@ -15,32 +15,25 @@
                 Padding="8"
                 BorderBrush="Gray"
                 BorderThickness="0,0,1,0">
-
             <StackPanel>
                 <TextBlock Text="Uploaded files"
                            FontWeight="Bold"
-                           Margin="0,0,0,8"/>
-
-                
+                           Margin="0,0,0,8" />
                 <Grid>
-
                     <!-- File list -->
                     <ListBox
                         ItemsSource="{Binding Files}"
                         SelectedItem="{Binding SelectedFile}"
                         IsVisible="{Binding Files.Count}" />
-
                     <!-- Empty state -->
                     <Border IsVisible="{Binding !Files.Count}">
                         <TextBlock Text="No file uploaded yet"
                                    Opacity="0.6"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
-                                   TextAlignment="Center"/>
+                                   TextAlignment="Center" />
                     </Border>
-
                 </Grid>
-
             </StackPanel>
         </Border>
 
@@ -62,7 +55,7 @@
 
             <!-- DATA GRID -->
             <DataGrid
-                Grid.Column="0" 
+                Grid.Column="0"
                 ItemsSource="{Binding Sources}"
                 HeadersVisibility="Column"
                 AutoGenerateColumns="False"
@@ -72,37 +65,37 @@
                 GridLinesVisibility="All">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id"
-                                           Binding="{Binding Id}" />
+                                        Binding="{Binding Id}" />
 
                     <DataGridTextColumn Header="From"
-                                           Binding="{Binding TimeFrom}" />
+                                        Binding="{Binding TimeFrom}" />
 
                     <DataGridTextColumn Header="To"
-                                           Binding="{Binding TimeTo}" />
+                                        Binding="{Binding TimeTo}" />
 
                     <DataGridTextColumn Header="Heat demand"
-                                           Binding="{Binding HeatDemand}" />
+                                        Binding="{Binding HeatDemand}" />
 
                     <DataGridTextColumn Header="Price"
-                                           Binding="{Binding ElectricityPrice}" />
+                                        Binding="{Binding ElectricityPrice}" />
                 </DataGrid.Columns>
             </DataGrid>
-            <StackPanel 
+            <StackPanel
                 Grid.Column="1"
                 Opacity="{Binding HasSources, Converter={StaticResource BoolToOpacity}}"
                 IsHitTestVisible="{Binding HasSources}"
                 Spacing="20">
-                <avalonia:CartesianChart 
+                <avalonia:CartesianChart
                     Series="{Binding WinterSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    Height="200"/>
-                
-                <avalonia:CartesianChart 
+                    Height="200" />
+
+                <avalonia:CartesianChart
                     Series="{Binding SummerSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    Height="200"/>
+                    Height="200" />
             </StackPanel>
             <!-- EMPTY STATE -->
             <Border Grid.ColumnSpan="2" Background="#10AAAAAA"
