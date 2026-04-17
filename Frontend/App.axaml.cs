@@ -29,6 +29,7 @@ public partial class App : Application
             };
 
             httpClient.BaseAddress = new Uri("http://localhost:8080/");
+
             var sourceClient = new SourceClient(httpClient);
             var resultListClient = new ResultListClient(httpClient);
 
@@ -36,6 +37,7 @@ public partial class App : Application
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
 
             DisableAvaloniaDataAnnotationValidation();
+            var assetClient = new AssetClient(httpClient);
 
             desktop.MainWindow = new MainWindow(new ResultListClient(httpClient))
             {
@@ -48,11 +50,9 @@ public partial class App : Application
 
     private void DisableAvaloniaDataAnnotationValidation()
     {
-        // Get an array of plugins to remove
         var dataValidationPluginsToRemove =
             BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 
-        // remove each entry found
         foreach (var plugin in dataValidationPluginsToRemove)
         {
             BindingPlugins.DataValidators.Remove(plugin);
