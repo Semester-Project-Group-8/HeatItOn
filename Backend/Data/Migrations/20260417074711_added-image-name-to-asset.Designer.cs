@@ -4,6 +4,7 @@ using Backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Backend.Data.Migrations
 {
     [DbContext(typeof(BackendDbContext))]
-    partial class BackendDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260417074711_added-image-name-to-asset")]
+    partial class addedimagenametoasset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,23 +80,6 @@ namespace Backend.Data.Migrations
                     b.ToTable("Images");
                 });
 
-            modelBuilder.Entity("Backend.Models.OptimizedResults", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OptimizedResults");
-                });
-
             modelBuilder.Entity("Backend.Models.Result", b =>
                 {
                     b.Property<int>("Id")
@@ -140,9 +126,6 @@ namespace Backend.Data.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("OptimizedResultsId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("TimeFrom")
                         .HasColumnType("datetime(6)");
 
@@ -150,8 +133,6 @@ namespace Backend.Data.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OptimizedResultsId");
 
                     b.ToTable("ResultList");
                 });
@@ -194,18 +175,6 @@ namespace Backend.Data.Migrations
                         .HasForeignKey("ResultListId");
 
                     b.Navigation("Asset");
-                });
-
-            modelBuilder.Entity("Backend.Models.ResultList", b =>
-                {
-                    b.HasOne("Backend.Models.OptimizedResults", null)
-                        .WithMany("ResultsForHours")
-                        .HasForeignKey("OptimizedResultsId");
-                });
-
-            modelBuilder.Entity("Backend.Models.OptimizedResults", b =>
-                {
-                    b.Navigation("ResultsForHours");
                 });
 
             modelBuilder.Entity("Backend.Models.ResultList", b =>

@@ -19,5 +19,7 @@ namespace Backend.Models
         public float OilConsumption { get; set; }
         [Required]
         public float MaxElectricity { get; set; }
+
+        public string? ImageName { get; set; } = null;
     }
 }
