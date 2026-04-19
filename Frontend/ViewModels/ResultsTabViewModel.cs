@@ -59,7 +59,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         new LineSeries<DateTimePoint>
         {
             Name = "Heat",
-            Values = HeatChartData
+            Values = HeatChartData,
+            GeometrySize = 0
         }
     ];
 
@@ -68,7 +69,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         new LineSeries<DateTimePoint>
         {
             Name = "Electricity",
-            Values = ElectricityChartData
+            Values = ElectricityChartData,
+            GeometrySize = 0
         }
     ];
 
@@ -77,7 +79,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         new LineSeries<DateTimePoint>
         {
             Name = "CO₂",
-            Values = Co2ChartData
+            Values = Co2ChartData,
+            GeometrySize = 0
         }
     ];
 
@@ -181,7 +184,6 @@ public class ResultsTabViewModel : INotifyPropertyChanged
             var heat = hour.Results.Sum(r => r.HeatProduction);
             var electricity = hour.Results.Sum(r => r.Electricity);
             var co2 = hour.Results.Sum(r => r.CO2Produced);
-            var primaryEnergy = hour.Results.Sum(r => r.PrimaryEnergyConsumed);
             var cost = hour.Results.Sum(r => r.ProductionCost);
 
             HeatChartData.Add(new DateTimePoint(hour.TimeFrom, heat));

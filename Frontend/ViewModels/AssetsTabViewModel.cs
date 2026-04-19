@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Frontend.Data;
 using Frontend.Models;
 using System.IO;
 
