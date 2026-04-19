@@ -27,7 +27,6 @@ public partial class App : Application
             var sourceClient = new SourceClient(httpClient);
             var assetClient = new AssetClient(httpClient);
             var optimizerClient = new OptimizerClient(httpClient);
-            var resultList = new ResultListClient(httpClient);
             var optimizedResultsClient = new OptimizedResultsClient(httpClient);
 
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
