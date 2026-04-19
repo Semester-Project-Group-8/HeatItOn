@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -152,12 +153,12 @@ public partial class SourceTabViewModel :
 
     public void Export()
     {
-        SourceCsvHandler.ExportCsv("source.csv", Sources.ToList());
+        SourceCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
     }
 
     public async Task Import()
     {
-        await SourceCsvHandler.ImportCsv("source.csv", _client);
+        await SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)

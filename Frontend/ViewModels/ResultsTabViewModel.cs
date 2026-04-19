@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -124,7 +125,7 @@ public class ResultsTabViewModel :
 
     public void Export()
     {
-        ResultCsvHandler.ExportCsv("result.csv", Rows.ToList());
+        ResultCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
     }
 
     private void RebuildRows()
