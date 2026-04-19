@@ -61,7 +61,7 @@ public class ResultsTabViewModel :
         new LineSeries<DateTimePoint>
         {
             Name = "Heat",
-            Values = HeatChartData,
+            Values = HeatChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
             GeometrySize = 0
         }
     ];
@@ -71,7 +71,7 @@ public class ResultsTabViewModel :
         new LineSeries<DateTimePoint>
         {
             Name = "Electricity",
-            Values = ElectricityChartData,
+            Values = ElectricityChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
             GeometrySize = 0
         }
     ];
@@ -81,7 +81,7 @@ public class ResultsTabViewModel :
         new LineSeries<DateTimePoint>
         {
             Name = "CO₂",
-            Values = Co2ChartData,
+            Values = Co2ChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
             GeometrySize = 0
         }
     ];
