@@ -73,6 +73,7 @@
                             <DataGridTextColumn Header="Heat (kW)" Binding="{Binding HeatProduced}" />
                             <DataGridTextColumn Header="Electricity (kW)" Binding="{Binding Electricity}" />
                             <DataGridTextColumn Header="CO2 (kg)" Binding="{Binding Co2Produced}" />
+                            <DataGridTextColumn Header="ProductionCost" Binding="{Binding ProductionCost}" />
                         </DataGrid.Columns>
                     </DataGrid>
                     <!-- Charts -->

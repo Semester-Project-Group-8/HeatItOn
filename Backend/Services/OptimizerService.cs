@@ -21,11 +21,83 @@ namespace Backend.Services
             _resultListService = resultListService;
             _optimizedResultsService = optimizedResultsService;
         }
+        private int DeterminePrimaryEnergyConsumed(Asset asset)
+        {
+            if (asset.GasConsumption > asset.OilConsumption && -asset.GasConsumption < asset.MaxElectricity)
+                return 0;//gas
+            if (asset.OilConsumption > asset.GasConsumption && -asset.OilConsumption < asset.MaxElectricity)
+                return 1;//oil
+            return 2;//electricity
+        }
+        public Result CalculateAssetResult(Asset asset, Source source,float heatTarget)
+        {
+            float assetProductionCapacity = heatTarget / asset.MaxHeat;//determiunes the capacity the asset is running at
+            Result result = new Result()
+            {
+                HeatProduction = heatTarget,
+                PrimaryEnergyConsumed = DeterminePrimaryEnergyConsumed(asset),
+                CO2Produced=Convert.ToInt32(asset.CO2Emission*assetProductionCapacity),
+                AssetId=asset.Id
+            };
+            float netProductionCost = asset.ProductionCost * assetProductionCapacity* asset.MaxHeat;
+            netProductionCost -= asset.MaxElectricity * assetProductionCapacity * source.ElectricityPrice;
+            return result;
+        }
+        private List<Asset> SortAssets(List<Asset> assets,float electricityPrice)
+        {
+            return assets.OrderBy(asset => asset.ProductionCost - asset.MaxElectricity/asset.MaxHeat * electricityPrice).ToList();
+        }
+        public async Task<ActionResult<OptimizedResults>> Optimize(List<Asset> scenarioAssets)
+        {
+            var allSources = await _sourceService.ListSources();
+            OptimizedResults finalResults = new OptimizedResults
+            {
+                Name = $"results_{DateTime.Now:yyyy_MM_dd_HH_mm}",
+                ResultsForHours = new List<ResultList>()
+            };
+            foreach (Source source in allSources)
+            {
+                scenarioAssets=SortAssets(scenarioAssets,source.ElectricityPrice);
+                float heatOfTheHour = 0;
+                int usedGenerators = 0;
+                ResultList resultOfHour = new ResultList
+                {
+                    TimeFrom = source.TimeFrom,
+                    TimeTo = source.TimeTo,
+                    Results = new List<Result>()
+                };
+                while(heatOfTheHour<source.HeatDemand && usedGenerators<scenarioAssets.Count())
+                {
+                    float targetHeatProduction = 0;
+                    if (source.HeatDemand - heatOfTheHour > scenarioAssets[usedGenerators].MaxHeat)
+                    {
+                        targetHeatProduction = scenarioAssets[usedGenerators].MaxHeat;
+                    }
+                    else
+                    {
+                        targetHeatProduction = source.HeatDemand - heatOfTheHour;
+                    }
+                    resultOfHour.Results.Add(CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction));
+                    heatOfTheHour += targetHeatProduction;
+                    usedGenerators++;
+                }
+                finalResults.ResultsForHours.Add(resultOfHour);
+            }
+            await _resultListService.AddResultList(finalResults.ResultsForHours);
+            await _optimizedResultsService.AddOptimizedResults(finalResults);
+            return finalResults;
+        }
 
-        public async Task<float> CalculateNetProductionCost(int assetId, DateTime date)
+        /*
+        public async Task<float> CalculateNetProductionCost(int assetId, DateTime date, float heatTarget)
         {
             Asset asset = await _assetService.GetAsset(assetId);
-            float netProductionCost = asset.ProductionCost * asset.MaxHeat;
+            float generatedHeat = heatTarget;
+            if (generatedHeat > asset.MaxHeat)
+            {
+                generatedHeat = asset.MaxHeat;
+            }
+            float netProductionCost = asset.ProductionCost * generatedHeat;
             if (asset.MaxElectricity < 0)
             {
                 Source source = await _sourceService.ListByHour(date);
@@ -39,10 +111,10 @@ namespace Backend.Services
             return netProductionCost;
         }
 
-        public async Task<ActionResult<List<ResultList>>> Optimize()//Task<List<ResultList>>
+        public async Task<ActionResult<OptimizedResults>> Optimize(List<Asset> ScenarioAssets)//Task<List<ResultList>>
         {
             var AllSources = await _sourceService.ListSources();
-            var ScenarioAssets = await _assetService.ListAssets();
+            //var ScenarioAssets = await _assetService.ListAssets();
             List<(Asset asset, float cost)> prices = new();
             List<ResultList> optimizedData = new List<ResultList>();
             int maintencance = 0;
@@ -89,7 +161,14 @@ namespace Backend.Services
                 maintencance--;
             }
             await _resultListService.AddResultList(optimizedData);
-            return optimizedData;
-        }
+            OptimizedResults optimizedResult = new OptimizedResults
+            {
+                //Id= 1,
+                Name = $"result_{DateTime.Now:yyyy_MM_dd_HH_mm}",
+                ResultsForHours= optimizedData
+            };
+            await _optimizedResultsService.AddOptimizedResults(optimizedResult);
+            return optimizedResult;
+        }*/
     }
 }

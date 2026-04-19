@@ -154,7 +154,9 @@ public class ResultsTabViewModel : INotifyPropertyChanged
                     ),
                     HeatProduced = heat,
                     Electricity = electricity,
-                    Co2Produced = co2
+                    Co2Produced = co2,
+                    ProductionCost = cost
+                    
                 };
             })
             .ToList();
@@ -230,4 +232,5 @@ public class ResultTableRow
     public float HeatProduced { get; set; }
     public float Electricity { get; set; }
     public int Co2Produced { get; set; }
+    public float ProductionCost { get; set; }
 }

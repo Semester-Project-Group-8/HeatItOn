@@ -41,6 +41,20 @@ namespace Backend.Controllers
                 return NotFound();
             }
         }
+        [HttpPost("Add")]
+        public async Task<IActionResult> AddResultList([FromBody] ResultList resultList)
+        {
+            List<ResultList> list = new List<ResultList> { resultList };
+            var result = await _resultListService.AddResultList(list);
+            return Ok(result);
+        }
+
+        [HttpPost("Adds")]
+        public async Task<IActionResult> AddResultList([FromBody] List<ResultList> resultLists)
+        {
+            var result = await _resultListService.AddResultList(resultLists);
+            return Ok(result);
+        }
 
         [HttpPost("Create")]
         public async Task<IActionResult> CreateResultList([FromQuery] DateTime timeFrom, [FromQuery] DateTime timeTo, [FromBody] List<Result> resultList)
