@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Frontend.Data;
+using Frontend.Data.CSV;
 using Frontend.Models;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
@@ -143,6 +144,16 @@ public partial class SourceTabViewModel : ViewModelBase
             BuildWinterSeries();
             BuildSummerSeries();
         });
+    }
+
+    public void Export()
+    {
+        SourceCsvHandler.ExportCsv("source.csv", Sources.ToList());
+    }
+
+    public async Task Import()
+    {
+        await SourceCsvHandler.ImportCsv("source.csv", _client);
     }
 
     private static bool IsWinter(Source s)

@@ -8,31 +8,18 @@ namespace Frontend.Data.CSV
 {
     public static class ResultCsvHandler
     {
-        public static async void ExportCsv(string location, ResultListClient resultListClient)
+        public static async void ExportCsv(string location, List<ResultTableRow>? results)
         {
-            List<ResultList>? resultLists = await resultListClient.ListResultLists();
 
-            if (resultLists != null && resultLists.Count > 0)
+            if (results is { Count: > 0 })
             {
-                List<string> lines = new List<string>();
+                List<string> lines =
+                [
+                    "Hour,ActiveAssets,HeatProduced MW,Electricity MW,Co2Produced kg"
+                ];
+                lines.AddRange(results.Select(row => $"{row.Hour},{row.ActiveAssets},{row.HeatProduced.ToString(CultureInfo.InvariantCulture)},{row.Electricity.ToString(CultureInfo.InvariantCulture)},{row.Co2Produced}"));
 
-                lines.Add("Hour,ActiveAssets,HeatProduced MW,Electricity MW,Co2Produced kg");
-
-                foreach (var resultList in resultLists)
-                {
-                    string hour = resultList.TimeFrom.ToString("yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture);
-
-                    string activeAssets = string.Join(" | ", resultList.Results.Select(r => r.AssetId.ToString()));
-
-                    float heatProduced = resultList.Results.Sum(r => r.HeatProduction);
-                    float electricity = resultList.Results.Sum(r => r.Electricity);
-                    int co2Produced = resultList.Results.Sum(r => r.CO2Produced);
-
-                    string csvLine = $"{hour},{activeAssets},{heatProduced.ToString(CultureInfo.InvariantCulture)},{electricity.ToString(CultureInfo.InvariantCulture)},{co2Produced}";
-                    lines.Add(csvLine);
-                }
-
-                System.IO.File.WriteAllLines(location, lines);
+                await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | optimized result csv file export");
             }
             else

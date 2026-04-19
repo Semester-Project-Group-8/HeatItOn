@@ -53,6 +53,7 @@
                     <Button Content="Search" Click="OnSearchClick" />
                     <Button Content="Clear" Click="OnClearClick" />
                 </StackPanel>
+                <Button Content="Export" Command="{Binding Export}"></Button>
             </StackPanel>
         </Border>
         <!-- MAIN CONTENT -->
@@ -68,12 +69,29 @@
                         AutoGenerateColumns="False"
                         GridLinesVisibility="All">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Time" Binding="{Binding Hour}" />
-                            <DataGridTextColumn Header="Active Assets" Binding="{Binding ActiveAssets}" />
-                            <DataGridTextColumn Header="Heat (kW)" Binding="{Binding HeatProduced}" />
-                            <DataGridTextColumn Header="Electricity (kW)" Binding="{Binding Electricity}" />
-                            <DataGridTextColumn Header="CO2 (kg)" Binding="{Binding Co2Produced}" />
-                            <DataGridTextColumn Header="ProductionCost" Binding="{Binding ProductionCost}" />
+                            <DataGridTextColumn Header="Time" 
+                                                Binding="{Binding Hour}" 
+                                                IsReadOnly="True"/>
+                            
+                            <DataGridTextColumn Header="Active Assets" 
+                                                Binding="{Binding ActiveAssets}" 
+                                                IsReadOnly="True"/>
+                            
+                            <DataGridTextColumn Header="Heat (MW)" 
+                                                Binding="{Binding HeatProduced}" 
+                                                IsReadOnly="True"/>
+                            
+                            <DataGridTextColumn Header="Electricity (MW)" 
+                                                Binding="{Binding Electricity}" 
+                                                IsReadOnly="True"/>
+                            
+                            <DataGridTextColumn Header="CO2 (kg)" 
+                                                Binding="{Binding Co2Produced}" 
+                                                IsReadOnly="True"/>
+                            
+                            <DataGridTextColumn Header="ProductionCost (DKK)"
+                                                Binding="{Binding ProductionCost}" 
+                                                IsReadOnly="True"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <!-- Charts -->

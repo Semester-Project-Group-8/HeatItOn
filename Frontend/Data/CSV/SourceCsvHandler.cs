@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using Frontend.Data;
 using Frontend.Models;
 using System;
+using System.Linq;
+
 namespace Frontend.Data.CSV
 {
     static class SourceCsvHandler
     { 
         
-        public static async void ImportCsv(string location, SourceClient sourceClient) 
+        public static async Task ImportCsv(string location, SourceClient sourceClient) 
         { 
             List<Source> Sources = new List<Source>();
             using (TextFieldParser parser = new TextFieldParser(location))
@@ -53,23 +55,19 @@ namespace Frontend.Data.CSV
             return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
         }
 
-        public static async void ExportCsv(string location, SourceClient sourceClient)
+        public static async void ExportCsv(string location, List<Source>? sources)
         {
-            List<Source>? sources = await sourceClient.GetAll();
-
             if (sources != null)
             {   
-                List<string> lines = new List<string>();
-                lines.Add("TimeFrom,TimeTo,HeatDemand,ElectricityPrice");
-                foreach (var source in sources)
-                {
-                    string csvLine = $"{source.TimeFrom.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.TimeTo.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.HeatDemand.ToString("00.00", CultureInfo.InvariantCulture)},{source.ElectricityPrice.ToString(CultureInfo.InvariantCulture)}";
-                    lines.Add(csvLine);
-                }
-                System.IO.File.WriteAllLines(location, lines);
+                List<string> lines =
+                [
+                    "TimeFrom,TimeTo,HeatDemand,ElectricityPrice"
+                ];
+                lines.AddRange(sources.Select(source => $"{source.TimeFrom.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.TimeTo.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.HeatDemand.ToString("00.00", CultureInfo.InvariantCulture)},{source.ElectricityPrice.ToString(CultureInfo.InvariantCulture)}"));
+                await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | csv file export");
             }
-             else
+            else
             {
                 Console.WriteLine("error | no sources found for export");
             }

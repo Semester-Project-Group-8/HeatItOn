@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Frontend.Data;
+using Frontend.Data.CSV;
 using Frontend.Models;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
@@ -116,6 +117,11 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(HasNoOptimizedResults));
     }
 
+    public void Export()
+    {
+        ResultCsvHandler.ExportCsv("result.csv", Rows.ToList());
+    }
+
     private void RebuildRows()
     {
         Rows.Clear();
@@ -136,7 +142,6 @@ public class ResultsTabViewModel : INotifyPropertyChanged
                 var heat = resultList.Results.Sum(r => r.HeatProduction);
                 var electricity = resultList.Results.Sum(r => r.Electricity);
                 var co2 = resultList.Results.Sum(r => r.CO2Produced);
-                var primaryEnergy = resultList.Results.Sum(r => r.PrimaryEnergyConsumed);
                 var cost = resultList.Results.Sum(r => r.ProductionCost);
                 HeatChartData.Add(new DateTimePoint(resultList.TimeFrom, heat));
                 ElectricityChartData.Add(new DateTimePoint(resultList.TimeFrom, electricity));
@@ -146,7 +151,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
                 {
                     Hour = resultList.TimeFrom.ToString("dd.MM.yyyy HH:mm"),
                     ActiveAssets = string.Join(
-                        ", ",
+                        "; ",
                         resultList.Results
                             .Select(r => r.Asset.Name)
                             .Where(n => !string.IsNullOrWhiteSpace(n))
@@ -223,14 +228,4 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
-}
-
-public class ResultTableRow
-{
-    public string Hour { get; set; } = string.Empty;
-    public string ActiveAssets { get; set; } = string.Empty;
-    public float HeatProduced { get; set; }
-    public float Electricity { get; set; }
-    public int Co2Produced { get; set; }
-    public float ProductionCost { get; set; }
 }

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
+using System.Linq;
 using Frontend.Models;
 using Frontend.Data;
 
@@ -66,17 +67,38 @@ namespace Frontend.Data.CSV
                 Console.WriteLine("completed | asset csv file read");
             }
 
-            List<Task> insertedAssets = new List<Task>();
-            foreach (var asset in Assets)
-            {
-                insertedAssets.Add(assetClient.Post(asset));
-            }
+            List<Task> insertedAssets = [];
+            insertedAssets.AddRange(Assets.Select(assetClient.Post));
             await Task.WhenAll(insertedAssets);
+        }
+
+        private static string? ImageParser(string name)
+        {
+            if (name.Contains("Gas Boiler", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return "gb1.png";
+            }
+            else if (name.Contains("Oil Boiler", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return "ob1.png";
+            }
+            else if (name.Contains("Electric Boiler", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return "eb1.png";
+            } 
+            else if (name.Contains("Gas Motor",  StringComparison.CurrentCultureIgnoreCase))
+            {
+                return "gm1.png";
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private static Asset AssetConverter(string name, string maxHeat, string prodCost, string co2, string gas, string oil, string maxElec)
         {
-            return new Asset()
+            var asd = new Asset()
             {
                 Name = name,
                 MaxHeat = float.Parse(maxHeat, CultureInfo.InvariantCulture),
@@ -84,8 +106,10 @@ namespace Frontend.Data.CSV
                 CO2Emission = int.Parse(co2),
                 GasConsumption = float.Parse(gas, CultureInfo.InvariantCulture),
                 OilConsumption = float.Parse(oil, CultureInfo.InvariantCulture),
-                MaxElectricity = float.Parse(maxElec, CultureInfo.InvariantCulture)
+                MaxElectricity = float.Parse(maxElec, CultureInfo.InvariantCulture),
+                ImageName = ImageParser(name)
             };
+            return asd;
         }
     }
 }

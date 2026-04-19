@@ -46,7 +46,8 @@
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Right">
                 <!-- Placeholder only -->
-                <Button Content="Upload" />
+                <Button Content="Export" Command="{Binding Export}"/>
+                <Button Content="Import" Command="{Binding Import}"/>
             </StackPanel>
         </Border>
 
@@ -65,19 +66,24 @@
                 GridLinesVisibility="All">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Id"
-                                        Binding="{Binding Id}" />
+                                        Binding="{Binding Id}"
+                                        IsReadOnly="True"/>
 
                     <DataGridTextColumn Header="From"
-                                        Binding="{Binding TimeFrom}" />
+                                        Binding="{Binding TimeFrom}" 
+                                        IsReadOnly="True"/>
 
                     <DataGridTextColumn Header="To"
-                                        Binding="{Binding TimeTo}" />
+                                        Binding="{Binding TimeTo}" 
+                                        IsReadOnly="True"/>
 
                     <DataGridTextColumn Header="Heat demand"
-                                        Binding="{Binding HeatDemand}" />
+                                        Binding="{Binding HeatDemand}" 
+                                        IsReadOnly="True"/>
 
                     <DataGridTextColumn Header="Price"
-                                        Binding="{Binding ElectricityPrice}" />
+                                        Binding="{Binding ElectricityPrice}" 
+                                        IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel
@@ -90,13 +96,14 @@
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
                     ZoomMode="X"
-                    Height="400"/>
+                    Height="300"/>
                 
                 <avalonia:CartesianChart 
                     Series="{Binding SummerSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    Height="400"/>
+                    ZoomMode="X"
+                    Height="300"/>
             </StackPanel>
             <!-- EMPTY STATE -->
             <Border Grid.ColumnSpan="2" Background="#10AAAAAA"
