@@ -9,23 +9,26 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Frontend">
 
-    <TabControl Margin="0" Padding="0">
 
-        <TabItem Header="Assets">
-            <views:AssetsTabView
-                DataContext="{Binding AssetsTab}"/>
-        </TabItem>
 
-        <TabItem Header="Results">
-            <views:ResultsTabView
-                DataContext="{Binding ResultTab}" />
-        </TabItem>
+    <Grid RowDefinitions="27,*">
+        <Button Content="Refresh"
+                Command="{Binding Refresh}"
+                HorizontalAlignment="Right"
+                Grid.Row="0"/>
+        <!-- Tabs -->
+        <TabControl Grid.Row="1">
+            <TabItem Header="Assets">
+                <views:AssetsTabView DataContext="{Binding AssetsTab}"/>
+            </TabItem>
 
-        <TabItem Header="Source">
-            <views:SourceTabView
-                DataContext="{Binding SourceTab}" />
-        </TabItem>
+            <TabItem Header="Results">
+                <views:ResultsTabView DataContext="{Binding ResultTab}"/>
+            </TabItem>
 
-    </TabControl>
-
+            <TabItem Header="Source">
+                <views:SourceTabView DataContext="{Binding SourceTab}"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </Window>

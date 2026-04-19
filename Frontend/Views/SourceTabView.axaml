@@ -89,21 +89,31 @@
             <StackPanel
                 Grid.Column="1"
                 Opacity="{Binding HasSources, Converter={StaticResource BoolToOpacity}}"
-                IsHitTestVisible="{Binding HasSources}"
-                Spacing="20">
+                IsHitTestVisible="{Binding HasSources}">
+                <TextBlock Text="Winter"
+                           HorizontalAlignment="Center"
+                           FontWeight="Bold"
+                           FontSize="16" />
                 <avalonia:CartesianChart
                     Series="{Binding WinterSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    ZoomMode="X"
-                    Height="300"/>
+                    Height="250"
+                    BorderBrush="Black"
+                    BorderThickness="1"/>
                 
+                <TextBlock Text="Summer"
+                           HorizontalAlignment="Center"
+                           FontWeight="Bold"
+                           FontSize="16"
+                           Margin="0,20,0,0"/>
                 <avalonia:CartesianChart 
                     Series="{Binding SummerSeries}"
                     XAxes="{Binding TimeAxis}"
                     YAxes="{Binding DualAxes}"
-                    ZoomMode="X"
-                    Height="300"/>
+                    Height="250"
+                    BorderBrush="Black"
+                    BorderThickness="1"/>
             </StackPanel>
             <!-- EMPTY STATE -->
             <Border Grid.ColumnSpan="2" Background="#10AAAAAA"

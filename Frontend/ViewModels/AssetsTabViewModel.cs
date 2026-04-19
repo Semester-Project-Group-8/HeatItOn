@@ -13,7 +13,9 @@ using System.IO;
 
 namespace Frontend.ViewModels;
 
-public class AssetsTabViewModel : ViewModelBase
+public class AssetsTabViewModel : 
+    ViewModelBase,
+    IRefreshable
 {
     private readonly AssetClient _assetClient;
     private readonly SourceClient _sourceClient;
@@ -83,7 +85,7 @@ public class AssetsTabViewModel : ViewModelBase
         _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, __) => OnPropertyChanged(nameof(HasAssets));
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
-        LoadFromBackend();
+        _ = LoadFromBackendAsync();
     }
     public async void StartOptimization()
     {
@@ -168,11 +170,6 @@ public class AssetsTabViewModel : ViewModelBase
         };
         
         CurrentDialog = dialogVm;
-    }
-
-    private async void LoadFromBackend()
-    {
-        await LoadFromBackendAsync();
     }
 
     private async Task LoadFromBackendAsync()
@@ -265,6 +262,11 @@ public class AssetsTabViewModel : ViewModelBase
     private static Bitmap LoadFromResource(string resourceName)
     {
         return new Bitmap(AssetLoader.Open(new Uri($"avares://Frontend/Assets/{resourceName}")));
+    }
+
+    public void Refresh()
+    {
+        _ = LoadFromBackendAsync();
     }
 }
 

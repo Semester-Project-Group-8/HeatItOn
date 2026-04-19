@@ -16,7 +16,9 @@ using SkiaSharp;
 
 namespace Frontend.ViewModels;
 
-public class ResultsTabViewModel : INotifyPropertyChanged
+public class ResultsTabViewModel : 
+    INotifyPropertyChanged,
+    IRefreshable
 {
     private readonly OptimizedResultsClient _client;
     private List<ResultTableRow> _allRows = [];
@@ -229,5 +231,10 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? name = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    public void Refresh()
+    {
+        _ = LoadAsync();
     }
 }
