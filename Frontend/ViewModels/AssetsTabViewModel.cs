@@ -8,14 +8,18 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Frontend.Data;
 using Frontend.Models;
+using System.IO;
 
 namespace Frontend.ViewModels;
 
-public class AssetsTabViewModel : ViewModelBase
+public class AssetsTabViewModel : 
+    ViewModelBase,
+    IRefreshable
 {
     private readonly AssetClient _assetClient;
+    private readonly SourceClient _sourceClient;
+    private readonly OptimizerClient _optimizerClient;
     private readonly List<AssetCardItem> _allAssetItems = new();
     private string _statusMessage = string.Empty;
     private bool _isScenario1Selected = true;
@@ -77,9 +81,31 @@ public class AssetsTabViewModel : ViewModelBase
     public AssetsTabViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient)
     {
         _assetClient = assetClient;
+        _sourceClient = sourceClient;
+        _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, __) => OnPropertyChanged(nameof(HasAssets));
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
-        LoadFromBackend();
+        _ = LoadFromBackendAsync();
+    }
+    public async void StartOptimization()
+    {
+        List<Asset> scenarioAssets= new List<Asset>();
+        foreach (AssetCardItem item in _allAssetItems)
+        {
+            if(item.IsSelected && item.OriginalAsset!=null)
+            {
+                scenarioAssets.Add(item.OriginalAsset);
+            }
+        }
+        await _optimizerClient.Optimize(scenarioAssets);
+    }
+    public void ImportAssets()
+    {
+        AssetCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
+    }
+    public void ExportAssets()
+    {
+        AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
     }
 
     private void OpenAddAssetDialog()
@@ -144,11 +170,6 @@ public class AssetsTabViewModel : ViewModelBase
         };
         
         CurrentDialog = dialogVm;
-    }
-
-    private async void LoadFromBackend()
-    {
-        await LoadFromBackendAsync();
     }
 
     private async Task LoadFromBackendAsync()
@@ -241,6 +262,11 @@ public class AssetsTabViewModel : ViewModelBase
     private static Bitmap LoadFromResource(string resourceName)
     {
         return new Bitmap(AssetLoader.Open(new Uri($"avares://Frontend/Assets/{resourceName}")));
+    }
+
+    public void Refresh()
+    {
+        _ = LoadFromBackendAsync();
     }
 }
 

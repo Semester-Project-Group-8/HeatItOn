@@ -1,19 +1,24 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using Frontend.Data;
+using Frontend.Data.CSV;
 using Frontend.Models;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.Measure;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView.Painting;
+using SkiaSharp;
 
 namespace Frontend.ViewModels;
 
-public partial class SourceTabViewModel : ViewModelBase  
+public partial class SourceTabViewModel : 
+    ViewModelBase,
+    IRefreshable
 {
     // Api connection
     private readonly SourceClient _client;
@@ -53,8 +58,6 @@ public partial class SourceTabViewModel : ViewModelBase
     public SourceTabViewModel(SourceClient client)
     {
         _client = client;
-        Sources.CollectionChanged += (_, __) =>
-            OnPropertyChanged(nameof(HasSources));
         TimeAxis =
         [
             new Axis
@@ -71,7 +74,6 @@ public partial class SourceTabViewModel : ViewModelBase
                         ticks = DateTime.MaxValue.Ticks;
 
                     return new DateTime(ticks, DateTimeKind.Utc)
-                        .ToLocalTime()
                         .ToString("dd.MM HH:mm");
                 },
                 UnitWidth = TimeSpan.FromHours(1).Ticks,
@@ -80,7 +82,9 @@ public partial class SourceTabViewModel : ViewModelBase
                 MinZoomDelta = TimeSpan.FromHours(3).Ticks,
                 LabelsRotation = -90,
                 TextSize = 11,
-                NameTextSize = 10
+                NameTextSize = 10,
+                SeparatorsPaint = new SolidColorPaint(SKColors.LightGray),
+                ShowSeparatorLines = true,
             }
         ];
         DualAxes =
@@ -121,6 +125,8 @@ public partial class SourceTabViewModel : ViewModelBase
                 if (!Files.Contains(source.FileName))
                     Files.Add(source.FileName);
             }
+
+            SelectedFile = Files.FirstOrDefault();
         }
         catch (Exception e)
         {
@@ -143,6 +149,16 @@ public partial class SourceTabViewModel : ViewModelBase
             BuildWinterSeries();
             BuildSummerSeries();
         });
+    }
+
+    public void Export()
+    {
+        SourceCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
+    }
+
+    public async Task Import()
+    {
+        await SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)
@@ -215,5 +231,10 @@ public partial class SourceTabViewModel : ViewModelBase
             GeometrySize = 0,
             ScalesYAt = 1
         });
+    }
+
+    public void Refresh()
+    {
+        _ = LoadFromBackend();
     }
 }

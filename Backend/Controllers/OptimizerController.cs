@@ -16,26 +16,16 @@ namespace Backend.Controllers
             _optimizerService = optimizerService;
         }
 
-        [HttpGet("{id:int}-{date:datetime}")]
-        public async Task<IActionResult> NetProductionCost(int assetId, DateTime date)
-        {
-            try
-            {
-                float cost = await _optimizerService.CalculateNetProductionCost(assetId,date);
-                return Ok(cost);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(503, new { message = ex.Message });
-            }
-        }
-
         [HttpPost]
-        public async Task<ActionResult<List<ResultList>>> Optimize()
+        public async Task<ActionResult<OptimizedResults>> Optimize([FromBody] List<Asset> scenarioAssets)
         {
+            if(scenarioAssets == null || scenarioAssets.Count==0)
+            {
+                return BadRequest("BadRequest | Must have at least one Asset to Optimize.");
+            }
             try
             {
-                return await _optimizerService.Optimize();
+                return await _optimizerService.Optimize(scenarioAssets);
             }
             catch (InvalidOperationException ex)
             {
