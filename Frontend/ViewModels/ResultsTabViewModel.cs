@@ -163,10 +163,10 @@ public class ResultsTabViewModel :
                             .Where(n => !string.IsNullOrWhiteSpace(n))
                             .Distinct()
                     ),
-                    HeatProduced = heat,
-                    Electricity = electricity,
+                    HeatProduced = MathF.Round(heat,2),
+                    Electricity = MathF.Round(electricity,2),
                     Co2Produced = co2,
-                    ProductionCost = cost
+                    ProductionCost = MathF.Round(cost,2)
                     
                 };
             })

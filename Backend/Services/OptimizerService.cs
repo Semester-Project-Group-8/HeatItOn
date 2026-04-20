@@ -41,6 +41,8 @@ namespace Backend.Services
             };
             float netProductionCost = asset.ProductionCost * assetProductionCapacity* asset.MaxHeat;
             netProductionCost -= asset.MaxElectricity * assetProductionCapacity * source.ElectricityPrice;
+            result.ProductionCost = netProductionCost;
+            result.Electricity =asset.MaxElectricity * assetProductionCapacity;
             return result;
         }
         private List<Asset> SortAssets(List<Asset> assets,float electricityPrice)
@@ -49,10 +51,12 @@ namespace Backend.Services
         }
         public async Task<ActionResult<OptimizedResults>> Optimize(List<Asset> scenarioAssets)
         {
-            var allSources = await _sourceService.ListSources();
+            var allSources = (await _sourceService.ListSources())
+                .OrderBy(s => s.TimeFrom)
+                .ToList();
             OptimizedResults finalResults = new OptimizedResults
             {
-                Name = $"results_{DateTime.Now:yyyy_MM_dd_HH_mm}",
+                Name = $"results_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}",
                 ResultsForHours = new List<ResultList>()
             };
             foreach (Source source in allSources)
@@ -60,26 +64,48 @@ namespace Backend.Services
                 scenarioAssets=SortAssets(scenarioAssets,source.ElectricityPrice);
                 float heatOfTheHour = 0;
                 int usedGenerators = 0;
+                bool allowOverproduction = true;
+                DateTime maintenanceFrom = DateTime.Parse("2025-09-09T20:00:00");
+                DateTime maintenanceTil = maintenanceFrom.AddHours(45);
                 ResultList resultOfHour = new ResultList
                 {
                     TimeFrom = source.TimeFrom,
                     TimeTo = source.TimeTo,
                     Results = new List<Result>()
                 };
-                while(heatOfTheHour<source.HeatDemand && usedGenerators<scenarioAssets.Count())
+                while(usedGenerators<scenarioAssets.Count() && (heatOfTheHour < source.HeatDemand || allowOverproduction))
                 {
+                    if(scenarioAssets[usedGenerators].Name=="Gas boiler 1" && maintenanceFrom <= source.TimeFrom && source.TimeFrom < maintenanceTil)
+                    {
+                        usedGenerators++;
+                        continue;
+                    }
                     float targetHeatProduction = 0;
-                    if (source.HeatDemand - heatOfTheHour > scenarioAssets[usedGenerators].MaxHeat)
+                    if (source.HeatDemand - heatOfTheHour > scenarioAssets[usedGenerators].MaxHeat || heatOfTheHour >= source.HeatDemand)
                     {
                         targetHeatProduction = scenarioAssets[usedGenerators].MaxHeat;
                     }
                     else
                     {
                         targetHeatProduction = source.HeatDemand - heatOfTheHour;
+                        Result partialProductionResult = CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction);
+                        Result fullProductionResult = CalculateAssetResult(scenarioAssets[usedGenerators], source, scenarioAssets[usedGenerators].MaxHeat);
+                        if(fullProductionResult.ProductionCost<partialProductionResult.ProductionCost)
+                        {
+                            targetHeatProduction = scenarioAssets[usedGenerators].MaxHeat;
+                        }
                     }
-                    resultOfHour.Results.Add(CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction));
-                    heatOfTheHour += targetHeatProduction;
-                    usedGenerators++;
+                    Result newResult = CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction);
+                    if (heatOfTheHour >= source.HeatDemand && newResult.ProductionCost >= 0)
+                    {
+                        allowOverproduction=false;
+                    }
+                    if(allowOverproduction)
+                    {
+                        resultOfHour.Results.Add(newResult);
+                        heatOfTheHour += targetHeatProduction;
+                        usedGenerators++;
+                    }
                 }
                 finalResults.ResultsForHours.Add(resultOfHour);
             }
