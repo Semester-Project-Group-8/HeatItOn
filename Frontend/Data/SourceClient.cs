@@ -31,7 +31,6 @@ public class SourceClient : IClient<Source>
         var result = await response.Content.ReadFromJsonAsync<List<Source>>();
         return result ?? new List<Source>();
     }
-
     public async Task<HttpContent> PostList(List<Source> source)
     {
         HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
