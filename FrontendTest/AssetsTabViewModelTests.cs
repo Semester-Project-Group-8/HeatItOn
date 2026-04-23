@@ -173,10 +173,12 @@ public class AssetsTabViewModelTests
             BaseAddress = new Uri("http://localhost/")
         };
 
-        return new AssetsTabViewModel(
-            new SourceClient(httpClient),
-            new AssetClient(httpClient),
-            new OptimizerClient(httpClient));
+        // return new AssetsTabViewModel(new AssetClient(httpClient));
+        var assetClient = new AssetClient(httpClient);
+        var sourceClient = new SourceClient(httpClient);
+        var optimizerClient = new OptimizerClient(httpClient);
+
+        return new AssetsTabViewModel(sourceClient, assetClient, optimizerClient);
     }
 
     private static async Task WaitForAsync(Func<bool> condition)
