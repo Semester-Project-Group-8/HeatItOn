@@ -11,7 +11,7 @@ namespace Frontend.Data.CSV
     static class SourceCsvHandler
     { 
         
-        public static async Task ImportCsv(string location, SourceClient sourceClient) 
+        public static async Task ImportCsv(string location, IClient<Source> sourceClient) 
         { 
             List<Source> Sources = new List<Source>();
             using (TextFieldParser parser = new TextFieldParser(location))

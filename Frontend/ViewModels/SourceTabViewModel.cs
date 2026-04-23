@@ -21,7 +21,7 @@ public partial class SourceTabViewModel :
     IRefreshable
 {
     // Api connection
-    private readonly SourceClient _client;
+    private readonly IClient<Source> _client;
 
     // Sources
     private readonly ObservableCollection<Source> _allSources = [];
@@ -55,7 +55,7 @@ public partial class SourceTabViewModel :
         set => SetProperty(ref _selectedSource, value);
     }
 
-    public SourceTabViewModel(SourceClient client)
+    public SourceTabViewModel(IClient<Source> client)
     {
         _client = client;
         TimeAxis =

@@ -17,8 +17,8 @@ public class AssetsTabViewModel :
     ViewModelBase,
     IRefreshable
 {
-    private readonly AssetClient _assetClient;
-    private readonly SourceClient _sourceClient;
+    private readonly IClient<Asset> _assetClient;
+    private readonly IClient<Source> _sourceClient;
     private readonly OptimizerClient _optimizerClient;
     private readonly List<AssetCardItem> _allAssetItems = new();
     private string _statusMessage = string.Empty;
@@ -78,7 +78,7 @@ public class AssetsTabViewModel :
         }
     }
 
-    public AssetsTabViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient)
+    public AssetsTabViewModel(IClient<Source> sourceClient, IClient<Asset> assetClient, OptimizerClient optimizerClient)
     {
         _assetClient = assetClient;
         _sourceClient = sourceClient;
@@ -140,7 +140,7 @@ public class AssetsTabViewModel :
         {
             try
             {
-                await _assetClient.Put(editedAsset);
+                await _assetClient.Update(editedAsset);
                 await LoadFromBackendAsync();
                 CurrentDialog = null;
             }

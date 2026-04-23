@@ -10,7 +10,7 @@ namespace Frontend.Data.CSV
 {
     public static class AssetCsvHandler
     {
-        public static async void ExportCsv(string location, AssetClient assetClient)
+        public static async void ExportCsv(string location, IClient<Asset> assetClient)
         {
             List<Asset>? assets = await assetClient.GetAll();
 
@@ -35,7 +35,7 @@ namespace Frontend.Data.CSV
             }
         }
 
-        public static async void ImportCsv(string location, AssetClient assetClient)
+        public static async Task ImportCsv(string location, IClient<Asset> assetClient)
         {
             List<Asset> Assets = new List<Asset>();
 
