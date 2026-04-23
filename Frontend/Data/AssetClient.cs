@@ -6,7 +6,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class AssetClient
+public class AssetClient : IClient<Asset>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Asset";
@@ -37,7 +37,7 @@ public class AssetClient
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task Put(Asset asset)
+    public async Task Update(Asset asset) // renamed from Put
     {
         HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/{asset.Id}", JsonContent.Create(asset));
         response.EnsureSuccessStatusCode();

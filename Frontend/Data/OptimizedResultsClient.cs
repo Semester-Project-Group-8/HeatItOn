@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -6,7 +7,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class OptimizedResultsClient
+public class OptimizedResultsClient : IClient<OptimizedResults>
 {
     private readonly HttpClient _client;
     private const string urlExtension = "OptimizedResults";
@@ -31,8 +32,11 @@ public class OptimizedResultsClient
         return result;
     }
 
-    public async void Delete(int id)
+    public async Task Delete(int id) // changed from async void to Task
     {
         HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
     }
+
+    public Task Post(OptimizedResults item) => throw new NotImplementedException();
+    public Task Update(OptimizedResults item) => throw new NotImplementedException();
 }

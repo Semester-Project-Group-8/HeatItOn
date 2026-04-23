@@ -6,7 +6,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class SourceClient
+public class SourceClient : IClient<Source>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Source";
@@ -31,21 +31,21 @@ public class SourceClient
         return result;
     }
 
-    public async Task<string> Post(Source source)
+    public async Task Post(Source source) // changed return type to Task
     {
         HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
-        return await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<Source?> Patch(Source source)
+    public async Task Update(Source source) // renamed from Patch
     {
         HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(source));
-        return await response.Content.ReadFromJsonAsync<Source>();
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<Source?> Delete(int id)
+    public async Task Delete(int id) // changed return type to Task
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}" );
-        return await response.Content.ReadFromJsonAsync<Source>();
+        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id}");
+        response.EnsureSuccessStatusCode();
     }
 }
