@@ -20,7 +20,7 @@ public class ManagerButtonViewModelTests
     {
         var vm = new ManagerButtonViewModel();
         var count = 0;
-        vm.AddRequested += () => raisedCount++;
+        vm.AddRequested += () => count++;
 
         vm.AddNewAssetCommand.Execute(null);
 
@@ -36,7 +36,7 @@ public class ManagerButtonViewModelTests
 
         vm.ImportAssetsCommand.Execute(null);
 
-        Assert.Equal(1, raisedCount);
+        Assert.Equal(1, count);
     }
 
     [Fact]
