@@ -222,12 +222,12 @@ public partial class SourceTabViewModel :
 
     public void Export()
     {
-        SourceCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
+        CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
     }
 
     public void Import()
     {
-            _ = SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
+        await CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)
