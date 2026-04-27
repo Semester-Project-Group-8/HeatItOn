@@ -167,35 +167,15 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
     public async Task ImportAssets()
-        {
-            try
-            {
-                var csvPath = Path.Combine(AppContext.BaseDirectory, "assets.csv");
-                await AssetCsvHandler.ImportCsv(csvPath, _assetClient);
-                await LoadFromBackendAsync();
-                StatusMessage = "Assets imported successfully.";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Import failed: {ex.Message}";
-                Console.WriteLine($"Error importing assets: {ex}");
-            }
-        }
+    {
+        CsvHandler.ImportAsset(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
+    }
 
-        public async void ExportAssets()
-        {
-            try
-            {
-                await AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
-                StatusMessage = "Assets exported to assets_export.csv.";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Export failed: {ex.Message}";
-                Console.WriteLine($"Error exporting assets: {ex}");
-            }
-        }
-        
+    public void ExportAssets()
+    {
+        CsvHandler.ExportAsset(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+    }
+
     private void OpenAddAssetDialog()
     {
         var dialogVm = new AddAssetDialogViewModel();
@@ -228,7 +208,7 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Update(editedAsset);
+                await _assetClient.Put(editedAsset);
                 await LoadFromBackendAsync();
                 CurrentDialog = null;
             }
