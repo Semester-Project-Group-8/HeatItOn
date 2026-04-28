@@ -4,5 +4,8 @@ namespace Backend.Hubs;
 
 public class BackendHub : Hub
 {
-    
+    public async Task SendMessage(string message)
+    {
+        await Clients.All.SendAsync("ReceiveMessage", message);
+    }
 }

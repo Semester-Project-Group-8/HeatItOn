@@ -1,6 +1,9 @@
+using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
 namespace Backend.Controllers
 {
     [Route("Asset")]
@@ -9,9 +12,11 @@ namespace Backend.Controllers
     public class AssetsController : ControllerBase
     {
         private readonly AssetsService _assetsService;
-        public AssetsController(AssetsService assetsService)
+        private readonly IHubContext<BackendHub> _hubContext;
+        public AssetsController(AssetsService assetsService, IHubContext<BackendHub> hubContext)
         {
             _assetsService = assetsService;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -60,6 +65,7 @@ namespace Backend.Controllers
                     ImageName = asset.ImageName
                 };
                 await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageName);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption});
             }
             catch (InvalidOperationException ex)
