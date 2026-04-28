@@ -9,32 +9,92 @@
              x:DataType="vm:AssetsTabViewModel">
 
     <UserControl.Styles>
-        <Style Selector="ToggleButton.asset-card">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Width" Value="308"/>
-            <Setter Property="Height" Value="300"/>
-            <Setter Property="Padding" Value="10"/>
 
-        </Style>
-        <Style Selector="Button.card-corner-btn">
-            <Setter Property="Width" Value="30"/>
-            <Setter Property="Height" Value="30"/>
+        <Style Selector="RadioButton.scenario-card">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="HorizontalAlignment" Value="Right"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="Margin" Value="2"/>
-            <Setter Property="Panel.ZIndex" Value="10"/>
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Content" Value="  ..."/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="CardBorder"
+                            CornerRadius="12"
+                            BorderThickness="1.5"
+                            BorderBrush="#E0E0E0"
+                            Background="#F5F5F5"
+                            Padding="16,14"
+                            Margin="0,0,0,10"
+                            Cursor="Hand">
+                        <Border.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+                                <BrushTransition Property="Background"  Duration="0:0:0.15"/>
+                            </Transitions>
+                        </Border.Transitions>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <ContentPresenter Grid.Column="0"
+                                              Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="Left"/>
+                            <Ellipse Grid.Column="1"
+                                     Name="RadioCircle"
+                                     Width="20" Height="20"
+                                     Stroke="#CCCCCC" StrokeThickness="2"
+                                     Fill="Transparent"
+                                     VerticalAlignment="Top"
+                                     Margin="12,2,0,0"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
         </Style>
-        <Style Selector="StackPanel.asset-card-content">
-            <Setter Property="Margin" Value="0,24,0,0"/>
+
+        <Style Selector="RadioButton.scenario-card:checked /template/ Border#CardBorder">
+            <Setter Property="BorderBrush" Value="#E06020"/>
+            <Setter Property="Background"  Value="#FFF3EC"/>
         </Style>
+
+        <Style Selector="RadioButton.scenario-card:checked /template/ Ellipse#RadioCircle">
+            <Setter Property="Fill"   Value="#E06020"/>
+            <Setter Property="Stroke" Value="#E06020"/>
+        </Style>
+
+        <Style Selector="Button.action-primary">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#E06020"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style Selector="Button.action-secondary">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#EEEEEE"/>
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style Selector="ToggleButton.asset-card">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      HorizontalContentAlignment="Stretch"
+                                      VerticalContentAlignment="Top"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        
     </UserControl.Styles>
 
     <Grid RowDefinitions="*">
@@ -42,28 +102,82 @@
                DisplayMode="Inline"
                IsEnabled="{Binding IsUiEnabled}">
             <SplitView.Pane>
-                <DockPanel LastChildFill="False">
-                    <RadioButton DockPanel.Dock="Top"
-                                 FontSize="18"
-                                 Margin="15,15,15,7.5"
-                                 Content="Scenario 1"
-                                 GroupName="Scenarios"
-                                 IsChecked="{Binding IsScenario1Selected}"/>
+                <Border BorderBrush="#E8E8E8" BorderThickness="0,0,1,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="20,20,20,20">
 
-                    <RadioButton DockPanel.Dock="Top"
-                                 FontSize="18"
-                                 Margin="15,7.5,15,7.5"
-                                 Content="Scenario 2"
-                                 GroupName="Scenarios"
-                                 IsChecked="{Binding IsScenario2Selected}"/>
+                            <RadioButton Classes="scenario-card"
+                                         GroupName="Scenarios"
+                                         IsChecked="{Binding IsScenario1Selected}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="SCENARIO 01"
+                                               Foreground="#E06020"
+                                               FontSize="10" FontWeight="Bold" LetterSpacing="1.5"/>
+                                    <TextBlock Text="PEAK LOAD"
+                                               FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="Gas boilers + motor at full capacity"
+                                               Foreground="#999999" FontSize="12"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </RadioButton>
 
-                    <RadioButton DockPanel.Dock="Top"
-                                 FontSize="18"
-                                 Margin="15,7.5,15,15"
-                                 Content="Custom"
-                                 GroupName="Scenarios"
-                                 IsChecked="{Binding IsCustomScenarioSelected}"/>
-                </DockPanel>
+                            <RadioButton Classes="scenario-card"
+                                         GroupName="Scenarios"
+                                         IsChecked="{Binding IsScenario2Selected}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="SCENARIO 02"
+                                               Foreground="#E06020"
+                                               FontSize="10" FontWeight="Bold" LetterSpacing="1.5"/>
+                                    <TextBlock Text="ECO MODE"
+                                               FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="Prioritise electric boiler + gas motor"
+                                               Foreground="#999999" FontSize="12"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton Classes="scenario-card"
+                                         GroupName="Scenarios"
+                                         IsChecked="{Binding IsCustomScenarioSelected}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="CUSTOM"
+                                               Foreground="#E06020"
+                                               FontSize="10" FontWeight="Bold" LetterSpacing="1.5"/>
+                                    <TextBlock Text="CONFIGURE"
+                                               FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="Manually select assets for optimizer"
+                                               Foreground="#999999" FontSize="12"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <Rectangle Height="1" Fill="#E8E8E8" Margin="0,12,0,16"/>
+
+                            <Button Classes="action-primary"
+                                    Command="{Binding StartOptimization}"
+                                    Content="▶  OPTIMIZE"/>
+
+                            <Button Classes="action-secondary"
+                                    Command="{Binding OpenAddAssetDialogCommand}"
+                                    Content="+ Add Asset"/>
+
+                            <Button Classes="action-secondary"
+                                    Command="{Binding ImportAssets}"
+                                    Content="↑ Import CSV"/>
+
+                            <Button Classes="action-secondary"
+                                    Command="{Binding ExportAssets}"
+                                    Content="↓ Export CSV"/>
+                            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+                                <Button Grid.Column="0" Content="Manager" Width="150" Height="50" FontSize="30"
+                                        Command="{Binding OpenManagerButtonViewCommand}"/>
+                                <Button Command="{Binding StartOptimizationCommand}" Grid.Column="2" Content="Optimize" Width="150" Height="50" FontSize="30"/>
+                            </Grid>
+                            <Rectangle Height="1" Fill="#E8E8E8" Margin="0,8,0,0"/>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid RowDefinitions="Auto,*,Auto" Margin="5">
@@ -72,46 +186,143 @@
                                Text="{Binding StatusMessage}"
                                Margin="0,0,0,8"
                                Opacity="0.8"/>
-                    <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
-                        <Button Grid.Column="0" Content="Manager" Width="150" Height="50" FontSize="30"
-                                Command="{Binding OpenManagerButtonViewCommand}"/>
-                        <Button Command="{Binding StartOptimizationCommand}" Grid.Column="2" Content="Optimize" Width="150" Height="50" FontSize="30"/>
-                    </Grid>
                     <ScrollViewer Grid.Row="1"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding AssetItems}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" ItemWidth="318" ItemHeight="310"/>
+                                    <WrapPanel Orientation="Horizontal" ItemWidth="300"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <ToggleButton Classes="asset-card"
                                                   Margin="0,0,10,10"
-                                                  HorizontalAlignment="Left"
-                                                  VerticalAlignment="Top"
-                                                  HorizontalContentAlignment="Stretch"
-                                                  VerticalContentAlignment="Stretch"
                                                   IsChecked="{Binding IsSelected}">
-                                        <Grid>
-                                            <StackPanel Classes="asset-card-content" Spacing="8">
-                                                <Image Source="{Binding ImagePath}"
-                                                       Height="100"
-                                                       Stretch="UniformToFill"/>
-                                                <TextBlock Text="{Binding Name}"/>
-                                                <ItemsControl ItemsSource="{Binding Details}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <TextBlock Text="{Binding}"/>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
+                                        <Border BorderBrush="{Binding CardBorderBrush}"
+                                                BorderThickness="3"
+                                                CornerRadius="16"
+                                                Background="White"
+                                                ClipToBounds="True"
+                                                Width="290">
+                                            <StackPanel>
+                                                <!-- Banner area -->
+                                                <Panel Height="140">
+                                                    <Border Background="{Binding BannerBrush}"
+                                                            CornerRadius="13,13,0,0"/>
+                                                    <Image Source="{Binding ImagePath}"
+                                                           Width="100" Height="100"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           Stretch="Uniform"/>
+                                                    <!-- Type badge top-left -->
+                                                    <Border HorizontalAlignment="Left"
+                                                            VerticalAlignment="Top"
+                                                            Margin="10"
+                                                            Padding="7,3"
+                                                            Background="White"
+                                                            BorderBrush="{Binding TypeAccentBrush}"
+                                                            BorderThickness="1.5"
+                                                            CornerRadius="5">
+                                                        <TextBlock Text="{Binding AssetType}"
+                                                                   FontSize="9"
+                                                                   FontWeight="Bold"
+                                                                   Foreground="{Binding TypeAccentBrush}"
+                                                                   LetterSpacing="1"/>
+                                                    </Border>
+                                                    <!-- Checkmark top-right (visible when selected) -->
+                                                    <Border HorizontalAlignment="Right"
+                                                            VerticalAlignment="Top"
+                                                            Margin="10"
+                                                            Width="28" Height="28"
+                                                            CornerRadius="6"
+                                                            Background="#E06020"
+                                                            IsVisible="{Binding IsSelected}">
+                                                        <TextBlock Text="✓"
+                                                                   Foreground="White"
+                                                                   FontSize="15"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <!-- Edit button bottom-right -->
+                                                    <Button Command="{Binding EditCommand}"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Width="30" Height="30"
+                                                            Padding="0"
+                                                            CornerRadius="6"
+                                                            Background="White"
+                                                            BorderThickness="1"
+                                                            BorderBrush="#D0D0D0"
+                                                            ToolTip.Tip="Edit asset">
+                                                        <TextBlock Text="✎"
+                                                                FontSize="14"
+                                                                HorizontalAlignment="Center"
+                                                                VerticalAlignment="Center"
+                                                                TextAlignment="Center" />
+                                                    </Button>
+                                                </Panel>
+                                                <!-- Info area -->
+                                                <StackPanel Background="White" Margin="16,12,16,14">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               FontSize="18"
+                                                               FontWeight="ExtraBold"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               Margin="0,0,0,10"/>
+                                                    <Grid ColumnDefinitions="*,1,*"
+                                                          RowDefinitions="Auto,1,Auto">
+                                                        <!-- MAX HEAT -->
+                                                        <StackPanel Grid.Row="0" Grid.Column="0"
+                                                                    Margin="0,6,0,10" Spacing="3">
+                                                            <TextBlock Text="{Binding MaxHeatDisplay}"
+                                                                       FontSize="15" FontWeight="Bold"
+                                                                       Foreground="#2090CC"/>
+                                                            <TextBlock Text="MAX HEAT"
+                                                                       FontSize="8" Foreground="#AAAAAA"
+                                                                       LetterSpacing="1.5"/>
+                                                        </StackPanel>
+                                                        <!-- Vertical separator -->
+                                                        <Rectangle Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"
+                                                                   Fill="#F0F0F0"/>
+                                                        <!-- COST/MWH -->
+                                                        <StackPanel Grid.Row="0" Grid.Column="2"
+                                                                    Margin="12,6,0,10" Spacing="3">
+                                                            <TextBlock Text="{Binding CostDisplay}"
+                                                                       FontSize="15" FontWeight="Bold"
+                                                                       Foreground="#2090CC"/>
+                                                            <TextBlock Text="COST/MWH"
+                                                                       FontSize="8" Foreground="#AAAAAA"
+                                                                       LetterSpacing="1.5"/>
+                                                        </StackPanel>
+                                                        <!-- Horizontal separator -->
+                                                        <Rectangle Grid.Row="1" Grid.Column="0"
+                                                                   Grid.ColumnSpan="3" Fill="#F0F0F0"/>
+                                                        <!-- CO2/MWH -->
+                                                        <StackPanel Grid.Row="2" Grid.Column="0"
+                                                                    Margin="0,10,0,0" Spacing="3">
+                                                            <TextBlock Text="{Binding CO2Display}"
+                                                                       FontSize="15" FontWeight="Bold"
+                                                                       Foreground="#2090CC"/>
+                                                            <TextBlock Text="CO₂/MWH"
+                                                                       FontSize="8" Foreground="#AAAAAA"
+                                                                       LetterSpacing="1.5"/>
+                                                        </StackPanel>
+                                                        <!-- ELECTRICITY -->
+                                                        <StackPanel Grid.Row="2" Grid.Column="2"
+                                                                    Margin="12,10,0,0" Spacing="3">
+                                                            <TextBlock Text="{Binding ElectricityDisplay}"
+                                                                       FontSize="15" FontWeight="Bold"
+                                                                       Foreground="#2090CC"/>
+                                                            <TextBlock Text="ELECTRICITY"
+                                                                       FontSize="8" Foreground="#AAAAAA"
+                                                                       LetterSpacing="1.5"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </StackPanel>
                                             </StackPanel>
-                                            <Button Classes="card-corner-btn"
-                                                    Command="{Binding EditCommand}"/>
-                                        </Grid>
+                                        </Border>
                                     </ToggleButton>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

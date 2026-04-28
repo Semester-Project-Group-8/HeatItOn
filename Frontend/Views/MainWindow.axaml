@@ -9,26 +9,110 @@
         x:DataType="vm:MainWindowViewModel"
         Title="HeatItOn">
 
+    <Window.Styles>
+        <Style Selector="TabItem">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TabBorder"
+                            Padding="16,10"
+                            Background="Transparent"
+                            BorderThickness="0,0,0,2"
+                            BorderBrush="Transparent">
+                        <Border.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                                <BrushTransition Property="Background"  Duration="0:0:0.2"/>
+                            </Transitions>
+                        </Border.Transitions>
+                        <ContentPresenter Content="{TemplateBinding Header}"
+                                          Name="TabContent"
+                                          Foreground="#999999"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
 
+        <Style Selector="TabItem:pointerover /template/ Border#TabBorder">
+            <Setter Property="BorderBrush" Value="#80E06020"/>
+            <Setter Property="Background"  Value="#08E06020"/>
+        </Style>
 
-    <Grid RowDefinitions="27,*">
-        <Button Content="Refresh"
-                Command="{Binding Refresh}"
-                HorizontalAlignment="Right"
-                Grid.Row="0"/>
-        <!-- Tabs -->
-        <TabControl Grid.Row="1">
-            <TabItem Header="Assets">
-                <views:AssetsTabView DataContext="{Binding AssetsTab}"/>
-            </TabItem>
+        <Style Selector="TabItem:selected /template/ Border#TabBorder">
+            <Setter Property="BorderBrush" Value="#E06020"/>
+            <Setter Property="Background"  Value="#12E06020"/>
+        </Style>
 
-            <TabItem Header="Results">
-                <views:ResultsTabView DataContext="{Binding ResultTab}"/>
-            </TabItem>
+        <Style Selector="TabItem:selected /template/ ContentPresenter#TabContent">
+            <Setter Property="Foreground" Value="#E06020"/>
+        </Style>
+    </Window.Styles>
 
-            <TabItem Header="Source">
-                <views:SourceTabView DataContext="{Binding SourceTab}"/>
-            </TabItem>
-        </TabControl>
-    </Grid>
+    <TabControl>
+        <TabControl.Template>
+            <ControlTemplate TargetType="TabControl">
+                <Grid RowDefinitions="Auto,*">
+
+                    <Border Grid.Row="0" Background="White"
+                            BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                        <DockPanel LastChildFill="False">
+
+                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal"
+                                        VerticalAlignment="Center" Margin="16,8,8,8">
+                                <Image Source="avares://Frontend/Assets/icon.ico"
+                                       Width="32" Height="32" VerticalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                            Margin="8,0,0,0">
+                                    <TextBlock Text="HEAT" Foreground="#E06020"
+                                               FontWeight="Bold" FontSize="18"/>
+                                    <TextBlock Text="ITON" Foreground="#999999"
+                                               FontWeight="Bold" FontSize="18"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <Rectangle DockPanel.Dock="Left" Width="1" Fill="#DDDDDD"
+                                       Margin="8,6"/>
+
+                            <ItemsPresenter Name="PART_ItemsPresenter" DockPanel.Dock="Left"
+                                            ItemsPanel="{TemplateBinding ItemsPanel}"/>
+
+                            <Button DockPanel.Dock="Right"
+                                    Content="Refresh"
+                                    Command="{Binding Refresh}"
+                                    Margin="8,6"
+                                    Padding="12,6"
+                                    Background="Transparent"
+                                    BorderBrush="#E06020"
+                                    BorderThickness="1"
+                                    Foreground="#E06020"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Right"/>
+
+                        </DockPanel>
+                    </Border>
+
+                    <ContentPresenter Name="PART_SelectedContentHost"
+                                      Grid.Row="1"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Content="{TemplateBinding SelectedContent}"
+                                      ContentTemplate="{TemplateBinding SelectedContentTemplate}"/>
+
+                </Grid>
+            </ControlTemplate>
+        </TabControl.Template>
+
+        <TabItem Header="Assets">
+            <views:AssetsTabView DataContext="{Binding AssetsTab}"/>
+        </TabItem>
+
+        <TabItem Header="Results">
+            <views:ResultsTabView DataContext="{Binding ResultTab}"/>
+        </TabItem>
+
+        <TabItem Header="Source">
+            <views:SourceTabView DataContext="{Binding SourceTab}"/>
+        </TabItem>
+
+    </TabControl>
+
 </Window>
