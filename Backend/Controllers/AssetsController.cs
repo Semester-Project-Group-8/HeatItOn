@@ -65,7 +65,7 @@ namespace Backend.Controllers
                     ImageName = asset.ImageName
                 };
                 await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageName);
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
+                await _hubContext.Clients.All.SendAsync("Asset");
                 return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption});
             }
             catch (InvalidOperationException ex)
