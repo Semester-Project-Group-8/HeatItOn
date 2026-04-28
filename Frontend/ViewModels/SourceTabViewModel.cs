@@ -115,18 +115,25 @@ public partial class SourceTabViewModel :
     {
         try
         {
-            var sources = await _client.GetAll();
+            var sources = await _client.GetAll() ?? [];
 
-            foreach (var source in sources)
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                source.FileName ??= "source.csv";
-                _allSources.Add(source);
+                _allSources.Clear();
+                Sources.Clear();
+                Files.Clear();
 
-                if (!Files.Contains(source.FileName))
-                    Files.Add(source.FileName);
-            }
+                foreach (var source in sources)
+                {
+                    source.FileName ??= "source.csv";
+                    _allSources.Add(source);
 
-            SelectedFile = Files.FirstOrDefault();
+                    if (!Files.Contains(source.FileName))
+                        Files.Add(source.FileName);
+                }
+
+                SelectedFile = Files.FirstOrDefault();
+            });
         }
         catch (Exception e)
         {

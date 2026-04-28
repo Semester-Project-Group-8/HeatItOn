@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
 using Frontend.Models;
@@ -116,11 +117,14 @@ public class ResultsTabViewModel :
     private async Task LoadAsync()
     {
         var results = await _client.GetAll();
-        OptimizedResults.Clear();
-        if (results != null)
-            foreach (var r in results)
-                OptimizedResults.Add(r);
-        OnPropertyChanged(nameof(HasNoOptimizedResults));
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            OptimizedResults.Clear();
+            if (results != null)
+                foreach (var r in results)
+                    OptimizedResults.Add(r);
+            OnPropertyChanged(nameof(HasNoOptimizedResults));
+        });
     }
 
     public void Export()

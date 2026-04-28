@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using Frontend.Models;
 using System.IO;
 
@@ -178,32 +179,38 @@ public class AssetsTabViewModel :
         {
             var assets = await _assetClient.GetAll() ?? new List<Asset>();
 
-            _allAssetItems.Clear();
-            if (assets.Count == 0)
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                _allAssetItems.Clear();
                 AssetItems.Clear();
-                StatusMessage = "No assets available from backend yet.";
-                return;
-            }
 
-            foreach (var asset in assets)
-            {
-                var cardItem = MapAssetToCard(asset);
-                cardItem.EditCommand = new RelayCommand(() => OpenEditAssetDialog(asset));
-                _allAssetItems.Add(cardItem);
-            }
+                if (assets.Count == 0)
+                {
+                    StatusMessage = "No assets available from backend yet.";
+                    return;
+                }
 
-            AssetItems.Clear();
-            foreach (var item in _allAssetItems)
-                AssetItems.Add(item);
+                foreach (var asset in assets)
+                {
+                    var cardItem = MapAssetToCard(asset);
+                    cardItem.EditCommand = new RelayCommand(() => OpenEditAssetDialog(asset));
+                    _allAssetItems.Add(cardItem);
+                }
 
-            ApplyScenarioSelection();
-            StatusMessage = string.Empty;
+                foreach (var item in _allAssetItems)
+                    AssetItems.Add(item);
+
+                ApplyScenarioSelection();
+                StatusMessage = string.Empty;
+            });
         }
         catch (Exception ex)
         {
-            AssetItems.Clear();
-            StatusMessage = "Backend unavailable.";
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                AssetItems.Clear();
+                StatusMessage = "Backend unavailable.";
+            });
             Console.WriteLine($"Error loading assets: {ex.Message}");
         }
     }
