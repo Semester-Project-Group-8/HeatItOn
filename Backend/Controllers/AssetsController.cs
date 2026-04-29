@@ -65,7 +65,7 @@ namespace Backend.Controllers
                     ImageName = asset.ImageName
                 };
                 await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageName);
-                await _hubContext.Clients.All.SendAsync("Asset");
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption});
             }
             catch (InvalidOperationException ex)
@@ -79,7 +79,9 @@ namespace Backend.Controllers
         {
             try
             {
+                var asset = await _assetsService.GetAsset(id);
                 await _assetsService.DeleteAsset(id);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -98,6 +100,7 @@ namespace Backend.Controllers
             try
             {
                 await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageName);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return Ok();
             }
             catch (KeyNotFoundException)

@@ -140,12 +140,12 @@ public class ResultsTabViewModel :
         if (SelectedOptimizedResult == null)
             return;
 
-        var hours = SelectedOptimizedResult.ResultsForHours
+        var hours = (SelectedOptimizedResult.ResultsForHours ?? [])
             .OrderBy(r => r.TimeFrom)
             .ToList();
 
         RebuildCharts(hours);
-        _allRows = SelectedOptimizedResult.ResultsForHours
+        _allRows = (SelectedOptimizedResult.ResultsForHours ?? [])
             .OrderBy(r => r.TimeFrom)
             .Select(resultList =>
             {
@@ -163,7 +163,7 @@ public class ResultsTabViewModel :
                     ActiveAssets = string.Join(
                         "; ",
                         resultList.Results
-                            .Select(r => r.Asset.Name)
+                            .Select(r => r.Asset?.Name)
                             .Where(n => !string.IsNullOrWhiteSpace(n))
                             .Distinct()
                     ),
@@ -208,7 +208,7 @@ public class ResultsTabViewModel :
     {
         if (SelectedOptimizedResult == null)
             return;
-        var filteredHours = SelectedOptimizedResult.ResultsForHours
+        var filteredHours = (SelectedOptimizedResult.ResultsForHours ?? [])
             .Where(h => h.TimeFrom >= from && h.TimeFrom <= to)
             .OrderBy(h => h.TimeFrom)
             .ToList();

@@ -1,6 +1,8 @@
+using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
 {
     [Route("ResultList")]
@@ -9,9 +11,11 @@ namespace Backend.Controllers
     public class ResultListController : ControllerBase
     {
         private readonly ResultListService _resultListService;
-        public ResultListController(ResultListService resultListService)
+        private readonly IHubContext<BackendHub> _hubContext;
+        public ResultListController(ResultListService resultListService, IHubContext<BackendHub> hubContext)
         {
             _resultListService = resultListService;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -46,6 +50,7 @@ namespace Backend.Controllers
         {
             List<ResultList> list = new List<ResultList> { resultList };
             var result = await _resultListService.AddResultList(list);
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
             return Ok(result);
         }
 
@@ -53,6 +58,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> AddResultList([FromBody] List<ResultList> resultLists)
         {
             var result = await _resultListService.AddResultList(resultLists);
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
             return Ok(result);
         }
 
@@ -62,6 +68,7 @@ namespace Backend.Controllers
             try
             {
                 var createdId = await _resultListService.CreateResultList(timeFrom, timeTo, resultList);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
                 return Created($"/ResultList/{createdId}", new { id = createdId });
             }
             catch (ArgumentException)
@@ -80,6 +87,7 @@ namespace Backend.Controllers
             try
             {
                 await _resultListService.DeleteResultList(id);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
                 return NoContent();
             }
             catch (KeyNotFoundException)

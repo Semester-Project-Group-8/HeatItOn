@@ -1,6 +1,8 @@
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Backend.Controllers;
 
@@ -9,10 +11,12 @@ namespace Backend.Controllers;
 public class OptimizedResultsController : ControllerBase
 {
     private readonly OptimizedResultsService _optimizedResultsService;
+    private readonly IHubContext<BackendHub> _hubContext;
     
-    public OptimizedResultsController(OptimizedResultsService optimizedResultsService)
+    public OptimizedResultsController(OptimizedResultsService optimizedResultsService, IHubContext<BackendHub> hubContext)
     {
         _optimizedResultsService = optimizedResultsService;
+        _hubContext = hubContext;
     }
 
     [HttpGet]
@@ -33,6 +37,7 @@ public class OptimizedResultsController : ControllerBase
     public async Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
     { 
         var result = await _optimizedResultsService.AddOptimizedResults(optimizedResults);
+        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "OptimizedResults");
         return Ok(result);
     }
 
@@ -40,6 +45,7 @@ public class OptimizedResultsController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         await _optimizedResultsService.DeleteOptimizedResult(id);
+        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "OptimizedResults");
         return Ok("deleted");
     }
 }

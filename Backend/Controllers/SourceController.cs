@@ -1,6 +1,8 @@
-﻿using Backend.Models;
+﻿using Backend.Hubs;
+using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
 {
     [Route("Source")]
@@ -8,9 +10,11 @@ namespace Backend.Controllers
     public class SourceController : ControllerBase
     {
         private readonly SourceService _sourceService;
-        public SourceController(SourceService SourceService)
+        private readonly IHubContext<BackendHub> _hubContext;
+        public SourceController(SourceService SourceService, IHubContext<BackendHub> hubContext)
         {
             _sourceService = SourceService;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -41,6 +45,7 @@ namespace Backend.Controllers
                     ElectricityPrice = source.ElectricityPrice
                 };
                 await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Created($"/Source/{s.Id}", new { Id = s.Id, TimeFrom = s.TimeFrom, TimeTo = s.TimeTo, HeatDemand = s.HeatDemand, ElectricityPrice = s.ElectricityPrice });
             }
             catch (InvalidOperationException ex)
@@ -75,6 +80,7 @@ namespace Backend.Controllers
             try
             {
                 await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Ok(new { Message = "Source updated successfully." });
             }
             catch (KeyNotFoundException)
@@ -92,7 +98,9 @@ namespace Backend.Controllers
         {
             try
             {
+                var source = await _sourceService.GetSource(id);
                 await _sourceService.DeleteSource(id);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Ok(new { Message = "Source deleted successfully." });
             }
             catch (KeyNotFoundException)

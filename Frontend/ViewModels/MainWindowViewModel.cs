@@ -47,7 +47,24 @@ public class MainWindowViewModel : ViewModelBase
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Debug.WriteLine($"Signal received: {message}. Refreshing UI data...");
-                Refresh();
+
+                switch (message)
+                {
+                    case "Asset":
+                        AssetsTab.Refresh();
+                        break;
+                    case "Source":
+                        SourceTab.Refresh();
+                        break;
+                    case "Result":
+                    case "ResultList":
+                    case "OptimizedResults":
+                        ResultTab.Refresh();
+                        break;
+                    default:
+                        Refresh();
+                        break;
+                }
             });
         });
 

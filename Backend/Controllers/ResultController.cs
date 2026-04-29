@@ -1,6 +1,8 @@
+using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
 {
     [Route("Result")]
@@ -8,9 +10,11 @@ namespace Backend.Controllers
     public class ResultController : ControllerBase
     {
         private readonly ResultService _resultService;
-        public ResultController(ResultService ResultService)
+        private readonly IHubContext<BackendHub> _hubContext;
+        public ResultController(ResultService ResultService, IHubContext<BackendHub> hubContext)
         {
             _resultService = ResultService;
+            _hubContext = hubContext;
         }
 
         // GetAllResults
@@ -73,6 +77,7 @@ namespace Backend.Controllers
 
             if (rowsAffected > 0)
             {
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Created($"/Result/{incomingResult.Id}", incomingResult);
             }
 
@@ -86,6 +91,7 @@ namespace Backend.Controllers
             var rowsAffected = await _resultService.AddResult(results);
             if (rowsAffected > 0)
             {
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Ok(new { Message = $"{results.Count} results added successfully." });
             }
 
@@ -110,6 +116,7 @@ namespace Backend.Controllers
 
                 if (rowsAffected > 0)
                 {
+                    await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                     return Ok(new { Message = "Result updated successfully." });
                 }
                 return BadRequest("Failed to update Result.");
@@ -130,6 +137,7 @@ namespace Backend.Controllers
                 var rowsAffected = await _resultService.DeleteResult(id);
                 if (rowsAffected > 0)
                 {
+                    await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                     return Ok(new { Message = "Result deleted successfully." });
                 }
                 return BadRequest("Failed to delete Result.");
