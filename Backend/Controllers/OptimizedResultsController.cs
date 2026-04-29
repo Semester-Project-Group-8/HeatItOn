@@ -18,15 +18,15 @@ public class OptimizedResultsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> List()
     {
-        var result = await _optimizedResultsService.ListOptimizedResults();
+        var result = await _optimizedResultsService.List();
         return Ok(result);
     }
     
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
-        var result = await _optimizedResultsService.GetOptimizedResults(id);
-        return Ok(result);
+        var results = await _optimizedResultsService.Get(id);
+        return Ok(results.First());
     }
 
     [HttpPost("Add")]
@@ -39,7 +39,7 @@ public class OptimizedResultsController : ControllerBase
     [HttpDelete("Delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        await _optimizedResultsService.DeleteOptimizedResult(id);
+        await _optimizedResultsService.Delete(id);
         return Ok("deleted");
     }
 }

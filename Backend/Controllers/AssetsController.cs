@@ -19,7 +19,7 @@ namespace Backend.Controllers
         {
             try
             {
-                var assets = await _assetsService.ListAssets();
+                var assets = await _assetsService.List();
                 return Ok(assets);
             }
             catch (InvalidOperationException ex)
@@ -33,8 +33,8 @@ namespace Backend.Controllers
         {
             try
             {
-                var asset = await _assetsService.GetAsset(id);
-                return Ok(asset);
+                var assets = await _assetsService.Get(id);
+                return Ok(assets.First());
             }
             catch (KeyNotFoundException)
             {
@@ -73,7 +73,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await _assetsService.DeleteAsset(id);
+                await _assetsService.Delete(id);
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -91,7 +91,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageName);
+                await _assetsService.Put(id, asset);
                 return Ok();
             }
             catch (KeyNotFoundException)

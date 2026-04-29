@@ -18,7 +18,7 @@ namespace Backend.Controllers
         {
             try
             {
-                var Sources = await _sourceService.ListSources();
+                var Sources = await _sourceService.List();
                 return Ok(Sources);
             }
             catch (InvalidOperationException ex)
@@ -74,7 +74,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);
+                await _sourceService.Put(id, source);
                 return Ok(new { Message = "Source updated successfully." });
             }
             catch (KeyNotFoundException)
@@ -92,7 +92,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await _sourceService.DeleteSource(id);
+                await _sourceService.Delete(id);
                 return Ok(new { Message = "Source deleted successfully." });
             }
             catch (KeyNotFoundException)
