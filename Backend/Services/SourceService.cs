@@ -84,7 +84,7 @@ namespace Backend.Services
 
         }
 
-        public async Task<Source> GetSource(int id)
+        public async Task<Source> Get(int id)
         {
             var source = await _dbContext.Sources.FindAsync(id);
             if (source == null)
