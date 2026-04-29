@@ -9,10 +9,10 @@ using Frontend.Data.CSV;
 using Frontend.Models;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
-using LiveChartsCore.Measure;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using LiveChartsCore.Measure;
 
 namespace Frontend.ViewModels;
 
@@ -95,7 +95,7 @@ public partial class SourceTabViewModel :
                 Position = AxisPosition.Start,
                 TextSize = 14,
                 NameTextSize = 10,
-                MinLimit = null,
+                MinLimit = 0,
                 MaxLimit = null
             },
             new Axis
@@ -104,12 +104,14 @@ public partial class SourceTabViewModel :
                 Position = AxisPosition.End,
                 TextSize = 14,
                 NameTextSize = 10,
-                MinLimit = null,
+                MinLimit = 0,
                 MaxLimit = null
             }
         ];
         _ = LoadFromBackend();
     }
+
+    
 
     private async Task LoadFromBackend()
     {
@@ -185,21 +187,31 @@ public partial class SourceTabViewModel :
 
         WinterSeries.Add(new LineSeries<DateTimePoint>
         {
-            Name = "Heat Demand",
             Values = winter.Select(x =>
                 new DateTimePoint(x.TimeFrom, x.HeatDemand)).ToList(),
             GeometrySize = 0,
-            ScalesYAt = 0
+            GeometryStroke = null,
+            GeometryFill = null,
+            ScalesYAt = 0,
+            // heat uses red
+            Stroke = new SolidColorPaint(SKColor.Parse("#E4572E")) { StrokeThickness = 1 },
+            Fill = new SolidColorPaint(SKColor.Parse("#30E4572E"))
         });
 
         WinterSeries.Add(new LineSeries<DateTimePoint>
         {
-            Name = "Electricity Price",
             Values = winter.Select(x =>
                 new DateTimePoint(x.TimeFrom, x.ElectricityPrice)).ToList(),
             GeometrySize = 0,
-            ScalesYAt = 1
+            GeometryStroke = null,
+            GeometryFill = null,
+            ScalesYAt = 1,
+            // electricity uses blue
+            Stroke = new SolidColorPaint(SKColor.Parse("#0084FF")) { StrokeThickness = 1 },
+            Fill = new SolidColorPaint(SKColor.Parse("#300084FF"))
         });
+
+        
     }
 
     private void BuildSummerSeries()
@@ -216,21 +228,29 @@ public partial class SourceTabViewModel :
 
         SummerSeries.Add(new LineSeries<DateTimePoint>
         {
-            Name = "Heat Demand",
             Values = summer.Select(x =>
                 new DateTimePoint(x.TimeFrom, x.HeatDemand)).ToList(),
             GeometrySize = 0,
-            ScalesYAt = 0
+            GeometryStroke = null,
+            GeometryFill = null,
+            ScalesYAt = 0,
+            Stroke = new SolidColorPaint(SKColor.Parse("#E4572E")) { StrokeThickness = 1 },
+            Fill = new SolidColorPaint(SKColor.Parse("#30E4572E"))
         });
 
         SummerSeries.Add(new LineSeries<DateTimePoint>
         {
-            Name = "Electricity Price",
             Values = summer.Select(x =>
                 new DateTimePoint(x.TimeFrom, x.ElectricityPrice)).ToList(),
             GeometrySize = 0,
-            ScalesYAt = 1
+            GeometryStroke = null,
+            GeometryFill = null,
+            ScalesYAt = 1,
+            Stroke = new SolidColorPaint(SKColor.Parse("#0084FF")) { StrokeThickness = 1 },
+            Fill = new SolidColorPaint(SKColor.Parse("#300084FF"))
         });
+
+        
     }
 
     public void Refresh()

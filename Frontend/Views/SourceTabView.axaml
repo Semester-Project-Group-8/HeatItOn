@@ -90,30 +90,69 @@
                 Grid.Column="1"
                 Opacity="{Binding HasSources, Converter={StaticResource BoolToOpacity}}"
                 IsHitTestVisible="{Binding HasSources}">
+                <Border Background="#F8FAFC"
+                        BorderBrush="#D6DCE5"
+                        BorderThickness="1"
+                        CornerRadius="6"
+                        Padding="8"
+                        Margin="0,0,0,10">
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Spacing="16">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Rectangle Width="12"
+                                       Height="12"
+                                       Fill="#E4572E"
+                                       RadiusX="2"
+                                       RadiusY="2" />
+                            <TextBlock Text="Heat demand"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Rectangle Width="12"
+                                       Height="12"
+                                       Fill="#0084FF"
+                                       RadiusX="2"
+                                       RadiusY="2" />
+                            <TextBlock Text="Electricity price"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
                 <TextBlock Text="Winter"
                            HorizontalAlignment="Center"
                            FontWeight="Bold"
                            FontSize="16" />
-                <avalonia:CartesianChart
-                    Series="{Binding WinterSeries}"
-                    XAxes="{Binding TimeAxis}"
-                    YAxes="{Binding DualAxes}"
-                    Height="250"
-                    BorderBrush="Black"
-                    BorderThickness="1"/>
+                <Border Background="#F8FAFC"
+                        BorderBrush="#D6DCE5"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="0,8,0,0">
+                    <avalonia:CartesianChart
+                        Series="{Binding WinterSeries}"
+                        XAxes="{Binding TimeAxis}"
+                        YAxes="{Binding DualAxes}"
+                        Height="250" />
+                </Border>
                 
                 <TextBlock Text="Summer"
                            HorizontalAlignment="Center"
                            FontWeight="Bold"
                            FontSize="16"
                            Margin="0,20,0,0"/>
-                <avalonia:CartesianChart 
-                    Series="{Binding SummerSeries}"
-                    XAxes="{Binding TimeAxis}"
-                    YAxes="{Binding DualAxes}"
-                    Height="250"
-                    BorderBrush="Black"
-                    BorderThickness="1"/>
+                <Border Background="#F8FAFC"
+                        BorderBrush="#D6DCE5"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="0,8,0,0">
+                    <avalonia:CartesianChart 
+                        Series="{Binding SummerSeries}"
+                        XAxes="{Binding TimeAxis}"
+                        YAxes="{Binding DualAxes}"
+                        Height="250" />
+                </Border>
             </StackPanel>
             <!-- EMPTY STATE -->
             <Border Grid.ColumnSpan="2" Background="#10AAAAAA"

@@ -14,6 +14,7 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using Avalonia.Media;
 
 namespace Frontend.ViewModels;
 
@@ -56,6 +57,8 @@ public class ResultsTabViewModel :
     private ObservableCollection<DateTimePoint> ElectricityChartData { get; } = [];
     private ObservableCollection<DateTimePoint> Co2ChartData { get; } = [];
     private ObservableCollection<DateTimePoint> CostChartData { get; } = [];
+    private ObservableCollection<ISeries> GeneratorUsageChartData { get; } = [];
+    public ObservableCollection<GeneratorLegendItem> GeneratorUsageLegend { get; } = new();
 
     public ISeries[] HeatChartSeries =>
     [
@@ -63,7 +66,13 @@ public class ResultsTabViewModel :
         {
             Name = "Heat",
             Values = HeatChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
-            GeometrySize = 0
+            GeometrySize = 0,
+            GeometryStroke = null,
+            GeometryFill = null,
+            Stroke = new SolidColorPaint(SKColor.Parse("#E4572E"))
+            {
+                StrokeThickness = 2
+            }
         }
     ];
 
@@ -73,7 +82,13 @@ public class ResultsTabViewModel :
         {
             Name = "Electricity",
             Values = ElectricityChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
-            GeometrySize = 0
+            GeometrySize = 0,
+            GeometryStroke = null,
+            GeometryFill = null,
+            Stroke = new SolidColorPaint(SKColor.Parse("#0084FF"))
+            {
+                StrokeThickness = 2
+            }
         }
     ];
 
@@ -83,14 +98,26 @@ public class ResultsTabViewModel :
         {
             Name = "CO₂",
             Values = Co2ChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
-            GeometrySize = 0
+            GeometrySize = 0,
+            GeometryStroke = null,
+            GeometryFill = null,
+            Stroke = new SolidColorPaint(SKColor.Parse("#4B5563"))
+            {
+                StrokeThickness = 2
+            }
         }
     ];
+
+    public ISeries[] GeneratorUsagePieSeries => GeneratorUsageChartData.ToArray();
 
     public Axis[] TimeAxis =>
     [
         new()
         {
+            Name = "Time",
+            NameTextSize = 12,
+            CrosshairPaint = new SolidColorPaint(SKColor.Parse("#94A3B8"), 1),
+            CrosshairSnapEnabled = true,
             Labeler = value =>
             {
                 var ticks = (long)value;
@@ -100,15 +127,20 @@ public class ResultsTabViewModel :
                     return string.Empty;
 
                 return new DateTime(ticks, DateTimeKind.Utc)
-                    .ToString("dd.MM.yyyy HH:mm");
+                    .ToString("dd.MM HH:mm");
             },
 
-            SeparatorsPaint = new SolidColorPaint(SKColors.LightGray),
+            SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#D9DDE3")),
             ShowSeparatorLines = true,
-            MinStep = TimeSpan.FromHours(1).Ticks,
-            LabelsRotation = -45
+            MinStep = TimeSpan.FromHours(2).Ticks,
+            TextSize = 12,
+            LabelsRotation = -30
         }
     ];
+
+    public Axis[] HeatAxis => CreateValueAxis("Heat (MWh)");
+    public Axis[] ElectricityAxis => CreateValueAxis("Electricity (MWh)");
+    public Axis[] Co2Axis => CreateValueAxis("CO₂ (kg)");
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -141,6 +173,7 @@ public class ResultsTabViewModel :
             .ToList();
 
         RebuildCharts(hours);
+        RebuildGeneratorUsagePie(hours);
         _allRows = SelectedOptimizedResult.ResultsForHours
             .OrderBy(r => r.TimeFrom)
             .Select(resultList =>
@@ -149,10 +182,6 @@ public class ResultsTabViewModel :
                 var electricity = resultList.Results.Sum(r => r.Electricity);
                 var co2 = resultList.Results.Sum(r => r.CO2Produced);
                 var cost = resultList.Results.Sum(r => r.ProductionCost);
-                HeatChartData.Add(new DateTimePoint(resultList.TimeFrom, heat));
-                ElectricityChartData.Add(new DateTimePoint(resultList.TimeFrom, electricity));
-                Co2ChartData.Add(new DateTimePoint(resultList.TimeFrom, co2));
-                CostChartData.Add(new DateTimePoint(resultList.TimeFrom, cost));
                 return new ResultTableRow
                 {
                     Hour = resultList.TimeFrom.ToString("dd.MM.yyyy HH:mm"),
@@ -200,6 +229,89 @@ public class ResultsTabViewModel :
         OnPropertyChanged(nameof(Co2ChartSeries));
     }
 
+    private void RebuildGeneratorUsagePie(IEnumerable<ResultList> hours)
+    {
+        GeneratorUsageChartData.Clear();
+
+        var assetTotals = hours
+            .SelectMany(hour => hour.Results)
+            .GroupBy(result => new
+            {
+                result.AssetId,
+                AssetName = result.Asset?.Name
+            })
+            .Select(group => new
+            {
+                Name = string.IsNullOrWhiteSpace(group.Key.AssetName)
+                    ? $"Asset {group.Key.AssetId}"
+                    : group.Key.AssetName!,
+                Value = group.Sum(result => (double)result.HeatProduction)
+            })
+            .Where(item => item.Value > 0)
+            .OrderByDescending(item => item.Value)
+            .ToList();
+
+        var total = assetTotals.Sum(item => item.Value);
+        if (total <= 0)
+        {
+            OnPropertyChanged(nameof(GeneratorUsagePieSeries));
+            return;
+        }
+
+        var colors = new[]
+        {
+            "#FF8C42",
+            "#0084FF",
+            "#E4572E",
+            "#4CAF50",
+            "#9C27B0",
+            "#FFC107",
+            "#607D8B"
+        };
+
+        GeneratorUsageLegend.Clear();
+
+        for (var index = 0; index < assetTotals.Count; index++)
+        {
+            var item = assetTotals[index];
+            var percentage = item.Value / total * 100d;
+            var hideLabel = percentage < 2d;
+
+            // add legend item (color swatch + name)
+            var hex = colors[index % colors.Length];
+            IBrush brush;
+            try
+            {
+                brush = new SolidColorBrush(Color.Parse(hex));
+            }
+            catch
+            {
+                brush = Brushes.Gray;
+            }
+
+            GeneratorUsageLegend.Add(new GeneratorLegendItem
+            {
+                Name = item.Name,
+                Percentage = Math.Round(percentage, 1),
+                Fill = brush
+            });
+
+            // show only percentage on the pie; tiny slices hide label
+            GeneratorUsageChartData.Add(new PieSeries<double>
+            {
+                Name = item.Name,
+                Values = [percentage],
+                DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
+                DataLabelsSize = 12,
+                DataLabelsFormatter = _ => hideLabel ? string.Empty : $"{percentage:0.#}%",
+                DataLabelsPaint = new SolidColorPaint(SKColor.Parse("#FFFFFF")),
+                Fill = new SolidColorPaint(SKColor.Parse(hex))
+            });
+        }
+
+        OnPropertyChanged(nameof(GeneratorUsagePieSeries));
+    }
+
     public void ApplySearch(DateTime from, DateTime to)
     {
         if (SelectedOptimizedResult == null)
@@ -209,6 +321,7 @@ public class ResultsTabViewModel :
             .OrderBy(h => h.TimeFrom)
             .ToList();
         RebuildCharts(filteredHours);
+        RebuildGeneratorUsagePie(filteredHours);
         ApplyRows(_allRows.Where(r =>
         {
             var time = DateTime.ParseExact(
@@ -227,6 +340,21 @@ public class ResultsTabViewModel :
         Rows.Clear();
         foreach (var row in rows)
             Rows.Add(row);
+    }
+
+    private static Axis[] CreateValueAxis(string name)
+    {
+        return
+        [
+            new()
+            {
+                Name = name,
+                NameTextSize = 12,
+                TextSize = 12,
+                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#D9DDE3")),
+                ShowSeparatorLines = true
+            }
+        ];
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null)
