@@ -43,6 +43,11 @@ namespace Backend.Services
         }
         public async Task<int> AddSource(int id, DateTime From, DateTime Til, float Heat, float Electro)
         {
+            if (Heat < 0)
+                throw new ArgumentException("Heat demand cannot be negative.");
+            if (From > Til)
+                throw new ArgumentException("From date must be before To date.");
+
             var exists = await _dbContext.Sources.AnyAsync(s => s.Id == id);
             if (exists)
                 throw new InvalidOperationException($"Source with ID {id} already exists.");
@@ -81,6 +86,8 @@ namespace Backend.Services
         }
         public async Task<IEnumerable<Source>> ListByMonth(int month)
         {
+            if (month < 1 || month > 12)
+                throw new ArgumentException("Month must be between 1 and 12.");
             try
             {
                 return await _dbContext.Sources
@@ -101,6 +108,29 @@ namespace Backend.Services
                         d.TimeFrom.Hour == date.Hour);
         }
 
+        public async Task Put(int id, DateTime From, DateTime Til, float Heat, float Electro)
+        {
+            var source = await _dbContext.Sources.FindAsync(id);
+            if (source == null)
+                throw new KeyNotFoundException($"Source with ID {id} not found.");
+
+            source.TimeFrom = From;
+            source.TimeTo = Til;
+            source.HeatDemand = Heat;
+            source.ElectricityPrice = Electro;
+
+            try
+            {
+                _dbContext.Sources.Update(source);
+                var result = await _dbContext.SaveChangesAsync();
+                if (result <= 0)
+                    throw new InvalidOperationException("Source was not updated.");
+            }
+            catch (DbUpdateException)
+            {
+                throw new InvalidOperationException($"Source with ID {id} could not be updated due to a database error.");
+            }
+        }
         public async Task Put(int id, Source value)
         {
             var source = await _dbContext.Sources.FindAsync(id);
