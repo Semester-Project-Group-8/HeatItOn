@@ -14,13 +14,11 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using Frontend.Interfaces;
 using LiveChartsCore.Measure;
+using Frontend.Interfaces;
 
 namespace Frontend.ViewModels;
 
 public class SourceTabViewModel : ViewModelBase
-public partial class SourceTabViewModel :
-    ViewModelBase,
-    IRefreshable
 {
     // Api connection
     private readonly IClient<Source> _client;
@@ -277,8 +275,6 @@ public partial class SourceTabViewModel :
             Stroke = new SolidColorPaint(SKColor.Parse("#0084FF")) { StrokeThickness = 1 },
             Fill = new SolidColorPaint(SKColor.Parse("#300084FF"))
         });
-
-        
     }
 
     private void BuildSummerSeries()
@@ -316,7 +312,5 @@ public partial class SourceTabViewModel :
             Stroke = new SolidColorPaint(SKColor.Parse("#0084FF")) { StrokeThickness = 1 },
             Fill = new SolidColorPaint(SKColor.Parse("#300084FF"))
         });
-
-        
     }
 }
