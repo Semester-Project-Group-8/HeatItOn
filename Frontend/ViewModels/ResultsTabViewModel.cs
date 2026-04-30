@@ -57,24 +57,46 @@ public class ResultsTabViewModel :
     private ObservableCollection<DateTimePoint> ElectricityChartData { get; } = [];
     private ObservableCollection<DateTimePoint> Co2ChartData { get; } = [];
     private ObservableCollection<DateTimePoint> CostChartData { get; } = [];
+    private ObservableCollection<ISeries> HeatGeneratorStackedChartData { get; } = [];
+    private ObservableCollection<ISeries> Co2GeneratorStackedChartData { get; } = [];
+    private ObservableCollection<ISeries> CostGeneratorStackedChartData { get; } = [];
     private ObservableCollection<ISeries> GeneratorUsageChartData { get; } = [];
     public ObservableCollection<GeneratorLegendItem> GeneratorUsageLegend { get; } = new();
-
-    public ISeries[] HeatChartSeries =>
+    private static readonly string[] GeneratorPalette =
     [
-        new LineSeries<DateTimePoint>
-        {
-            Name = "Heat",
-            Values = HeatChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
-            GeometrySize = 0,
-            GeometryStroke = null,
-            GeometryFill = null,
-            Stroke = new SolidColorPaint(SKColor.Parse("#E4572E"))
-            {
-                StrokeThickness = 2
-            }
-        }
+        "#FF6B6B",
+        "#4D96FF",
+        "#6BCB77",
+        "#FFD93D",
+        "#845EC2",
+        "#00C2A8",
+        "#FF8FAB"
     ];
+
+    public ISeries[] HeatChartSeries
+    {
+        get
+        {
+            if (HeatGeneratorStackedChartData.Count > 0)
+                return HeatGeneratorStackedChartData.ToArray();
+
+            return
+            [
+                new LineSeries<DateTimePoint>
+                {
+                    Name = "Heat",
+                    Values = HeatChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
+                    GeometrySize = 0,
+                    GeometryStroke = null,
+                    GeometryFill = null,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#E4572E"))
+                    {
+                        StrokeThickness = 2
+                    }
+                }
+            ];
+        }
+    }
 
     public ISeries[] ElectricityChartSeries =>
     [
@@ -92,21 +114,55 @@ public class ResultsTabViewModel :
         }
     ];
 
-    public ISeries[] Co2ChartSeries =>
-    [
-        new LineSeries<DateTimePoint>
+    public ISeries[] Co2ChartSeries
+    {
+        get
         {
-            Name = "CO₂",
-            Values = Co2ChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
-            GeometrySize = 0,
-            GeometryStroke = null,
-            GeometryFill = null,
-            Stroke = new SolidColorPaint(SKColor.Parse("#4B5563"))
-            {
-                StrokeThickness = 2
-            }
+            if (Co2GeneratorStackedChartData.Count > 0)
+                return Co2GeneratorStackedChartData.ToArray();
+
+            return
+            [
+                new LineSeries<DateTimePoint>
+                {
+                    Name = "CO₂",
+                    Values = Co2ChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
+                    GeometrySize = 0,
+                    GeometryStroke = null,
+                    GeometryFill = null,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#4B5563"))
+                    {
+                        StrokeThickness = 2
+                    }
+                }
+            ];
         }
-    ];
+    }
+
+    public ISeries[] CostChartSeries
+    {
+        get
+        {
+            if (CostGeneratorStackedChartData.Count > 0)
+                return CostGeneratorStackedChartData.ToArray();
+
+            return
+            [
+                new LineSeries<DateTimePoint>
+                {
+                    Name = "Cost",
+                    Values = CostChartData.OrderBy(p => p.DateTime.Ticks).ToArray(),
+                    GeometrySize = 0,
+                    GeometryStroke = null,
+                    GeometryFill = null,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#6D28D9"))
+                    {
+                        StrokeThickness = 2
+                    }
+                }
+            ];
+        }
+    }
 
     public ISeries[] GeneratorUsagePieSeries => GeneratorUsageChartData.ToArray();
 
@@ -138,9 +194,10 @@ public class ResultsTabViewModel :
         }
     ];
 
-    public Axis[] HeatAxis => CreateValueAxis("Heat (MWh)");
-    public Axis[] ElectricityAxis => CreateValueAxis("Electricity (MWh)");
-    public Axis[] Co2Axis => CreateValueAxis("CO₂ (kg)");
+    public Axis[] HeatAxis => CreateValueAxis("Heat (MWh)", minLimit: 0);
+    public Axis[] ElectricityAxis => CreateValueAxis("Electricity (MWh)", minLimit: null);
+    public Axis[] Co2Axis => CreateValueAxis("CO₂ (kg)", minLimit: 0);
+    public Axis[] CostAxis => CreateValueAxis("Production cost (DKK)", minLimit: 0);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -207,11 +264,13 @@ public class ResultsTabViewModel :
 
     private void RebuildCharts(IEnumerable<ResultList> hours)
     {
+        var orderedHours = hours.OrderBy(h => h.TimeFrom).ToList();
+
         HeatChartData.Clear();
         ElectricityChartData.Clear();
         Co2ChartData.Clear();
         CostChartData.Clear();
-        foreach (var hour in hours.OrderBy(h => h.TimeFrom))
+        foreach (var hour in orderedHours)
         {
             var heat = hour.Results.Sum(r => r.HeatProduction);
             var electricity = hour.Results.Sum(r => r.Electricity);
@@ -224,9 +283,259 @@ public class ResultsTabViewModel :
             CostChartData.Add(new DateTimePoint(hour.TimeFrom, cost));
         }
 
+        RebuildHeatStackedByGenerator(orderedHours);
+        RebuildStackedByGenerator(
+            orderedHours,
+            Co2GeneratorStackedChartData,
+            hour => hour.Results.Sum(r => (double)r.CO2Produced),
+            result => result.CO2Produced,
+            "kg",
+            "CO₂");
+        RebuildCostStackedByGenerator(orderedHours);
+
         OnPropertyChanged(nameof(HeatChartSeries));
         OnPropertyChanged(nameof(ElectricityChartSeries));
         OnPropertyChanged(nameof(Co2ChartSeries));
+        OnPropertyChanged(nameof(CostChartSeries));
+    }
+
+    private void RebuildHeatStackedByGenerator(IReadOnlyList<ResultList> hours)
+    {
+        RebuildStackedByHeatDispatch(
+            hours,
+            HeatGeneratorStackedChartData,
+            "Heat",
+            (heat, _) => heat);
+    }
+
+    private void RebuildCostStackedByGenerator(IReadOnlyList<ResultList> hours)
+    {
+        RebuildStackedByHeatDispatch(
+            hours,
+            CostGeneratorStackedChartData,
+            "Cost",
+            (heat, generator) => heat * generator.CostPerMwh);
+    }
+
+    private sealed class DispatchGenerator
+    {
+        public required int AssetId { get; init; }
+        public required string Name { get; init; }
+        public required double Capacity { get; init; }
+        public required double CostPerMwh { get; init; }
+        public required int Order { get; init; }
+        public required string HexColor { get; init; }
+    }
+
+    private static double PositiveOrDefault(double value, double fallback)
+    {
+        return value > 0 ? value : fallback;
+    }
+
+    private void RebuildStackedByHeatDispatch(
+        IReadOnlyList<ResultList> hours,
+        ObservableCollection<ISeries> targetSeries,
+        string chartLabel,
+        Func<double, DispatchGenerator, double> metricFromHeat)
+    {
+        targetSeries.Clear();
+
+        var grouped = hours
+            .SelectMany(hour => hour.Results)
+            .GroupBy(result => new
+            {
+                result.AssetId,
+                AssetName = result.Asset?.Name
+            })
+            .Select(group =>
+            {
+                var first = group.First();
+                var totalHeat = group.Sum(r => (double)r.HeatProduction);
+                var observedMaxHeat = group.Max(r => (double)r.HeatProduction);
+                var configuredMaxHeat = (double)(first.Asset?.MaxHeat ?? 0f);
+                var configuredCost = (double)(first.Asset?.ProductionCost ?? 0);
+                var weightedCostNumerator = group.Sum(r => (double)r.ProductionCost);
+                var weightedCostDenominator = group.Sum(r => (double)r.HeatProduction);
+                var weightedCostPerMwh = weightedCostDenominator > 0
+                    ? weightedCostNumerator / weightedCostDenominator
+                    : 0d;
+
+                return new
+                {
+                    first.AssetId,
+                    Name = string.IsNullOrWhiteSpace(group.Key.AssetName)
+                        ? $"Asset {group.Key.AssetId}"
+                        : group.Key.AssetName!,
+                    TotalHeat = totalHeat,
+                    Capacity = PositiveOrDefault(configuredMaxHeat, observedMaxHeat),
+                    Merit = PositiveOrDefault(configuredCost, weightedCostPerMwh),
+                    CostPerMwh = PositiveOrDefault(weightedCostPerMwh, configuredCost)
+                };
+            })
+            .Where(item => item.TotalHeat > 0 && item.Capacity > 0)
+            .OrderBy(item => item.Merit)
+            .ThenByDescending(item => item.Capacity)
+            .ToList();
+
+        if (grouped.Count == 0)
+            return;
+
+        var generators = grouped
+            .Select((item, index) => new DispatchGenerator
+            {
+                AssetId = item.AssetId,
+                Name = item.Name,
+                Capacity = item.Capacity,
+                CostPerMwh = item.CostPerMwh,
+                Order = index,
+                HexColor = GeneratorPalette[index % GeneratorPalette.Length]
+            })
+            .ToList();
+
+        var valuesByGenerator = generators.ToDictionary(
+            generator => generator.AssetId,
+            _ => new List<double>(hours.Count));
+
+        var totalValues = new List<double>(hours.Count);
+
+        foreach (var hour in hours)
+        {
+            var demand = (double)hour.Results.Sum(result => result.HeatProduction);
+            var remaining = Math.Max(0d, demand);
+            var hourTotalMetric = 0d;
+
+            foreach (var generator in generators)
+            {
+                var dispatchedHeat = Math.Min(generator.Capacity, remaining);
+                remaining -= dispatchedHeat;
+
+                var metricValue = Math.Max(0d, metricFromHeat(dispatchedHeat, generator));
+                valuesByGenerator[generator.AssetId].Add(metricValue);
+                hourTotalMetric += metricValue;
+            }
+
+            totalValues.Add(hourTotalMetric);
+        }
+
+        foreach (var generator in generators)
+        {
+            var points = hours
+                .Select((hour, index) => new DateTimePoint(
+                    hour.TimeFrom,
+                    valuesByGenerator[generator.AssetId][index]))
+                .ToArray();
+
+            targetSeries.Add(new StackedAreaSeries<DateTimePoint>
+            {
+                Name = generator.Name,
+                Values = points,
+                ScalesYAt = 0,
+                GeometrySize = 0,
+                GeometryStroke = null,
+                GeometryFill = null,
+                Stroke = new SolidColorPaint(SKColor.Parse(generator.HexColor))
+                {
+                    StrokeThickness = 0.9f
+                },
+                Fill = new SolidColorPaint(SKColor.Parse($"44{generator.HexColor.Substring(1)}"))
+            });
+        }
+
+        targetSeries.Add(new LineSeries<DateTimePoint>
+        {
+            Name = $"{chartLabel} total",
+            Values = hours
+                .Select((hour, index) => new DateTimePoint(hour.TimeFrom, totalValues[index]))
+                .ToArray(),
+            GeometrySize = 0,
+            GeometryStroke = null,
+            GeometryFill = null,
+            Fill = null,
+            Stroke = new SolidColorPaint(SKColor.Parse("#1F2937"))
+            {
+                StrokeThickness = 1f
+            }
+        });
+    }
+
+    private void RebuildStackedByGenerator(
+        IReadOnlyList<ResultList> hours,
+        ObservableCollection<ISeries> targetSeries,
+        Func<ResultList, double> totalSelector,
+        Func<Result, float> valueSelector,
+        string unitLabel,
+        string chartLabel)
+    {
+        targetSeries.Clear();
+
+        var totalPoints = hours
+            .Select(hour => new DateTimePoint(hour.TimeFrom, totalSelector(hour)))
+            .ToArray();
+
+        var generatorOrder = hours
+            .SelectMany(hour => hour.Results)
+            .GroupBy(result => new
+            {
+                result.AssetId,
+                AssetName = result.Asset?.Name
+            })
+            .Select(group => new
+            {
+                group.Key.AssetId,
+                Name = string.IsNullOrWhiteSpace(group.Key.AssetName)
+                    ? $"Asset {group.Key.AssetId}"
+                    : group.Key.AssetName!,
+                TotalValue = group.Sum(result => (double)valueSelector(result))
+            })
+            .Where(item => item.TotalValue > 0)
+            .OrderByDescending(item => item.TotalValue)
+            .ToList();
+
+        for (var index = 0; index < generatorOrder.Count; index++)
+        {
+            var generator = generatorOrder[index];
+            var hex = GeneratorPalette[index % GeneratorPalette.Length];
+
+            var points = hours
+                .Select(hour => new DateTimePoint(
+                    hour.TimeFrom,
+                    hour.Results
+                        .Where(result => result.AssetId == generator.AssetId)
+                        .Sum(result => (double)valueSelector(result))))
+                .ToArray();
+
+            targetSeries.Add(new StackedAreaSeries<DateTimePoint>
+            {
+                Name = generator.Name,
+                Values = points,
+                ScalesYAt = 0,
+                GeometrySize = 0,
+                GeometryStroke = null,
+                GeometryFill = null,
+                Stroke = new SolidColorPaint(SKColor.Parse(hex))
+                {
+                    StrokeThickness = 0.9f
+                },
+                Fill = new SolidColorPaint(SKColor.Parse($"44{hex.Substring(1)}"))
+            });
+        }
+
+        if (generatorOrder.Count > 0)
+        {
+            targetSeries.Add(new LineSeries<DateTimePoint>
+            {
+                Name = $"{chartLabel} total",
+                Values = totalPoints,
+                GeometrySize = 0,
+                GeometryStroke = null,
+                GeometryFill = null,
+                Fill = null,
+                Stroke = new SolidColorPaint(SKColor.Parse("#1F2937"))
+                {
+                    StrokeThickness = 1f
+                }
+            });
+        }
     }
 
     private void RebuildGeneratorUsagePie(IEnumerable<ResultList> hours)
@@ -258,17 +567,6 @@ public class ResultsTabViewModel :
             return;
         }
 
-        var colors = new[]
-        {
-            "#FF8C42",
-            "#0084FF",
-            "#E4572E",
-            "#4CAF50",
-            "#9C27B0",
-            "#FFC107",
-            "#607D8B"
-        };
-
         GeneratorUsageLegend.Clear();
 
         for (var index = 0; index < assetTotals.Count; index++)
@@ -278,7 +576,7 @@ public class ResultsTabViewModel :
             var hideLabel = percentage < 2d;
 
             // add legend item (color swatch + name)
-            var hex = colors[index % colors.Length];
+            var hex = GetPieColor(item.Name, index);
             IBrush brush;
             try
             {
@@ -312,6 +610,19 @@ public class ResultsTabViewModel :
         OnPropertyChanged(nameof(GeneratorUsagePieSeries));
     }
 
+    private static string GetPieColor(string generatorName, int index)
+    {
+        var normalized = new string(generatorName.Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
+
+        return normalized switch
+        {
+            "GASBOILER1" or "GB1" => "#FF6B6B",
+            "GASBOILER2" or "GB2" => "#4D96FF",
+            "GASBOILER3" or "GB3" => "#6BCB77",
+            _ => GeneratorPalette[index % GeneratorPalette.Length]
+        };
+    }
+
     public void ApplySearch(DateTime from, DateTime to)
     {
         if (SelectedOptimizedResult == null)
@@ -342,7 +653,7 @@ public class ResultsTabViewModel :
             Rows.Add(row);
     }
 
-    private static Axis[] CreateValueAxis(string name)
+    private static Axis[] CreateValueAxis(string name, double? minLimit = 0)
     {
         return
         [
@@ -351,6 +662,7 @@ public class ResultsTabViewModel :
                 Name = name,
                 NameTextSize = 12,
                 TextSize = 12,
+                MinLimit = minLimit,
                 SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#D9DDE3")),
                 ShowSeparatorLines = true
             }

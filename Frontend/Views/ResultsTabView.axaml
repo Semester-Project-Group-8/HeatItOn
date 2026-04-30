@@ -157,6 +157,30 @@
                         </Border>
                     </StackPanel>
                     <StackPanel>
+                        <TextBlock Text="Production cost per hour (DKK)"
+                                   HorizontalAlignment="Center"
+                                   FontWeight="Bold"
+                                   FontSize="16" />
+                        <Border Background="#F8FAFC"
+                                BorderBrush="#D6DCE5"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Margin="20,10,20,0"
+                                Padding="12">
+                            <avalonia:CartesianChart
+                                MinHeight="380"
+                                MinWidth="400"
+                                Series="{Binding CostChartSeries}"
+                                XAxes="{Binding TimeAxis}"
+                                YAxes="{Binding CostAxis}"
+                                FindingStrategy="CompareOnlyXTakeClosest"
+                                TooltipPosition="Top"
+                                TooltipTextSize="14"
+                                TooltipBackgroundPaint="#F8FAFC"
+                                TooltipTextPaint="#111827" />
+                        </Border>
+                    </StackPanel>
+                    <StackPanel>
                         <TextBlock Text="Electricity used/Generated per hour (MWh)"
                                    HorizontalAlignment="Center"
                                    FontWeight="Bold"
