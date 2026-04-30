@@ -10,6 +10,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Frontend.Models;
 using System.IO;
+using Frontend.Interfaces;
 
 namespace Frontend.ViewModels;
 
@@ -99,13 +100,15 @@ public class AssetsTabViewModel :
         }
         await _optimizerClient.Optimize(scenarioAssets);
     }
-    public void ImportAssets()
+    public async void ImportAssets()
     {
-        AssetCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
+        await AssetCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "assets.csv"), _assetClient);
+        await LoadFromBackendAsync();
     }
-    public void ExportAssets()
+
+    public async void ExportAssets()
     {
-        AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+        await AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
     }
 
     private void OpenAddAssetDialog()

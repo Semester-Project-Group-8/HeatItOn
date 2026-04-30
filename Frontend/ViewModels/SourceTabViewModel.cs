@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using Frontend.Data;
 using Frontend.Data.CSV;
 using Frontend.Models;
 using LiveChartsCore;
@@ -13,6 +12,7 @@ using LiveChartsCore.Measure;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using Frontend.Interfaces;
 
 namespace Frontend.ViewModels;
 

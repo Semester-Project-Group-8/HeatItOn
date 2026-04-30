@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Frontend.Models;
+using Frontend.Interfaces;
 
 namespace Frontend.Data;
 
@@ -22,7 +23,7 @@ public class ResultClient : IClient<Result>
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<List<Result>?> GetAll() // added ? to match interface
+    public async Task<List<Result>?> GetAll()
     {
         HttpResponseMessage response = await _client.GetAsync("");
         response.EnsureSuccessStatusCode();
@@ -30,19 +31,19 @@ public class ResultClient : IClient<Result>
         return result;
     }
 
-    public async Task Post(Result result) // changed return type to Task
+    public async Task Post(Result result)
     {
         HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task Update(Result result) // renamed from Patch
+    public async Task Update(Result result)
     {
         HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task Delete(int id) // changed return type to Task
+    public async Task Delete(int id)
     {
         HttpResponseMessage response = await _client.DeleteAsync(id.ToString());
         response.EnsureSuccessStatusCode();
