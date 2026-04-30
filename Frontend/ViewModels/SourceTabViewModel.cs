@@ -161,9 +161,9 @@ public class SourceTabViewModel : ViewModelBase
         SourceCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
     }
 
-    public async Task Import()
+    public void Import()
     {
-        await SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
+            _ = SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)

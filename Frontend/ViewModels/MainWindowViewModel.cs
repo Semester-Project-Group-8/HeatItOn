@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Frontend.Data;
 using Microsoft.AspNetCore.SignalR.Client;
+using Tmds.DBus.Protocol;
 
 namespace Frontend.ViewModels;
 
@@ -45,8 +46,8 @@ public class MainWindowViewModel : ViewModelBase
                     {
                         "Asset" => AssetsTab.LoadFromBackendAsync(),
                         "Source" => SourceTab.LoadAsync(),
-                        "Result" or "ResultList" or "OptimizedResults" => ResultTab.LoadAsync(),
-                        _ => throw new Exception($"{message} is not found!")
+                        "Optimized" => ResultTab.LoadAsync(),
+                        _ => null
                     };
                 });
             });

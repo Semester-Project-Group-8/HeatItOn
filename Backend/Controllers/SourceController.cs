@@ -11,9 +11,9 @@ namespace Backend.Controllers
     {
         private readonly SourceService _sourceService;
         private readonly IHubContext<BackendHub> _hubContext;
-        public SourceController(SourceService SourceService, IHubContext<BackendHub> hubContext)
+        public SourceController(SourceService sourceService, IHubContext<BackendHub> hubContext)
         {
-            _sourceService = SourceService;
+            _sourceService = sourceService;
             _hubContext = hubContext;
         }
 
@@ -22,8 +22,8 @@ namespace Backend.Controllers
         {
             try
             {
-                var Sources = await _sourceService.ListSources();
-                return Ok(Sources);
+                var sources = await _sourceService.ListSources();
+                return Ok(sources);
             }
             catch (InvalidOperationException ex)
             {
@@ -46,11 +46,28 @@ namespace Backend.Controllers
                 };
                 await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
-                return Created($"/Source/{s.Id}", new { Id = s.Id, TimeFrom = s.TimeFrom, TimeTo = s.TimeTo, HeatDemand = s.HeatDemand, ElectricityPrice = s.ElectricityPrice });
+                return Created($"/Source/{s.Id}", new { s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand,
+                    s.ElectricityPrice });
             }
             catch (InvalidOperationException ex)
             {
                 return Conflict(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("AddList")]
+        public async Task<IActionResult> AddSources([FromBody] List<Source> sources)
+        {
+            try
+            {
+                await _sourceService.AddSources(sources);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
+                return Created();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
         [HttpGet("{month:int}")]
@@ -58,8 +75,8 @@ namespace Backend.Controllers
         {
             try
             {
-                var Sources = await _sourceService.ListByMonth(month);
-                return Ok(Sources);
+                var sources = await _sourceService.ListByMonth(month);
+                return Ok(sources);
             }
             catch (InvalidOperationException ex)
             {
@@ -70,8 +87,8 @@ namespace Backend.Controllers
         [HttpGet("{date:DateTime}")]
         public async Task<IActionResult> GetByHour(DateTime date)
         {
-            var Sources = await _sourceService.ListByHour(date);
-            return Ok(Sources);
+            var sources = await _sourceService.ListByHour(date);
+            return Ok(sources);
         }
 
         [HttpPut("Update/{id:int}")]
@@ -98,7 +115,6 @@ namespace Backend.Controllers
         {
             try
             {
-                var source = await _sourceService.GetSource(id);
                 await _sourceService.DeleteSource(id);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Ok(new { Message = "Source deleted successfully." });
