@@ -16,9 +16,7 @@ using SkiaSharp;
 
 namespace Frontend.ViewModels;
 
-public partial class SourceTabViewModel : 
-    ViewModelBase,
-    IRefreshable
+public class SourceTabViewModel : ViewModelBase
 {
     // Api connection
     private readonly SourceClient _client;
@@ -108,10 +106,10 @@ public partial class SourceTabViewModel :
                 MaxLimit = null
             }
         ];
-        _ = LoadFromBackend();
+        _ = LoadAsync();
     }
 
-    private async Task LoadFromBackend()
+    public async Task LoadAsync()
     {
         try
         {
@@ -242,6 +240,6 @@ public partial class SourceTabViewModel :
 
     public void Refresh()
     {
-        _ = LoadFromBackend();
+        _ = LoadAsync();
     }
 }

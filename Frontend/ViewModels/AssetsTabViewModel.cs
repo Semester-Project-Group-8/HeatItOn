@@ -14,12 +14,9 @@ using System.IO;
 
 namespace Frontend.ViewModels;
 
-public class AssetsTabViewModel : 
-    ViewModelBase,
-    IRefreshable
+public class AssetsTabViewModel : ViewModelBase
 {
     private readonly AssetClient _assetClient;
-    private readonly SourceClient _sourceClient;
     private readonly OptimizerClient _optimizerClient;
     private readonly List<AssetCardItem> _allAssetItems = new();
     private string _statusMessage = string.Empty;
@@ -79,26 +76,32 @@ public class AssetsTabViewModel :
         }
     }
 
-    public AssetsTabViewModel(SourceClient sourceClient, AssetClient assetClient, OptimizerClient optimizerClient)
+    public AssetsTabViewModel(AssetClient assetClient, OptimizerClient optimizerClient)
     {
         _assetClient = assetClient;
-        _sourceClient = sourceClient;
         _optimizerClient = optimizerClient;
-        AssetItems.CollectionChanged += (_, __) => OnPropertyChanged(nameof(HasAssets));
+        AssetItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAssets));
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
         _ = LoadFromBackendAsync();
     }
     public async void StartOptimization()
     {
-        List<Asset> scenarioAssets= new List<Asset>();
-        foreach (AssetCardItem item in _allAssetItems)
+        try
         {
-            if(item.IsSelected && item.OriginalAsset!=null)
+            List<Asset> scenarioAssets= new List<Asset>();
+            foreach (AssetCardItem item in _allAssetItems)
             {
-                scenarioAssets.Add(item.OriginalAsset);
+                if(item is { IsSelected: true, OriginalAsset: not null })
+                {
+                    scenarioAssets.Add(item.OriginalAsset);
+                }
             }
+            await _optimizerClient.Optimize(scenarioAssets);
         }
-        await _optimizerClient.Optimize(scenarioAssets);
+        catch (Exception e)
+        {
+           Console.WriteLine(e); 
+        }
     }
     public void ImportAssets()
     {
@@ -112,7 +115,7 @@ public class AssetsTabViewModel :
     private void OpenAddAssetDialog()
     {
         var dialogVm = new AddAssetDialogViewModel();
-        dialogVm.OnAssetAdded += async (asset) =>
+        dialogVm.OnAssetAdded += async void (asset) =>
         {
             try
             {
@@ -137,7 +140,7 @@ public class AssetsTabViewModel :
         var dialogVm = new AddAssetDialogViewModel();
         dialogVm.InitializeForEdit(asset);
         
-        dialogVm.OnAssetAdded += async (editedAsset) =>
+        dialogVm.OnAssetAdded += async void (editedAsset) =>
         {
             try
             {
@@ -156,7 +159,7 @@ public class AssetsTabViewModel :
             CurrentDialog = null;
         };
         
-        dialogVm.OnAssetDeleted += async () =>
+        dialogVm.OnAssetDeleted += async void () =>
         {
             try
             {
@@ -173,7 +176,7 @@ public class AssetsTabViewModel :
         CurrentDialog = dialogVm;
     }
 
-    private async Task LoadFromBackendAsync()
+    public async Task LoadFromBackendAsync()
     {
         try
         {
@@ -221,11 +224,11 @@ public class AssetsTabViewModel :
 
         if (IsScenario1Selected)
         {
-            selectedNames = new HashSet<string>(new[] { "Gas Boiler 1", "Gas Boiler 2", "Gas Boiler 3", "Oil Boiler 1" }, StringComparer.OrdinalIgnoreCase);
+            selectedNames = new HashSet<string>(["Gas Boiler 1", "Gas Boiler 2", "Gas Boiler 3", "Oil Boiler 1"], StringComparer.OrdinalIgnoreCase);
         }
         else if (IsScenario2Selected)
         {
-            selectedNames = new HashSet<string>(new[] { "Gas Motor 1", "Electric Boiler 1", "Gas Boiler 1", "Gas Boiler 3" }, StringComparer.OrdinalIgnoreCase);
+            selectedNames = new HashSet<string>(["Gas Motor 1", "Electric Boiler 1", "Gas Boiler 1", "Gas Boiler 3"], StringComparer.OrdinalIgnoreCase);
         }
 
         foreach (var item in _allAssetItems)
