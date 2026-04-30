@@ -1,11 +1,12 @@
 ﻿using Backend.Models;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 namespace Backend.Controllers
 {
     [Route("Source")]
     [ApiController]
-    public class SourceController : ControllerBase
+    public class SourceController : ControllerBase, IController<Source, Source>
     {
         private readonly SourceService _sourceService;
         public SourceController(SourceService SourceService)
@@ -14,7 +15,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSources()
+        public async Task<IActionResult> List()
         {
             try
             {
@@ -27,8 +28,22 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                var source = await _sourceService.GetSource(id);
+                return Ok(source);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpPost("Add")]
-        public async Task<IActionResult> AddSource([FromBody] Source source)
+        public async Task<IActionResult> Post([FromBody] Source source)
         {
             try
             {
@@ -48,7 +63,7 @@ namespace Backend.Controllers
                 return Conflict(new { message = ex.Message });
             }
         }
-        [HttpGet("{month:int}")]
+        [HttpGet("Month/{month:int}")]
         public async Task<IActionResult> GetByMonth(int month)
         {
             try
@@ -70,7 +85,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut("Update/{id:int}")]
-        public async Task<IActionResult> UpdateSource(int id, [FromBody] Source source)
+        public async Task<IActionResult> Put(int id, [FromBody] Source source)
         {
             try
             {
@@ -88,7 +103,7 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("Delete/{id:int}")]
-        public async Task<IActionResult> DeleteSource(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
