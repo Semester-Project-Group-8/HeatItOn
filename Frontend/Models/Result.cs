@@ -9,6 +9,6 @@
         public float PrimaryEnergyConsumed { get; set; }
         public int CO2Produced { get; set; }
         public int AssetId { get; set; }
-        public Asset Asset { get; set; }
+        public Asset? Asset { get; set; }
     }
 }

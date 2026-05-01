@@ -18,7 +18,7 @@ namespace Backend.Services
                 .ToListAsync();
         }
 
-        public async Task<ResultList> GetResultList(int id)
+        public async Task<ResultList> Get(int id)
         {
             var resultList = await _dbContext.ResultList
                 .Include(rl => rl.Results)
@@ -32,7 +32,7 @@ namespace Backend.Services
             return resultList;
         }
 
-        public async Task<int> CreateResultList(DateTime timeFrom, DateTime timeTo, List<Result> resultList)
+        public async Task<int> Put(DateTime timeFrom, DateTime timeTo, List<Result> resultList)
         {
             if (resultList == null || resultList.Count == 0)
             {
@@ -79,7 +79,7 @@ namespace Backend.Services
             await _dbContext.SaveChangesAsync();
             return newResultList.Id;
         }
-        public async Task<int> AddResultList(List<ResultList> results)
+        public async Task<int> Post(List<ResultList> results)
         {
             foreach (var result in results)
             {

@@ -1,7 +1,10 @@
+using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
 using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
 namespace Backend.Controllers
 {
     [Route("Asset")]
@@ -10,9 +13,11 @@ namespace Backend.Controllers
     public class AssetsController : ControllerBase, IController<Asset, Asset>
     {
         private readonly AssetsService _assetsService;
-        public AssetsController(AssetsService assetsService)
+        private readonly IHubContext<BackendHub> _hubContext;
+        public AssetsController(AssetsService assetsService, IHubContext<BackendHub> hubContext)
         {
             _assetsService = assetsService;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -48,20 +53,9 @@ namespace Backend.Controllers
         {
             try
             {
-                Asset a = new Asset
-                {
-                    Id = asset.Id,
-                    Name = asset.Name,
-                    MaxHeat = asset.MaxHeat,
-                    ProductionCost = asset.ProductionCost,
-                    CO2Emission = asset.CO2Emission,
-                    GasConsumption = asset.GasConsumption,
-                    OilConsumption = asset.OilConsumption,
-                    MaxElectricity = asset.MaxElectricity,
-                    ImageName = asset.ImageName
-                };
-                await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageName);
-                return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption});
+                await _assetsService.Post(asset.Id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageName);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
+                return Created();
             }
             catch (InvalidOperationException ex)
             {
@@ -75,7 +69,8 @@ namespace Backend.Controllers
             try
             {
                 await _assetsService.Delete(id);
-                return NoContent();
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
+                return Ok();
             }
             catch (KeyNotFoundException)
             {
@@ -93,6 +88,7 @@ namespace Backend.Controllers
             try
             {
                 await _assetsService.Put(id, asset);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return Ok();
             }
             catch (KeyNotFoundException)

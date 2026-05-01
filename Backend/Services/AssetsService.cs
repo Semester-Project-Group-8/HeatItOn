@@ -42,7 +42,8 @@ namespace Backend.Services
             }
         }
         
-        public async Task<int> AddAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, string? imageName = null)
+
+        public async Task<int> Post(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, string? imageName = null)
         {
             var exists = await _dbContext.Assets.AnyAsync(a => a.Id == id);
             if (exists)
@@ -75,8 +76,7 @@ namespace Backend.Services
                 throw new InvalidOperationException($"Asset with ID {id} already exists.");
             }
         }
-
-        public Task<Asset> Post() => throw new NotSupportedException("Use AddAsset instead.");
+        
 
         public async Task<Asset> Get(int id)
         {

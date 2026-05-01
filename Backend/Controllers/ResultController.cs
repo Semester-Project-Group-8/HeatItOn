@@ -1,7 +1,9 @@
+using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
 using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
 {
     [Route("Result")]
@@ -9,9 +11,11 @@ namespace Backend.Controllers
     public class ResultController : ControllerBase, IController<Result, Result>
     {
         private readonly ResultService _resultService;
-        public ResultController(ResultService ResultService)
+        private readonly IHubContext<BackendHub> _hubContext;
+        public ResultController(ResultService ResultService, IHubContext<BackendHub> hubContext)
         {
             _resultService = ResultService;
+            _hubContext = hubContext;
         }
 
         // List
@@ -44,11 +48,11 @@ namespace Backend.Controllers
 
         // GetResultByAssetId
         [HttpGet("Asset/{assetId:int}")]
-        public async Task<IActionResult> GetResultByAsset(int assetId)
+        public async Task<IActionResult> GetByAssetId(int assetId)
         {
             try
             {
-                var result = await _resultService.GetResultByAssetId(assetId);
+                var result = await _resultService.Get(assetId);
                 return Ok(result);
             }
 
@@ -62,7 +66,7 @@ namespace Backend.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> Post([FromBody] Result incomingResult)
         {
-            var rowsAffected = await _resultService.AddResult(
+            var rowsAffected = await _resultService.Post(
                 incomingResult.Id,
                 incomingResult.HeatProduction,
                 incomingResult.Electricity,
@@ -74,6 +78,7 @@ namespace Backend.Controllers
 
             if (rowsAffected > 0)
             {
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Created($"/Result/{incomingResult.Id}", incomingResult);
             }
 
@@ -84,9 +89,10 @@ namespace Backend.Controllers
         [HttpPost("AddList")]
         public async Task<IActionResult> AddResultList([FromBody] List<Result> results)
         {
-            var rowsAffected = await _resultService.AddResult(results);
+            var rowsAffected = await _resultService.Post(results);
             if (rowsAffected > 0)
             {
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Ok(new { Message = $"{results.Count} results added successfully." });
             }
 
@@ -100,7 +106,7 @@ namespace Backend.Controllers
             try
             {
                 await _resultService.Put(id, result);
-
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Ok(new { Message = "Result updated successfully." });
             }
 
@@ -117,6 +123,7 @@ namespace Backend.Controllers
             try
             {
                 await _resultService.Delete(id);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Ok(new { Message = "Result deleted successfully." });
             }
 

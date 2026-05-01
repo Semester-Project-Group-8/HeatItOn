@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Services;
+using Backend.Hubs;
 //using Backend.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+// Add SignalIR
+builder.Services.AddSignalR();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<BackendDbContext>(
@@ -34,6 +39,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// Add SignalIR
+app.MapHub<BackendHub>("/datahub");
 
 app.UseAuthorization();
 

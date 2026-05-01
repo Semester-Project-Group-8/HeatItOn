@@ -17,7 +17,7 @@ namespace Backend.Services
 			return await _dbContext.Results.ToListAsync();
 		}
 
-		public async Task<int> AddResult(List<Result> result)
+		public async Task<int> Post(List<Result> result)
 		{
 			if (result == null || result.Count == 0)
 			{
@@ -46,10 +46,9 @@ namespace Backend.Services
 			return result;
 		}
 
-		// AddResult ( for a single result )
 		public Task<Result> Post() => throw new NotSupportedException("Use AddResult instead.");
 
-		public async Task<int> AddResult(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
+		public async Task<int> Post(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
 		{
 			Result result = new Result
 			{

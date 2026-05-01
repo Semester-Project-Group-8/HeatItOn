@@ -17,6 +17,7 @@ using SkiaSharp;
 
 namespace Frontend.ViewModels;
 
+public class SourceTabViewModel : ViewModelBase
 public partial class SourceTabViewModel :
     ViewModelBase,
     IRefreshable
@@ -165,25 +166,32 @@ public partial class SourceTabViewModel :
                 MaxLimit = null
             }
         ];
-        _ = LoadFromBackend();
+        _ = LoadAsync();
     }
 
-    private async Task LoadFromBackend()
+    public async Task LoadAsync()
     {
         try
         {
-            var sources = await _client.GetAll();
+            var sources = await _client.GetAll() ?? [];
 
-            foreach (var source in sources)
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                source.FileName ??= "source.csv";
-                _allSources.Add(source);
+                _allSources.Clear();
+                Sources.Clear();
+                Files.Clear();
 
-                if (!Files.Contains(source.FileName))
-                    Files.Add(source.FileName);
-            }
+                foreach (var source in sources)
+                {
+                    source.FileName ??= "source.csv";
+                    _allSources.Add(source);
 
-            SelectedFile = Files.FirstOrDefault();
+                    if (!Files.Contains(source.FileName))
+                        Files.Add(source.FileName);
+                }
+
+                SelectedFile = Files.FirstOrDefault();
+            });
         }
         catch (Exception e)
         {
@@ -217,9 +225,9 @@ public partial class SourceTabViewModel :
         SourceCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
     }
 
-    public async Task Import()
+    public void Import()
     {
-        await SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
+            _ = SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)
@@ -292,10 +300,5 @@ public partial class SourceTabViewModel :
             GeometrySize = 0,
             ScalesYAt = 1
         });
-    }
-
-    public void Refresh()
-    {
-        _ = LoadFromBackend();
     }
 }
