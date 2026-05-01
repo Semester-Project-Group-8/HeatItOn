@@ -18,7 +18,7 @@ namespace Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var Results = await _resultService.ListResult();
+            var Results = await _resultService.List();
             if (Results == null)
             {
                 return NotFound("No results found.");
@@ -32,8 +32,8 @@ namespace Backend.Controllers
         {
             try
             {
-                var result = await _resultService.GetResultById(id);
-                return Ok(result);
+                var results = await _resultService.Get(id);
+                return Ok(results.First());
             }
 
             catch (KeyNotFoundException ex)
@@ -128,12 +128,8 @@ namespace Backend.Controllers
         {
             try
             {
-                var rowsAffected = await _resultService.DeleteResult(id);
-                if (rowsAffected > 0)
-                {
-                    return Ok(new { Message = "Result deleted successfully." });
-                }
-                return BadRequest("Failed to delete Result.");
+                await _resultService.Delete(id);
+                return Ok(new { Message = "Result deleted successfully." });
             }
 
             catch (KeyNotFoundException ex)

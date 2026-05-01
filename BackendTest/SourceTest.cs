@@ -29,7 +29,7 @@ public class SourceServiceTests : IDisposable
     {
         await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
 
-        var result = await _sourceService.ListSources();
+        var result = await _sourceService.List();
 
         Assert.Single(result);
     }
@@ -64,7 +64,7 @@ public class SourceServiceTests : IDisposable
     [Fact]
     public async Task ListSources_ShouldReturnEmpty_WhenNoItems()
     {
-        var result = await _sourceService.ListSources();
+        var result = await _sourceService.List();
 
         Assert.Empty(result);
     }
@@ -75,7 +75,7 @@ public class SourceServiceTests : IDisposable
         var date = new DateTime(2025, 5, 1);
 
         await _sourceService.AddSource(1, date, date, 10, 5);
-        await _sourceService.AddSource(2, new DateTime(2025, 6, 1), date, 20, 10);
+        await _sourceService.AddSource(2, new DateTime(2025, 6, 1), new DateTime(2025, 6, 1), 20, 10);
 
         var result = await _sourceService.ListByMonth(5);
 
@@ -95,9 +95,9 @@ public class SourceServiceTests : IDisposable
     {
         await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
 
-        await _sourceService.UpdateSource(1, DateTime.Now, DateTime.Now, 50, 20);
+        await _sourceService.Put(1, DateTime.Now, DateTime.Now, 50, 20);
 
-        var result = await _sourceService.ListSources();
+        var result = await _sourceService.List();
 
         Assert.Equal(50, result.First().HeatDemand);
         Assert.Equal(20, result.First().ElectricityPrice);
@@ -107,7 +107,7 @@ public class SourceServiceTests : IDisposable
     public async Task UpdateSource_ShouldThrow_WhenNotFound()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _sourceService.UpdateSource(999, DateTime.Now, DateTime.Now, 10, 5)
+            _sourceService.Put(999, DateTime.Now, DateTime.Now, 10, 5)
         );
     }
 
@@ -116,9 +116,9 @@ public class SourceServiceTests : IDisposable
     {
         await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
 
-        await _sourceService.DeleteSource(1);
+        await _sourceService.Delete(1);
 
-        var result = await _sourceService.ListSources();
+        var result = await _sourceService.List();
 
         Assert.Empty(result);
     }
@@ -127,7 +127,7 @@ public class SourceServiceTests : IDisposable
     public async Task DeleteSource_ShouldThrow_WhenNotFound()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _sourceService.DeleteSource(999)
+            _sourceService.Delete(999)
         );
     }
 
@@ -136,10 +136,10 @@ public class SourceServiceTests : IDisposable
     {
         await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
 
-        await _sourceService.DeleteSource(1);
+        await _sourceService.Delete(1);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _sourceService.DeleteSource(1)
+            _sourceService.Delete(1)
         );
     }
 }

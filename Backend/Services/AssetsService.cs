@@ -3,7 +3,7 @@ using Backend.Data;
 using Backend.Models;
 namespace Backend.Services
 {
-    public class AssetsService
+    public class AssetsService:IService<Asset>
     {
         private readonly BackendDbContext _dbContext;
         public AssetsService(BackendDbContext dbContext)
@@ -11,7 +11,7 @@ namespace Backend.Services
             _dbContext=dbContext;
         }
 
-        public async Task<IEnumerable<Asset>> ListAssets() 
+        public async Task<List<Asset>> List()
         {
             try
             {
@@ -53,7 +53,7 @@ namespace Backend.Services
                 Id= id,
                 Name = name,
                 MaxHeat= maxHeat,
-                ProductionCost= productionCost, 
+                ProductionCost= productionCost,
                 CO2Emission= co2Emission,
                 GasConsumption= gasConsumption,
                 OilConsumption= oilConsumption,
@@ -76,19 +76,27 @@ namespace Backend.Services
             }
         }
 
-        public async Task<int> DeleteAsset(int id)
+        public Task<Asset> Post() => throw new NotSupportedException("Use AddAsset instead.");
+
+        public async Task<List<Asset>> Get(int id)
         {
             var asset = await _dbContext.Assets.FindAsync(id);
             if (asset == null)
                 throw new KeyNotFoundException($"Asset with ID {id} not found.");
-            try 
+            return new List<Asset> { asset };
+        }
+
+        public async Task Delete(int id)
+        {
+            var asset = await _dbContext.Assets.FindAsync(id);
+            if (asset == null)
+                throw new KeyNotFoundException($"Asset with ID {id} not found.");
+            try
             {
                 _dbContext.Assets.Remove(asset);
                 var result = await _dbContext.SaveChangesAsync();
                 if (result <= 0)
-                    throw new InvalidOperationException("Asset was not deleted.");  
-
-                return result;
+                    throw new InvalidOperationException("Asset was not deleted.");
             }
             catch (DbUpdateException)
             {
@@ -96,29 +104,28 @@ namespace Backend.Services
             }
         }
         
-        public async Task<int> UpdateAsset(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, string? imageName = null)
+
+        public async Task Put(int id, Asset value)
         {
             var asset = await _dbContext.Assets.FindAsync(id);
             if (asset == null)
                 throw new KeyNotFoundException($"Asset with ID {id} not found.");
 
-            asset.Name = name;
-            asset.MaxHeat = maxHeat;
-            asset.ProductionCost = productionCost;
-            asset.CO2Emission = co2Emission;
-            asset.GasConsumption = gasConsumption;
-            asset.OilConsumption = oilConsumption;
-            asset.MaxElectricity = maxElectricity;
-            asset.ImageName = imageName;
+            asset.Name = value.Name;
+            asset.MaxHeat = value.MaxHeat;
+            asset.ProductionCost = value.ProductionCost;
+            asset.CO2Emission = value.CO2Emission;
+            asset.GasConsumption = value.GasConsumption;
+            asset.OilConsumption = value.OilConsumption;
+            asset.MaxElectricity = value.MaxElectricity;
+            asset.ImageName = value.ImageName;
 
-            try 
+            try
             {
                 _dbContext.Assets.Update(asset);
                 var result = await _dbContext.SaveChangesAsync();
                 if (result <= 0)
-                    throw new InvalidOperationException("Asset was not updated.");  
-                    
-                return result;
+                    throw new InvalidOperationException("Asset was not updated.");
             }
             catch (DbUpdateException)
             {
@@ -126,12 +133,5 @@ namespace Backend.Services
             }
         }
 
-        public async Task<Asset> GetAsset(int id)
-        {
-            var asset = await _dbContext.Assets.FindAsync(id);
-            if (asset == null)
-                throw new KeyNotFoundException($"Asset with ID {id} not found.");
-            return asset;
-        }
     }
 }
