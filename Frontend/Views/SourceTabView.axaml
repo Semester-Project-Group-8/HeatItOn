@@ -107,7 +107,12 @@
             </DockPanel>
         </Border>
 
-        <!-- MAIN CONTENT -->
+       
+                
+            
+            <!-- EMPTY STATE -->
+            <Border Grid.ColumnSpan="2" Background="#10AAAAAA"
+                    IsVisible="{Binding !Sources.Count}">
         <Grid>
 
             <!-- Content when data is present -->
@@ -120,38 +125,40 @@
                     <Grid ColumnDefinitions="*,12,*">
 
                         <!-- Winter chart -->
-                        <Border Grid.Column="0"
-                                Background="White"
-                                CornerRadius="12"
-                                ClipToBounds="True">
-                            <StackPanel Margin="16,14,16,16" Spacing="4">
-                                <TextBlock Text="Winter"
-                                           FontWeight="Bold"
-                                           FontSize="16"
-                                           HorizontalAlignment="Center"/>
-                                <avalonia:CartesianChart
-                                    Series="{Binding WinterSeries}"
-                                    XAxes="{Binding TimeAxis}"
-                                    YAxes="{Binding DualAxes}"
-                                    Height="280"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Summer chart -->
-                        <Border Grid.Column="2"
-                                Background="White"
-                                CornerRadius="12"
-                                ClipToBounds="True">
-                            <StackPanel Margin="16,14,16,16" Spacing="4">
-                                <TextBlock Text="Summer"
-                                           FontWeight="Bold"
-                                           FontSize="16"
-                                           HorizontalAlignment="Center"/>
-                                <avalonia:CartesianChart
-                                    Series="{Binding SummerSeries}"
-                                    XAxes="{Binding TimeAxis}"
-                                    YAxes="{Binding DualAxes}"
-                                    Height="280"/>
+                        <TextBlock Text="Winter"
+                           HorizontalAlignment="Center"
+                           FontWeight="Bold"
+                           FontSize="16" />
+                <Border Background="#F8FAFC"
+                        BorderBrush="#D6DCE5"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="0,8,0,0">
+                    <avalonia:CartesianChart
+                        Series="{Binding WinterSeries}"
+                        XAxes="{Binding TimeAxis}"
+                        YAxes="{Binding DualAxes}"
+                        Height="250" />
+                </Border>
+                
+                <TextBlock Text="Summer"
+                           HorizontalAlignment="Center"
+                           FontWeight="Bold"
+                           FontSize="16"
+                           Margin="0,20,0,0"/>
+                <Border Background="#F8FAFC"
+                        BorderBrush="#D6DCE5"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="0,8,0,0">
+                    <avalonia:CartesianChart 
+                        Series="{Binding SummerSeries}"
+                        XAxes="{Binding TimeAxis}"
+                        YAxes="{Binding DualAxes}"
+                        Height="250" />
+                </Border>
                             </StackPanel>
                         </Border>
 

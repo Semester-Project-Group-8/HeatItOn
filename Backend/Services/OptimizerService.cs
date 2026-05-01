@@ -109,7 +109,7 @@ namespace Backend.Services
                 }
                 finalResults.ResultsForHours.Add(resultOfHour);
             }
-            await _resultListService.AddResultList(finalResults.ResultsForHours);
+            await _resultListService.Post(finalResults.ResultsForHours);
             await _optimizedResultsService.AddOptimizedResults(finalResults);
             return finalResults;
         }

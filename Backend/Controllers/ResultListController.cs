@@ -38,7 +38,7 @@ namespace Backend.Controllers
         {
             try
             {
-                var resultList = await _resultListService.GetResultList(id);
+                var resultList = await _resultListService.Get(id);
                 return Ok(resultList);
             }
             catch (KeyNotFoundException)
@@ -50,7 +50,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> Post([FromBody] ResultList resultList)
         {
             List<ResultList> list = new List<ResultList> { resultList };
-            var result = await _resultListService.AddResultList(list);
+            var result = await _resultListService.Post(list);
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
             return Ok(result);
         }
@@ -58,7 +58,7 @@ namespace Backend.Controllers
         [HttpPost("Adds")]
         public async Task<IActionResult> AddResultLists([FromBody] List<ResultList> resultLists)
         {
-            var result = await _resultListService.AddResultList(resultLists);
+            var result = await _resultListService.Post(resultLists);
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
             return Ok(result);
         }
@@ -74,7 +74,7 @@ namespace Backend.Controllers
         {
             try
             {
-                var createdId = await _resultListService.CreateResultList(timeFrom, timeTo, resultList);
+                var createdId = await _resultListService.Put(timeFrom, timeTo, resultList);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
                 return Created($"/ResultList/{createdId}", new { id = createdId });
             }
