@@ -65,22 +65,6 @@ namespace Backend.Services
 			return await _dbContext.SaveChangesAsync();
 		}
 
-		public async Task<int> UpdateResult(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
-		{
-			var result = await _dbContext.Results.FindAsync(id);
-			if (result == null)
-				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
-
-			result.HeatProduction = heatProduction;
-			result.Electricity = electricity;
-			result.ProductionCost = productionCost;
-			result.PrimaryEnergyConsumed = primaryEnergyConsumed;
-			result.CO2Produced = co2Produced;
-			result.AssetId = assetId;
-
-			return await _dbContext.SaveChangesAsync();
-		}
-
 		public async Task Put(int id, Result value)
 		{
 			var result = await _dbContext.Results.FindAsync(id);
