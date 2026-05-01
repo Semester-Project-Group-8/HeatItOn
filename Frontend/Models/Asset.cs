@@ -3,7 +3,7 @@
     public class Asset
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public float MaxHeat { get; set; }
         public int ProductionCost { get; set; }
         public int CO2Emission {  get; set; }

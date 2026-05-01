@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
 using Frontend.Models;
@@ -18,9 +19,7 @@ using Avalonia.Media;
 
 namespace Frontend.ViewModels;
 
-public class ResultsTabViewModel : 
-    INotifyPropertyChanged,
-    IRefreshable
+public class ResultsTabViewModel : INotifyPropertyChanged
 {
     private readonly OptimizedResultsClient _client;
     private List<ResultTableRow> _allRows = [];
@@ -32,10 +31,102 @@ public class ResultsTabViewModel :
         _ = LoadAsync();
     }
 
+    private int _currentPage = 1;
+    private const int PageSize = 12;
+    private List<ResultTableRow> _filteredRows = [];
+
     public ObservableCollection<OptimizedResults> OptimizedResults { get; } = [];
     public ObservableCollection<ResultTableRow> Rows { get; } = [];
     public bool HasNoOptimizedResults => OptimizedResults.Count == 0;
     public bool IsResultSelected => SelectedOptimizedResult != null;
+
+    public int CurrentPage => _currentPage;
+    public int TotalPages => Math.Max(1, (int)Math.Ceiling(_filteredRows.Count / (double)PageSize));
+    public bool CanGoPrev => _currentPage > 1;
+    public bool CanGoNext => _currentPage < TotalPages;
+    public string PageInfo => _filteredRows.Count == 0
+        ? "No rows to display"
+        : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, _filteredRows.Count)} of {_filteredRows.Count} rows";
+    public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
+
+    public void NextPage()
+    {
+        if (!CanGoNext) return;
+        _currentPage++;
+        NotifyPageChange();
+        RefreshPagedRows();
+    }
+
+    public void PrevPage()
+    {
+        if (!CanGoPrev) return;
+        _currentPage--;
+        NotifyPageChange();
+        RefreshPagedRows();
+    }
+
+    public void GoToPage(object? page)
+    {
+        if (page is not int p) return;
+        if (p < 1 || p > TotalPages) return;
+        _currentPage = p;
+        NotifyPageChange();
+        RefreshPagedRows();
+    }
+
+    private void NotifyPageChange()
+    {
+        OnPropertyChanged(nameof(CurrentPage));
+        OnPropertyChanged(nameof(CanGoPrev));
+        OnPropertyChanged(nameof(CanGoNext));
+        OnPropertyChanged(nameof(PageInfo));
+        OnPropertyChanged(nameof(PageNumbers));
+    }
+
+    private void RefreshPagedRows()
+    {
+        Rows.Clear();
+        foreach (var row in _filteredRows.Skip((_currentPage - 1) * PageSize).Take(PageSize))
+            Rows.Add(row);
+    }
+
+    public string TotalHeatDisplay
+    {
+        get
+        {
+            var total = _filteredRows.Sum(r => r.HeatProduced);
+            return $"{total:F1} MW";
+        }
+    }
+
+    public string NetElectricityDisplay
+    {
+        get
+        {
+            var total = _filteredRows.Sum(r => (double)r.Electricity);
+            return total >= 0 ? $"+{total:F1} MW" : $"{total:F1} MW";
+        }
+    }
+
+    public string TotalCo2Display
+    {
+        get
+        {
+            var total = _filteredRows.Sum(r => r.Co2Produced);
+            return $"{total:N0} KG";
+        }
+    }
+
+    public string TotalCostDisplay
+    {
+        get
+        {
+            var total = _filteredRows.Sum(r => (double)r.ProductionCost);
+            if (Math.Abs(total) >= 1000)
+                return $"{total / 1000:F0}K DKK";
+            return $"{total:F0} DKK";
+        }
+    }
 
     public OptimizedResults? SelectedOptimizedResult
     {
@@ -202,14 +293,17 @@ public class ResultsTabViewModel :
     public event PropertyChangedEventHandler? PropertyChanged;
 
 
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         var results = await _client.GetAll();
-        OptimizedResults.Clear();
-        if (results != null)
-            foreach (var r in results)
-                OptimizedResults.Add(r);
-        OnPropertyChanged(nameof(HasNoOptimizedResults));
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            OptimizedResults.Clear();
+            if (results != null)
+                foreach (var r in results)
+                    OptimizedResults.Add(r);
+            OnPropertyChanged(nameof(HasNoOptimizedResults));
+        });
     }
 
     public void Export()
@@ -225,13 +319,13 @@ public class ResultsTabViewModel :
         if (SelectedOptimizedResult == null)
             return;
 
-        var hours = SelectedOptimizedResult.ResultsForHours
+        var hours = (SelectedOptimizedResult.ResultsForHours ?? [])
             .OrderBy(r => r.TimeFrom)
             .ToList();
 
         RebuildCharts(hours);
         RebuildGeneratorUsagePie(hours);
-        _allRows = SelectedOptimizedResult.ResultsForHours
+        _allRows = (SelectedOptimizedResult.ResultsForHours ?? [])
             .OrderBy(r => r.TimeFrom)
             .Select(resultList =>
             {
@@ -245,7 +339,7 @@ public class ResultsTabViewModel :
                     ActiveAssets = string.Join(
                         "; ",
                         resultList.Results
-                            .Select(r => r.Asset.Name)
+                            .Select(r => r.Asset?.Name)
                             .Where(n => !string.IsNullOrWhiteSpace(n))
                             .Distinct()
                     ),
@@ -258,8 +352,7 @@ public class ResultsTabViewModel :
             })
             .ToList();
 
-        foreach (var row in _allRows)
-            Rows.Add(row);
+        ApplyRows(_allRows);
     }
 
     private void RebuildCharts(IEnumerable<ResultList> hours)
@@ -627,7 +720,7 @@ public class ResultsTabViewModel :
     {
         if (SelectedOptimizedResult == null)
             return;
-        var filteredHours = SelectedOptimizedResult.ResultsForHours
+        var filteredHours = (SelectedOptimizedResult.ResultsForHours ?? [])
             .Where(h => h.TimeFrom >= from && h.TimeFrom <= to)
             .OrderBy(h => h.TimeFrom)
             .ToList();
@@ -648,9 +741,15 @@ public class ResultsTabViewModel :
 
     private void ApplyRows(IEnumerable<ResultTableRow> rows)
     {
-        Rows.Clear();
-        foreach (var row in rows)
-            Rows.Add(row);
+        _filteredRows = rows.ToList();
+        _currentPage = 1;
+        OnPropertyChanged(nameof(TotalPages));
+        NotifyPageChange();
+        RefreshPagedRows();
+        OnPropertyChanged(nameof(TotalHeatDisplay));
+        OnPropertyChanged(nameof(NetElectricityDisplay));
+        OnPropertyChanged(nameof(TotalCo2Display));
+        OnPropertyChanged(nameof(TotalCostDisplay));
     }
 
     private static Axis[] CreateValueAxis(string name, double? minLimit = 0)

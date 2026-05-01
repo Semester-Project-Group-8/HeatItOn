@@ -3,103 +3,492 @@
              xmlns:models="using:Frontend.Models"
              xmlns:vm="using:Frontend.ViewModels"
              xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
+             xmlns:models="using:Frontend.Models"
              x:Class="Frontend.Views.ResultsTabView"
-             x:DataType="vm:ResultsTabViewModel">
+             x:DataType="vm:ResultsTabViewModel"
+             x:Name="RootControl">
+
+    <UserControl.Styles>
+
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="ItemBorder"
+                            CornerRadius="10"
+                            BorderThickness="1.5"
+                            BorderBrush="#E0E0E0"
+                            Background="#F5F5F5"
+                            Padding="14,12"
+                            Cursor="Hand">
+                        <Border.Transitions>
+                            <Transitions>
+                                <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+                                <BrushTransition Property="Background"  Duration="0:0:0.15"/>
+                            </Transitions>
+                        </Border.Transitions>
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          HorizontalAlignment="Stretch"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style Selector="ListBoxItem:selected /template/ Border#ItemBorder">
+            <Setter Property="BorderBrush" Value="#E06020"/>
+            <Setter Property="Background"  Value="#FFF3EC"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:pointerover /template/ Border#ItemBorder">
+            <Setter Property="Background" Value="#EBEBEB"/>
+        </Style>
+
+        <Style Selector="ListBoxItem:selected:pointerover /template/ Border#ItemBorder">
+            <Setter Property="Background" Value="#FFE8D8"/>
+        </Style>
+
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <Style Selector="Button.search-primary">
+            <Setter Property="Background" Value="#E06020"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style Selector="Button.search-secondary">
+            <Setter Property="Background" Value="#EEEEEE"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <!-- Pagination button -->
+        <Style Selector="Button.page-btn">
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.page-btn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#E0E0E0"/>
+        </Style>
+        <Style Selector="Button.page-btn.active">
+            <Setter Property="Background" Value="#E06020"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- DataGrid header -->
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,12"/>
+        </Style>
+        <Style Selector="DataGridColumnHeader:pointerover /template/ Grid">
+            <Setter Property="Background" Value="#F8F8F8"/>
+        </Style>
+        <Style Selector="DataGridRow">
+            <Setter Property="MinHeight" Value="44"/>
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#F0F0F0"/>
+        </Style>
+
+    </UserControl.Styles>
+
     <DockPanel>
+
         <!-- LEFT SIDEBAR -->
         <Border DockPanel.Dock="Left"
-                Width="240"
-                Padding="8"
-                BorderBrush="Gray"
+                Width="250"
+                Background="White"
+                BorderBrush="#E8E8E8"
                 BorderThickness="0,0,1,0">
-            <StackPanel Spacing="8">
-                <TextBlock Text="Results"
-                           FontWeight="Bold" />
-                <ListBox
-                    ItemsSource="{Binding OptimizedResults}"
-                    SelectedItem="{Binding SelectedOptimizedResult}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Name}" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+            <DockPanel>
+
+                <!-- Header label -->
+                <TextBlock DockPanel.Dock="Top"
+                           Text="// OPTIMIZATION RUNS"
+                           Margin="16,18,16,12"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           Foreground="#AAAAAA"
+                           LetterSpacing="1.5"/>
+
+                <!-- Export Results button pinned to bottom -->
+                <Border DockPanel.Dock="Bottom"
+                        Padding="16,12"
+                        BorderBrush="#E8E8E8"
+                        BorderThickness="0,1,0,0">
+                    <Button Classes="export-btn"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Content="↓  Export Results"
+                            Command="{Binding Export}"/>
+                </Border>
+
                 <!-- Empty state -->
-                <TextBlock Text="No optimization results available yet"
+                <TextBlock DockPanel.Dock="Top"
+                           Text="No optimization results available yet"
                            IsVisible="{Binding HasNoOptimizedResults}"
-                           Opacity="0.6"
-                           TextWrapping="Wrap" />
-            </StackPanel>
+                           Margin="16,0,16,0"
+                           Foreground="#AAAAAA"
+                           FontSize="13"
+                           TextWrapping="Wrap"/>
+
+                <!-- Results list -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ListBox Margin="12,0,12,8"
+                             ItemsSource="{Binding OptimizedResults}"
+                             SelectedItem="{Binding SelectedOptimizedResult}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="{Binding Name}"
+                                               FontSize="13"
+                                               FontWeight="Bold"
+                                               TextWrapping="Wrap"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <TextBlock Text="Custom"
+                                                   Foreground="#999999"
+                                                   FontSize="11"/>
+                                        <TextBlock Text="·"
+                                                   Foreground="#CCCCCC"
+                                                   FontSize="11"/>
+                                        <TextBlock FontSize="11" Foreground="#999999">
+                                            <Run Text="{Binding ResultsForHours.Count}"/><Run Text="h"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </ScrollViewer>
+
+            </DockPanel>
         </Border>
-        <!-- TOP SEARCH BAR -->
+
+        <!-- TOP FILTER BAR -->
         <Border DockPanel.Dock="Top"
-                Padding="8"
-                BorderBrush="Gray"
+                Padding="20,14"
+                Background="White"
+                BorderBrush="#E8E8E8"
                 BorderThickness="0,0,0,1"
                 IsVisible="{Binding IsResultSelected}">
-            <StackPanel Orientation="Horizontal" Spacing="12">
-                <StackPanel>
-                    <TextBlock Text="From" />
-                    <CalendarDatePicker x:Name="SearchFromDatePicker" />
-                    <TimePicker x:Name="SearchFromTimePicker" />
-                </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
 
-                <StackPanel>
-                    <TextBlock Text="To" />
-                    <CalendarDatePicker x:Name="SearchToDatePicker" />
-                    <TimePicker x:Name="SearchToTimePicker" />
-                </StackPanel>
+                <!-- Filter inputs card -->
+                <Border Grid.Column="0"
+                        Background="#F8F8F8"
+                        CornerRadius="10"
+                        Padding="16,10"
+                        ClipToBounds="True">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled">
+                    <StackPanel Orientation="Horizontal" Spacing="20" VerticalAlignment="Center">
 
-                <StackPanel VerticalAlignment="Bottom">
-                    <Button Content="Search" Click="OnSearchClick" />
-                    <Button Content="Clear" Click="OnClearClick" />
-                </StackPanel>
-                <Button Content="Export" Command="{Binding Export}"></Button>
-            </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="FROM DATE"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" LetterSpacing="1.2"/>
+                            <CalendarDatePicker x:Name="SearchFromDatePicker"
+                                                MinWidth="130"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="FROM TIME"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" LetterSpacing="1.2"/>
+                            <TimePicker x:Name="SearchFromTimePicker"
+                                        MinWidth="110"/>
+                        </StackPanel>
+
+                        <Rectangle Width="1" Fill="#DDDDDD" Margin="0,4"/>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="TO DATE"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" LetterSpacing="1.2"/>
+                            <CalendarDatePicker x:Name="SearchToDatePicker"
+                                                MinWidth="130"/>
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="TO TIME"
+                                       FontSize="9" FontWeight="Bold"
+                                       Foreground="#AAAAAA" LetterSpacing="1.2"/>
+                            <TimePicker x:Name="SearchToTimePicker"
+                                        MinWidth="110"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+                            <Button Classes="search-primary" Click="OnSearchClick">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="▶" VerticalAlignment="Center" />
+                                    <TextBlock Text="SEARCH" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Classes="search-secondary" Click="OnClearClick">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="↺" VerticalAlignment="Center" />
+                                    <TextBlock Text="CLEAR" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                    </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                
+            </Grid>
         </Border>
+
         <!-- MAIN CONTENT -->
         <Grid RowDefinitions="Auto,*">
 
-            <!-- DataGrid -->
+            <!-- DataGrid and Charts -->
             <ScrollViewer Grid.Row="1"
                           VerticalScrollBarVisibility="Auto"
-                          IsVisible="{Binding IsResultSelected}">
-                <StackPanel Spacing="16">
-                    <DataGrid
-                        Margin="20"
-                        ItemsSource="{Binding Rows}"
-                        AutoGenerateColumns="False"
-                        GridLinesVisibility="All"
-                        BorderBrush="Black"
-                        BorderThickness="1"
-                        MaxHeight="400">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Time" 
-                                                Binding="{Binding Hour}" 
-                                                IsReadOnly="True"/>
-                            
-                            <DataGridTextColumn Header="Active Assets" 
-                                                Binding="{Binding ActiveAssets}" 
-                                                IsReadOnly="True"/>
-                            
-                            <DataGridTextColumn Header="Heat (MWh)" 
-                                                Binding="{Binding HeatProduced}" 
-                                                IsReadOnly="True"/>
-                            
-                            <DataGridTextColumn Header="Electricity (MWh)" 
-                                                Binding="{Binding Electricity}" 
-                                                IsReadOnly="True"/>
-                            
-                            <DataGridTextColumn Header="CO2 (kg)" 
-                                                Binding="{Binding Co2Produced}" 
-                                                IsReadOnly="True"/>
-                            
-                            <DataGridTextColumn Header="ProductionCost (DKK)"
-                                                Binding="{Binding ProductionCost}" 
-                                                IsReadOnly="True"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <!-- Charts -->
+                          IsVisible="{Binding IsResultSelected}"
+                          Background="#F0F0F0">
+                <StackPanel Spacing="0">
+
+                    <!-- SUMMARY CARDS -->
+                    <Border Background="#F0F0F0" Padding="20,20,20,0">
+                        <Grid ColumnDefinitions="*,12,*,12,*,12,*">
+
+                            <!-- Total Heat -->
+                            <Border Grid.Column="0" Background="White" CornerRadius="10" ClipToBounds="True">
+                                <Grid RowDefinitions="4,Auto">
+                                    <Border Grid.Row="0" Background="#E06020" CornerRadius="10,10,0,0"/>
+                                    <StackPanel Grid.Row="1" Spacing="6" Margin="20,16,20,20">
+                                        <TextBlock Text="TOTAL HEAT"
+                                                   FontSize="9" FontWeight="Bold"
+                                                   Foreground="#AAAAAA" LetterSpacing="1.5"/>
+                                        <TextBlock Text="{Binding TotalHeatDisplay}"
+                                                   FontSize="28" FontWeight="Bold"
+                                                   Foreground="#E06020"/>
+                                        <TextBlock Text="Across all active assets"
+                                                   FontSize="11" Foreground="#AAAAAA"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Net Electricity -->
+                            <Border Grid.Column="2" Background="White" CornerRadius="10" ClipToBounds="True">
+                                <Grid RowDefinitions="4,Auto">
+                                    <Border Grid.Row="0" Background="#2080D0" CornerRadius="10,10,0,0"/>
+                                    <StackPanel Grid.Row="1" Spacing="6" Margin="20,16,20,20">
+                                        <TextBlock Text="NET ELECTRICITY"
+                                                   FontSize="9" FontWeight="Bold"
+                                                   Foreground="#AAAAAA" LetterSpacing="1.5"/>
+                                        <TextBlock Text="{Binding NetElectricityDisplay}"
+                                                   FontSize="28" FontWeight="Bold"
+                                                   Foreground="#2080D0"/>
+                                        <TextBlock Text="Generated minus consumed"
+                                                   FontSize="11" Foreground="#AAAAAA"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Total CO2 -->
+                            <Border Grid.Column="4" Background="White" CornerRadius="10" ClipToBounds="True">
+                                <Grid RowDefinitions="4,Auto">
+                                    <Border Grid.Row="0" Background="#D03030" CornerRadius="10,10,0,0"/>
+                                    <StackPanel Grid.Row="1" Spacing="6" Margin="20,16,20,20">
+                                        <TextBlock Text="TOTAL CO₂"
+                                                   FontSize="9" FontWeight="Bold"
+                                                   Foreground="#AAAAAA" LetterSpacing="1.5"/>
+                                        <TextBlock Text="{Binding TotalCo2Display}"
+                                                   FontSize="28" FontWeight="Bold"
+                                                   Foreground="#D03030"/>
+                                        <TextBlock Text="Across 24-hour period"
+                                                   FontSize="11" Foreground="#AAAAAA"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Production Cost -->
+                            <Border Grid.Column="6" Background="White" CornerRadius="10" ClipToBounds="True">
+                                <Grid RowDefinitions="4,Auto">
+                                    <Border Grid.Row="0" Background="#E06020" CornerRadius="10,10,0,0"/>
+                                    <StackPanel Grid.Row="1" Spacing="6" Margin="20,16,20,20">
+                                        <TextBlock Text="PRODUCTION COST"
+                                                   FontSize="9" FontWeight="Bold"
+                                                   Foreground="#AAAAAA" LetterSpacing="1.5"/>
+                                        <TextBlock Text="{Binding TotalCostDisplay}"
+                                                   FontSize="28" FontWeight="Bold"
+                                                   Foreground="#E06020"/>
+                                        <TextBlock Text="Net after electricity revenue"
+                                                   FontSize="11" Foreground="#AAAAAA"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                        </Grid>
+                    </Border>
+
+                    <StackPanel Spacing="16" Margin="20,20,20,0">
+                    <!-- Results Table -->
+                    <Border Background="White"
+                            CornerRadius="12"
+                            ClipToBounds="True"
+                            Margin="20,0">
+                        <Grid RowDefinitions="*,Auto">
+
+                            <DataGrid Grid.Row="0"
+                                      ItemsSource="{Binding Rows}"
+                                      AutoGenerateColumns="False"
+                                      GridLinesVisibility="Horizontal"
+                                      BorderThickness="0"
+                                      RowBackground="White"
+                                      HorizontalAlignment="Stretch"
+                                      IsReadOnly="True"
+                                      CanUserReorderColumns="False"
+                                      CanUserResizeColumns="False"
+                                      CanUserSortColumns="True">
+                                <DataGrid.Columns>
+
+                                    <!-- TIME - orange -->
+                                    <DataGridTemplateColumn Header="TIME" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="models:ResultTableRow">
+                                                <TextBlock Text="{Binding Hour}"
+                                                           Foreground="#E06020"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           Margin="12,0"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- ACTIVE ASSETS -->
+                                    <DataGridTextColumn Header="ACTIVE ASSETS"
+                                                        Binding="{Binding ActiveAssets}"
+                                                        Width="2*"/>
+
+                                    <!-- HEAT -->
+                                    <DataGridTextColumn Header="HEAT (MW)"
+                                                        Binding="{Binding HeatProduced}"
+                                                        Width="*"/>
+
+                                    <!-- ELECTRICITY - green -->
+                                    <DataGridTemplateColumn Header="ELECTRICITY (MW)" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate x:DataType="models:ResultTableRow">
+                                                <TextBlock Text="{Binding Electricity}"
+                                                           Foreground="#2E9E5E"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="13"
+                                                           VerticalAlignment="Center"
+                                                           Margin="12,0"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- CO2 -->
+                                    <DataGridTextColumn Header="CO&#x2082; (KG)"
+                                                        Binding="{Binding Co2Produced}"
+                                                        Width="*"/>
+
+                                    <!-- COST -->
+                                    <DataGridTextColumn Header="COST (DKK)"
+                                                        Binding="{Binding ProductionCost}"
+                                                        Width="*"/>
+
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- Pagination footer -->
+                            <Border Grid.Row="1"
+                                    Padding="16,10"
+                                    BorderBrush="#F0F0F0"
+                                    BorderThickness="0,1,0,0">
+                                <Grid ColumnDefinitions="*,Auto">
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding PageInfo}"
+                                               VerticalAlignment="Center"
+                                               Foreground="#AAAAAA"
+                                               FontSize="12"/>
+
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                Spacing="4"
+                                                VerticalAlignment="Center">
+
+                                        <Button Content="&#x2039;"
+                                                Command="{Binding PrevPage}"
+                                                IsEnabled="{Binding CanGoPrev}"
+                                                Classes="page-btn"
+                                                FontSize="16"/>
+
+                                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                      VerticalScrollBarVisibility="Disabled"
+                                                      MaxWidth="300">
+                                            <ItemsControl ItemsSource="{Binding PageNumbers}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="{Binding}"
+                                                                Command="{Binding ((vm:ResultsTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
+                                                                CommandParameter="{Binding}"
+                                                                Classes="page-btn"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+
+                                        <Button Content="&#x203A;"
+                                                Command="{Binding NextPage}"
+                                                IsEnabled="{Binding CanGoNext}"
+                                                Classes="page-btn"
+                                                FontSize="16"/>
+
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="// PERFORMANCE CHARTS"
+                               FontSize="10" FontWeight="Bold"
+                               Foreground="#AAAAAA" LetterSpacing="1.5"
+                               Margin="0,8,0,0"/>
+
                     <StackPanel>
                         <TextBlock Text="Heat produced per hour (MWh)"
                                    HorizontalAlignment="Center"
@@ -241,9 +630,9 @@
                             Spacing="8">
                     <TextBlock Text="No data to display"
                                FontSize="18"
-                               FontWeight="SemiBold" />
+                               FontWeight="SemiBold"/>
                     <TextBlock Text="Select a run on the left to view its results."
-                               Opacity="0.7" />
+                               Opacity="0.7"/>
                 </StackPanel>
             </Border>
 
