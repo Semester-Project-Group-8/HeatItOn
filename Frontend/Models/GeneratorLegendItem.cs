@@ -1,6 +1,6 @@
 using Avalonia.Media;
 
-namespace Frontend.ViewModels
+namespace Frontend.Models
 {
     public class GeneratorLegendItem
     {

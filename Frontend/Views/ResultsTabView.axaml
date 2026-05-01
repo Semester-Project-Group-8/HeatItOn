@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="using:Frontend.Models"
              xmlns:vm="using:Frontend.ViewModels"
              xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
              x:Class="Frontend.Views.ResultsTabView"
@@ -144,7 +145,7 @@
                                 <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                                     <ItemsControl ItemsSource="{Binding GeneratorUsageLegend}">
                                         <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="vm:GeneratorLegendItem">
+                                            <DataTemplate x:DataType="models:GeneratorLegendItem">
                                                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="6">
                                                     <Rectangle Width="16" Height="16" Fill="{Binding Fill}" RadiusX="2" RadiusY="2" />
                                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="6,0,0,0" />
