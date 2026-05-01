@@ -29,12 +29,12 @@ namespace Backend.Services
 		}
 
 		// GetResultById
-		public async Task<List<Result>> Get(int id)
+		public async Task<Result> Get(int id)
 		{
 			var result = await _dbContext.Results.FindAsync(id);
 			if (result == null)
 				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
-			return new List<Result> { result };
+			return  result;
 		}
 
 		// GetResultByAssetId

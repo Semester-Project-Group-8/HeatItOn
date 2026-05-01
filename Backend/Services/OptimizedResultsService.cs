@@ -21,12 +21,12 @@ public class OptimizedResultsService: IService<OptimizedResults>
     }
     
 
-    public async Task<List<OptimizedResults>> Get(int id)
+    public async Task<OptimizedResults> Get(int id)
     {
         var result = await _dbContext.OptimizedResults.FirstOrDefaultAsync(o => o.Id == id);
         if (result == null)
             throw new KeyNotFoundException($"OptimizedResults with ID {id} not found.");
-        return new List<OptimizedResults> { result };
+        return result;
     }
 
     public Task<OptimizedResults> Post() => throw new NotSupportedException("Use AddOptimizedResults instead.");

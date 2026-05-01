@@ -78,12 +78,12 @@ namespace Backend.Services
 
         public Task<Asset> Post() => throw new NotSupportedException("Use AddAsset instead.");
 
-        public async Task<List<Asset>> Get(int id)
+        public async Task<Asset> Get(int id)
         {
             var asset = await _dbContext.Assets.FindAsync(id);
             if (asset == null)
                 throw new KeyNotFoundException($"Asset with ID {id} not found.");
-            return new List<Asset> { asset };
+            return asset;
         }
 
         public async Task Delete(int id)

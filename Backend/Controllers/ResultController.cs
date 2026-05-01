@@ -33,7 +33,7 @@ namespace Backend.Controllers
             try
             {
                 var results = await _resultService.Get(id);
-                return Ok(results.First());
+                return Ok(results);
             }
 
             catch (KeyNotFoundException ex)
@@ -95,25 +95,13 @@ namespace Backend.Controllers
 
         // Put
         [HttpPut("Update/{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Result incomingResult)
+        public async Task<IActionResult> Put(int id, [FromBody] Result result)
         {
             try
             {
-                var rowsAffected = await _resultService.UpdateResult(
-                    id,
-                    incomingResult.HeatProduction,
-                    incomingResult.Electricity,
-                    incomingResult.ProductionCost,
-                    incomingResult.PrimaryEnergyConsumed,
-                    incomingResult.CO2Produced,
-                    incomingResult.AssetId
-                );
+                await _resultService.Put(id, result);
 
-                if (rowsAffected > 0)
-                {
-                    return Ok(new { Message = "Result updated successfully." });
-                }
-                return BadRequest("Failed to update Result.");
+                return Ok(new { Message = "Result updated successfully." });
             }
 
             catch (KeyNotFoundException ex)

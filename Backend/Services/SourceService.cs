@@ -77,13 +77,6 @@ namespace Backend.Services
         }
         public Task<Source> Post() => throw new NotSupportedException("Use AddSource instead.");
 
-        public async Task<List<Source>> Get(int id)
-        {
-            var source = await _dbContext.Sources.FindAsync(id);
-            if (source == null)
-                throw new KeyNotFoundException($"Source with ID {id} not found.");
-            return new List<Source> { source };
-        }
         public async Task<IEnumerable<Source>> ListByMonth(int month)
         {
             if (month < 1 || month > 12)

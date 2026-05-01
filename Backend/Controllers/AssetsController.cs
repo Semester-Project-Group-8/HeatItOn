@@ -35,7 +35,7 @@ namespace Backend.Controllers
             try
             {
                 var assets = await _assetsService.Get(id);
-                return Ok(assets.First());
+                return Ok(assets);
             }
             catch (KeyNotFoundException)
             {
