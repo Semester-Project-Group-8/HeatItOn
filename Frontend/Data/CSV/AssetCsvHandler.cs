@@ -4,17 +4,19 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using System.IO;
 using Frontend.Models;
+using Frontend.Interfaces;
 
 namespace Frontend.Data.CSV
 {
     public static class AssetCsvHandler
     {
-        public static async void ExportCsv(string location, AssetClient assetClient)
+        public static async Task ExportCsv(string location, IClient<Asset> assetClient)
         {
-            List<Asset>? assets = await assetClient.GetAll();
+            List<Asset> assets = await assetClient.GetAll();
 
-            if (assets != null && assets.Count > 0)
+            if (assets.Any())
             {
                 List<string> lines = new List<string>();
 
@@ -25,8 +27,7 @@ namespace Frontend.Data.CSV
                     string csvLine = $"{asset.Name},{asset.MaxHeat.ToString(CultureInfo.InvariantCulture)},{asset.ProductionCost},{asset.CO2Emission},{asset.GasConsumption.ToString(CultureInfo.InvariantCulture)},{asset.OilConsumption.ToString(CultureInfo.InvariantCulture)},{asset.MaxElectricity.ToString(CultureInfo.InvariantCulture)}";
                     lines.Add(csvLine);
                 }
-
-                System.IO.File.WriteAllLines(location, lines);
+                await File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | asset csv file export");
             }
             else
@@ -35,7 +36,7 @@ namespace Frontend.Data.CSV
             }
         }
 
-        public static async Task ImportCsv(string location, AssetClient assetClient)
+        public static async Task ImportCsv(string location, IClient<Asset> assetClient)
         {
             if (!System.IO.File.Exists(location))
                 throw new System.IO.FileNotFoundException($"Asset CSV file not found: {location}");
@@ -59,48 +60,33 @@ namespace Frontend.Data.CSV
                     if (fields != null && fields.Length >= 7)
                     {
                         Asset asset = AssetConverter(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6]);
-                        Assets.Add(asset);
+                        assetsToImport.Add(asset);
                     }
                     else
                     {
                         Console.WriteLine("error | read failed >> missing fields");
                     }
                 }
-                Console.WriteLine("completed | asset csv file read");
             }
 
-            List<Task> insertedAssets = [];
-            insertedAssets.AddRange(Assets.Select(assetClient.Post));
-            await Task.WhenAll(insertedAssets);
+            List<Task> tasks = assetsToImport.Select(assetClient.Post).ToList();
+            await Task.WhenAll(tasks);
+
+            Console.WriteLine("completed | asset csv file read and uploaded");
         }
 
         private static string? ImageParser(string name)
         {
-            if (name.Contains("Gas Boiler", StringComparison.CurrentCultureIgnoreCase))
-            {
-                return "gb1.png";
-            }
-            else if (name.Contains("Oil Boiler", StringComparison.CurrentCultureIgnoreCase))
-            {
-                return "ob1.png";
-            }
-            else if (name.Contains("Electric Boiler", StringComparison.CurrentCultureIgnoreCase))
-            {
-                return "eb1.png";
-            } 
-            else if (name.Contains("Gas Motor",  StringComparison.CurrentCultureIgnoreCase))
-            {
-                return "gm1.png";
-            }
-            else
-            {
-                return null;
-            }
+            if (name.Contains("Gas Boiler", StringComparison.OrdinalIgnoreCase)) return "gb1.png";
+            if (name.Contains("Oil Boiler", StringComparison.OrdinalIgnoreCase)) return "ob1.png";
+            if (name.Contains("Electric Boiler", StringComparison.OrdinalIgnoreCase)) return "eb1.png";
+            if (name.Contains("Gas Motor", StringComparison.OrdinalIgnoreCase)) return "gm1.png";
+            return null;
         }
 
         private static Asset AssetConverter(string name, string maxHeat, string prodCost, string co2, string gas, string oil, string maxElec)
         {
-            var asd = new Asset()
+            return new Asset()
             {
                 Name = name,
                 MaxHeat = float.Parse(maxHeat, CultureInfo.InvariantCulture),
@@ -111,7 +97,6 @@ namespace Frontend.Data.CSV
                 MaxElectricity = float.Parse(maxElec, CultureInfo.InvariantCulture),
                 ImageName = ImageParser(name)
             };
-            return asd;
         }
     }
 }

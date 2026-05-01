@@ -3,10 +3,11 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Frontend.Models;
+using Frontend.Interfaces;
 
 namespace Frontend.Data;
 
-public class ResultClient
+public class ResultClient : IClient<Result>
 {
     private readonly HttpClient _client;
 
@@ -22,7 +23,7 @@ public class ResultClient
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<List<Result>> GetAll()
+    public async Task<List<Result>?> GetAll()
     {
         HttpResponseMessage response = await _client.GetAsync("");
         response.EnsureSuccessStatusCode();
@@ -30,21 +31,21 @@ public class ResultClient
         return result ?? [];
     }
 
-    public async Task<string> Post(Result result)
+    public async Task Post(Result result)
     {
         HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
-        return await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<Result?> Patch(Result result)
+    public async Task Update(Result result)
     {
         HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
-        return await response.Content.ReadFromJsonAsync<Result>();
+        response.EnsureSuccessStatusCode();
     }
 
-    public async Task<Result?> Delete(int id)
+    public async Task Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync(id.ToString() );
-        return await response.Content.ReadFromJsonAsync<Result>();
+        HttpResponseMessage response = await _client.DeleteAsync(id.ToString());
+        response.EnsureSuccessStatusCode();
     }
 }

@@ -13,6 +13,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using Frontend.Models;
 using System.IO;
+using Frontend.Interfaces;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
@@ -21,7 +22,8 @@ namespace Frontend.ViewModels;
 
 public class AssetsTabViewModel : ViewModelBase
 {
-    private readonly AssetClient _assetClient;
+    private readonly IClient<Asset> _assetClient;
+    private readonly IClient<Source> _sourceClient;
     private readonly OptimizerClient _optimizerClient;
     private readonly List<AssetCardItem> _allAssetItems = new();
     private string _statusMessage = string.Empty;
@@ -107,8 +109,9 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
 
-    public AssetsTabViewModel(AssetClient assetClient, OptimizerClient optimizerClient)
+    public AssetsTabViewModel(IClient<Source> sourceClient, IClient<Asset> assetClient, OptimizerClient optimizerClient)
     {
+        _sourceClient = sourceClient;
         _assetClient = assetClient;
         _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAssets));
@@ -164,35 +167,35 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
     public async Task ImportAssets()
-    {
-        try
         {
-            var csvPath = Path.Combine(AppContext.BaseDirectory, "assets.csv");
-            await AssetCsvHandler.ImportCsv(csvPath, _assetClient);
-            await LoadFromBackendAsync();
-            StatusMessage = "Assets imported successfully.";
+            try
+            {
+                var csvPath = Path.Combine(AppContext.BaseDirectory, "assets.csv");
+                await AssetCsvHandler.ImportCsv(csvPath, _assetClient);
+                await LoadFromBackendAsync();
+                StatusMessage = "Assets imported successfully.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Import failed: {ex.Message}";
+                Console.WriteLine($"Error importing assets: {ex}");
+            }
         }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Import failed: {ex.Message}";
-            Console.WriteLine($"Error importing assets: {ex}");
-        }
-    }
 
-    public void ExportAssets()
-    {
-        try
+        public async void ExportAssets()
         {
-            AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
-            StatusMessage = "Assets exported to assets_export.csv.";
+            try
+            {
+                await AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+                StatusMessage = "Assets exported to assets_export.csv.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Export failed: {ex.Message}";
+                Console.WriteLine($"Error exporting assets: {ex}");
+            }
         }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Export failed: {ex.Message}";
-            Console.WriteLine($"Error exporting assets: {ex}");
-        }
-    }
-
+        
     private void OpenAddAssetDialog()
     {
         var dialogVm = new AddAssetDialogViewModel();
@@ -225,7 +228,7 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Put(editedAsset);
+                await _assetClient.Update(editedAsset);
                 await LoadFromBackendAsync();
                 CurrentDialog = null;
             }

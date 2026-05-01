@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using Frontend.Data;
 using Frontend.Data.CSV;
 using Frontend.Models;
 using LiveChartsCore;
@@ -13,6 +12,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using Frontend.Interfaces;
 using LiveChartsCore.Measure;
 
 namespace Frontend.ViewModels;
@@ -23,7 +23,7 @@ public partial class SourceTabViewModel :
     IRefreshable
 {
     // Api connection
-    private readonly SourceClient _client;
+    private readonly IClient<Source> _client;
 
     // Sources
     private readonly ObservableCollection<Source> _allSources = [];
@@ -113,7 +113,7 @@ public partial class SourceTabViewModel :
         set => SetProperty(ref _selectedSource, value);
     }
 
-    public SourceTabViewModel(SourceClient client)
+    public SourceTabViewModel(IClient<Source> client)
     {
         _client = client;
         TimeAxis =

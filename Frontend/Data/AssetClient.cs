@@ -3,10 +3,11 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Frontend.Models;
+using Frontend.Interfaces;
 
 namespace Frontend.Data;
 
-public class AssetClient
+public class AssetClient : IClient<Asset>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Asset";
@@ -23,12 +24,12 @@ public class AssetClient
         return await response.Content.ReadFromJsonAsync<Asset>();
     }
 
-    public async Task<List<Asset>?> GetAll()
+    public async Task<List<Asset>> GetAll()
     {
         HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Asset>>();
-        return result;
+        return result ?? new List<Asset>();
     }
 
     public async Task Post(Asset asset)
@@ -37,7 +38,7 @@ public class AssetClient
         response.EnsureSuccessStatusCode();
     }
 
-    public async Task Put(Asset asset)
+    public async Task Update(Asset asset)
     {
         HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/{asset.Id}", JsonContent.Create(asset));
         response.EnsureSuccessStatusCode();

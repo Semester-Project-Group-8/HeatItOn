@@ -104,6 +104,7 @@ public class AssetsTabViewModelTests
         var card = (AssetCardItem)mapMethod!.Invoke(null, new object[] { asset })!;
         Assert.NotNull(card);
         Assert.Equal("GB1", card.Name);
+        // Assert.Equal("/Assets/gb1.png", card.ImagePath);
         Assert.NotNull(card.ImagePath);
         Assert.Equal(asset, card.OriginalAsset);
         Assert.Contains(card.Details, d => d.Contains("Max heat"));

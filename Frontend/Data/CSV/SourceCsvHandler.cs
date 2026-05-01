@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using Frontend.Models;
 using System;
 using System.Linq;
+using Frontend.Interfaces;
 
 namespace Frontend.Data.CSV
 {
     static class SourceCsvHandler
     { 
         
-        public static async Task ImportCsv(string location, SourceClient sourceClient) 
+        public static async Task ImportCsv(string location, IClient<Source> sourceClient)
         {
             try
             {
@@ -20,6 +21,7 @@ namespace Frontend.Data.CSV
                 {
                     parser.SetDelimiters(",");
                     parser.HasFieldsEnclosedInQuotes = true;
+                    
                     while (!parser.EndOfData)
                     {
                         string[]? fields = parser.ReadFields();
