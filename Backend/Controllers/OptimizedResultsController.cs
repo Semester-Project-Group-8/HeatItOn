@@ -31,7 +31,7 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     public async Task<IActionResult> Get(int id)
     {
         var results = await _optimizedResultsService.Get(id);
-        return Ok(results.First());
+        return Ok(results);
     }
 
     [HttpPost("Add")]
@@ -46,8 +46,8 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     public async Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
     {
         optimizedResults.Id = id;
-        var result = await _optimizedResultsService.UpdateOptimizedResults(optimizedResults);
-        return Ok(result);
+        await _optimizedResultsService.Put(id, optimizedResults);
+        return Ok();
     }
 
     [HttpDelete("Delete/{id:int}")]

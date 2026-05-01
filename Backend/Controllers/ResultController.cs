@@ -37,7 +37,7 @@ namespace Backend.Controllers
             try
             {
                 var results = await _resultService.Get(id);
-                return Ok(results.First());
+                return Ok(results);
             }
 
             catch (KeyNotFoundException ex)
@@ -48,11 +48,11 @@ namespace Backend.Controllers
 
         // GetResultByAssetId
         [HttpGet("Asset/{assetId:int}")]
-        public async Task<IActionResult> GetResultByAsset(int assetId)
+        public async Task<IActionResult> GetByAssetId(int assetId)
         {
             try
             {
-                var result = await _resultService.GetResultByAssetId(assetId);
+                var result = await _resultService.Get(assetId);
                 return Ok(result);
             }
 
@@ -66,7 +66,7 @@ namespace Backend.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> Post([FromBody] Result incomingResult)
         {
-            var rowsAffected = await _resultService.AddResult(
+            var rowsAffected = await _resultService.Post(
                 incomingResult.Id,
                 incomingResult.HeatProduction,
                 incomingResult.Electricity,
@@ -89,7 +89,7 @@ namespace Backend.Controllers
         [HttpPost("AddList")]
         public async Task<IActionResult> AddResultList([FromBody] List<Result> results)
         {
-            var rowsAffected = await _resultService.AddResult(results);
+            var rowsAffected = await _resultService.Post(results);
             if (rowsAffected > 0)
             {
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
@@ -101,26 +101,13 @@ namespace Backend.Controllers
 
         // Put
         [HttpPut("Update/{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Result incomingResult)
+        public async Task<IActionResult> Put(int id, [FromBody] Result result)
         {
             try
             {
-                var rowsAffected = await _resultService.UpdateResult(
-                    id,
-                    incomingResult.HeatProduction,
-                    incomingResult.Electricity,
-                    incomingResult.ProductionCost,
-                    incomingResult.PrimaryEnergyConsumed,
-                    incomingResult.CO2Produced,
-                    incomingResult.AssetId
-                );
-
-                if (rowsAffected > 0)
-                {
-                    await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-                    return Ok(new { Message = "Result updated successfully." });
-                }
-                return BadRequest("Failed to update Result.");
+                await _resultService.Put(id, result);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
+                return Ok(new { Message = "Result updated successfully." });
             }
 
             catch (KeyNotFoundException ex)
@@ -135,7 +122,6 @@ namespace Backend.Controllers
         {
             try
             {
-         
                 await _resultService.Delete(id);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
                 return Ok(new { Message = "Result deleted successfully." });

@@ -51,18 +51,9 @@ namespace Backend.Controllers
         {
             try
             {
-                Source s = new Source
-                {
-                    Id = source.Id,
-                    TimeFrom = source.TimeFrom,
-                    TimeTo = source.TimeTo,
-                    HeatDemand = source.HeatDemand,
-                    ElectricityPrice = source.ElectricityPrice
-                };
-                await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+                await _sourceService.Post(source);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
-                return Created($"/Source/{s.Id}", new { s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand,
-                    s.ElectricityPrice });
+                return Created();
             }
             catch (InvalidOperationException ex)
             {

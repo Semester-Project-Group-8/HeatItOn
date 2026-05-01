@@ -40,7 +40,7 @@ namespace Backend.Controllers
             try
             {
                 var assets = await _assetsService.Get(id);
-                return Ok(assets.First());
+                return Ok(assets);
             }
             catch (KeyNotFoundException)
             {
@@ -53,21 +53,9 @@ namespace Backend.Controllers
         {
             try
             {
-                Asset a = new Asset
-                {
-                    Id = asset.Id,
-                    Name = asset.Name,
-                    MaxHeat = asset.MaxHeat,
-                    ProductionCost = asset.ProductionCost,
-                    CO2Emission = asset.CO2Emission,
-                    GasConsumption = asset.GasConsumption,
-                    OilConsumption = asset.OilConsumption,
-                    MaxElectricity = asset.MaxElectricity,
-                    ImageName = asset.ImageName
-                };
-                await _assetsService.AddAsset(a.Id, a.Name, a.MaxHeat, a.ProductionCost, a.CO2Emission, a.GasConsumption, a.OilConsumption, a.MaxElectricity, a.ImageName);
+                await _assetsService.Post(asset.Id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageName);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
-                return Created($"/Asset/{a.Id}", new { Id = a.Id, Name = a.Name, MaxHeat = a.MaxHeat, ProductionCost = a.ProductionCost, CO2Emission = a.CO2Emission, GasConsumption = a.GasConsumption, OilConsumption = a.OilConsumption});
+                return Created();
             }
             catch (InvalidOperationException ex)
             {
