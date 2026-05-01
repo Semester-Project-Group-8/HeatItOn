@@ -7,25 +7,36 @@
              x:Class="Frontend.Views.ManagerButtonView"
              x:DataType="vm:ManagerButtonViewModel"
              Background="White"
-             BorderBrush="Black"
+             CornerRadius="10"
              BorderThickness="2"
              Padding="20">
-    <StackPanel MinWidth="300" Spacing="10">
-        <Button Content="Add new Asset"
-                Height="44"
-                FontSize="18"
-                Command="{Binding AddNewAssetCommand}"/>
-        <Button Content="Import Assets"
-                Height="44"
-                FontSize="18"
-                Command="{Binding ImportAssetsCommand}"/>
-        <Button Content="Export Assets"
-                Height="44"
-                FontSize="18"
-                Command="{Binding ExportAssetsCommand}"/>
-        <Button Content="Cancel"
-                Height="44"
-                FontSize="18"
-                Command="{Binding CancelCommand}"/>
-    </StackPanel>
+        <UserControl.Styles>
+        <Style Selector="Button.action-secondary">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Background" Value="#EEEEEE"/>
+            <Setter Property="Foreground" Value="#E06020"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+                
+        </UserControl.Styles>
+        <StackPanel Spacing="10">
+                <Button Content="Add new Asset"
+                        Classes="action-secondary"
+                        Command="{Binding AddNewAssetCommand}"/>
+                <Button Content="Import Assets"
+                        Classes="action-secondary"
+                        Command="{Binding ImportAssetsCommand}"/>
+                <Button Content="Export Assets"
+                        Classes="action-secondary"
+                        Command="{Binding ExportAssetsCommand}"/>
+                <Button Content="Cancel"
+                        Classes="action-secondary"
+                        Command="{Binding CancelCommand}"/>
+        </StackPanel>
 </UserControl>

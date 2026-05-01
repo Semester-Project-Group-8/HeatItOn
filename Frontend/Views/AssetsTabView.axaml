@@ -65,6 +65,7 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Height" Value="48"/>
+            <Setter Property="Width" Value="180"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="BorderThickness" Value="0"/>
         </Style>
@@ -157,22 +158,11 @@
                                     Command="{Binding StartOptimization}"
                                     Content="▶  OPTIMIZE"/>
 
-                            <Button Classes="action-secondary"
-                                    Command="{Binding OpenAddAssetDialogCommand}"
-                                    Content="+ Add Asset"/>
-
-                            <Button Classes="action-secondary"
-                                    Command="{Binding ImportAssets}"
-                                    Content="↑ Import CSV"/>
-
-                            <Button Classes="action-secondary"
-                                    Command="{Binding ExportAssets}"
-                                    Content="↓ Export CSV"/>
-                            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
-                                <Button Grid.Column="0" Content="Manager" Width="150" Height="50" FontSize="30"
-                                        Command="{Binding OpenManagerButtonViewCommand}"/>
-                                <Button Command="{Binding StartOptimizationCommand}" Grid.Column="2" Content="Optimize" Width="150" Height="50" FontSize="30"/>
-                            </Grid>
+                            
+                            <Button Grid.Column="0" Content="MANAGER"  Classes="action-primary"
+                                    Command="{Binding OpenManagerButtonViewCommand}"/>
+                                
+                            
                             <Rectangle Height="1" Fill="#E8E8E8" Margin="0,8,0,0"/>
 
                         </StackPanel>
