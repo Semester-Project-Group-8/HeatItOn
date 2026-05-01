@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
 using Frontend.Models;
@@ -17,9 +18,7 @@ using SkiaSharp;
 
 namespace Frontend.ViewModels;
 
-public class ResultsTabViewModel : 
-    INotifyPropertyChanged,
-    IRefreshable
+public class ResultsTabViewModel : INotifyPropertyChanged
 {
     private readonly OptimizedResultsClient _client;
     private List<ResultTableRow> _allRows = [];
@@ -205,14 +204,17 @@ public class ResultsTabViewModel :
     public event PropertyChangedEventHandler? PropertyChanged;
 
 
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         var results = await _client.GetAll();
-        OptimizedResults.Clear();
-        if (results != null)
-            foreach (var r in results)
-                OptimizedResults.Add(r);
-        OnPropertyChanged(nameof(HasNoOptimizedResults));
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            OptimizedResults.Clear();
+            if (results != null)
+                foreach (var r in results)
+                    OptimizedResults.Add(r);
+            OnPropertyChanged(nameof(HasNoOptimizedResults));
+        });
     }
 
     public void Export()
@@ -228,12 +230,12 @@ public class ResultsTabViewModel :
         if (SelectedOptimizedResult == null)
             return;
 
-        var hours = SelectedOptimizedResult.ResultsForHours
+        var hours = (SelectedOptimizedResult.ResultsForHours ?? [])
             .OrderBy(r => r.TimeFrom)
             .ToList();
 
         RebuildCharts(hours);
-        _allRows = SelectedOptimizedResult.ResultsForHours
+        _allRows = (SelectedOptimizedResult.ResultsForHours ?? [])
             .OrderBy(r => r.TimeFrom)
             .Select(resultList =>
             {
@@ -247,7 +249,7 @@ public class ResultsTabViewModel :
                     ActiveAssets = string.Join(
                         "; ",
                         resultList.Results
-                            .Select(r => r.Asset.Name)
+                            .Select(r => r.Asset?.Name)
                             .Where(n => !string.IsNullOrWhiteSpace(n))
                             .Distinct()
                     ),
@@ -291,7 +293,7 @@ public class ResultsTabViewModel :
     {
         if (SelectedOptimizedResult == null)
             return;
-        var filteredHours = SelectedOptimizedResult.ResultsForHours
+        var filteredHours = (SelectedOptimizedResult.ResultsForHours ?? [])
             .Where(h => h.TimeFrom >= from && h.TimeFrom <= to)
             .OrderBy(h => h.TimeFrom)
             .ToList();
