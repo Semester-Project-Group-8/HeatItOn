@@ -237,9 +237,4 @@ public class SourceTabViewModel : ViewModelBase
             ScalesYAt = 1
         });
     }
-
-    public void Refresh()
-    {
-        _ = LoadAsync();
-    }
 }
