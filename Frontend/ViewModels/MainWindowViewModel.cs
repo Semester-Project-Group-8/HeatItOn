@@ -1,29 +1,63 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using Frontend.Data;
+using Microsoft.AspNetCore.SignalR.Client;
+using Tmds.DBus.Protocol;
 
 namespace Frontend.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private readonly List<IRefreshable> _tabs = [];
-    public SourceTabViewModel SourceTab => _tabs[0] as SourceTabViewModel ?? throw new InvalidOperationException();
-    public AssetsTabViewModel AssetsTab => _tabs[1] as AssetsTabViewModel ?? throw new InvalidOperationException();
-    public ResultsTabViewModel ResultTab => _tabs[2] as ResultsTabViewModel ?? throw new InvalidOperationException();
+    private HubConnection? _connection;
+    public SourceTabViewModel SourceTab {get; private set;}
+    public AssetsTabViewModel AssetsTab  {get; private set;}
+    public ResultsTabViewModel ResultTab   {get; private set;}
 
     public MainWindowViewModel(
         SourceClient sourceClient,
-        AssetClient assetClient, 
+        AssetClient assetClient,
         OptimizerClient optimizerClient,
         OptimizedResultsClient optimizedResultsClient)
     {
-        _tabs.Add(new SourceTabViewModel(sourceClient));
-        _tabs.Add(new AssetsTabViewModel(sourceClient, assetClient, optimizerClient));
-        _tabs.Add(new ResultsTabViewModel(optimizedResultsClient));
+        SourceTab = new SourceTabViewModel(sourceClient);
+        AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient);
+        ResultTab = new ResultsTabViewModel(optimizedResultsClient);
+        _ = InitializeSignalRAsync();
     }
 
-    public void Refresh()
+    private async Task InitializeSignalRAsync()
     {
-        _tabs.ForEach(t => t.Refresh());
+        try
+        {
+            _connection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:8080/datahub")
+                .WithAutomaticReconnect()
+                .Build();
+
+            _connection.On<string>("ReceiveMessage", async message =>
+            {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    Debug.WriteLine($"Signal received: {message}. Refreshing UI data...");
+
+                    _ = message switch
+                    {
+                        "Asset" => AssetsTab.LoadFromBackendAsync(),
+                        "Source" => SourceTab.LoadAsync(),
+                        "Optimized" => ResultTab.LoadAsync(),
+                        _ => null
+                    };
+                });
+            });
+
+            await _connection.StartAsync();
+            Console.WriteLine("Connected to SignalR Hub!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SignalR connection failed: {ex.Message}");
+        }
     }
 }
