@@ -55,7 +55,7 @@ namespace Backend.Controllers
                     HeatDemand = source.HeatDemand,
                     ElectricityPrice = source.ElectricityPrice
                 };
-                await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+                await _sourceService.Post([s]);
                 return Created($"/Source/{s.Id}", new { Id = s.Id, TimeFrom = s.TimeFrom, TimeTo = s.TimeTo, HeatDemand = s.HeatDemand, ElectricityPrice = s.ElectricityPrice });
             }
             catch (InvalidOperationException ex)
@@ -63,27 +63,8 @@ namespace Backend.Controllers
                 return Conflict(new { message = ex.Message });
             }
         }
-        [HttpGet("Month/{month:int}")]
-        public async Task<IActionResult> GetByMonth(int month)
-        {
-            try
-            {
-                var Sources = await _sourceService.ListByMonth(month);
-                return Ok(Sources);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(503, new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("{date:DateTime}")]
-        public async Task<IActionResult> GetByHour(DateTime date)
-        {
-            var Sources = await _sourceService.ListByHour(date);
-            return Ok(Sources);
-        }
-
+        
+        
         [HttpPut("Update/{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] Source source)
         {

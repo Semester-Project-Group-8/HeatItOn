@@ -17,7 +17,7 @@ namespace Backend.Services
 			return await _dbContext.Results.ToListAsync();
 		}
 
-		public async Task<int> AddResult(List<Result> result)
+		public async Task<int> Post(List<Result> result)
 		{
 			if (result == null || result.Count == 0)
 			{
@@ -29,27 +29,17 @@ namespace Backend.Services
 		}
 
 		// GetResultById
-		public async Task<List<Result>> Get(int id)
+		public async Task<Result> Get(int id)
 		{
 			var result = await _dbContext.Results.FindAsync(id);
 			if (result == null)
 				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
-			return new List<Result> { result };
-		}
-
-		// GetResultByAssetId
-		public async Task<Result> GetResultByAssetId(int assetId)
-		{
-			var result = await _dbContext.Results.FirstOrDefaultAsync(r => r.AssetId == assetId);
-			if (result == null)
-				throw new KeyNotFoundException($"Error | Result with Asset id {assetId} not found.");
 			return result;
 		}
 
-		// AddResult ( for a single result )
 		public Task<Result> Post() => throw new NotSupportedException("Use AddResult instead.");
 
-		public async Task<int> AddResult(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
+		public async Task<int> Post(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
 		{
 			Result result = new Result
 			{

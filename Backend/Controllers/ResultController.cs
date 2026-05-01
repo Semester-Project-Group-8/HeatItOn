@@ -33,7 +33,7 @@ namespace Backend.Controllers
             try
             {
                 var results = await _resultService.Get(id);
-                return Ok(results.First());
+                return Ok(results);
             }
 
             catch (KeyNotFoundException ex)
@@ -44,11 +44,11 @@ namespace Backend.Controllers
 
         // GetResultByAssetId
         [HttpGet("Asset/{assetId:int}")]
-        public async Task<IActionResult> GetResultByAsset(int assetId)
+        public async Task<IActionResult> GetByAssetId(int assetId)
         {
             try
             {
-                var result = await _resultService.GetResultByAssetId(assetId);
+                var result = await _resultService.Get(assetId);
                 return Ok(result);
             }
 
@@ -62,7 +62,7 @@ namespace Backend.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> Post([FromBody] Result incomingResult)
         {
-            var rowsAffected = await _resultService.AddResult(
+            var rowsAffected = await _resultService.Post(
                 incomingResult.Id,
                 incomingResult.HeatProduction,
                 incomingResult.Electricity,
@@ -84,7 +84,7 @@ namespace Backend.Controllers
         [HttpPost("AddList")]
         public async Task<IActionResult> AddResultList([FromBody] List<Result> results)
         {
-            var rowsAffected = await _resultService.AddResult(results);
+            var rowsAffected = await _resultService.Post(results);
             if (rowsAffected > 0)
             {
                 return Ok(new { Message = $"{results.Count} results added successfully." });
@@ -99,7 +99,7 @@ namespace Backend.Controllers
         {
             try
             {
-                var rowsAffected = await _resultService.UpdateResult(
+                var rowsAffected = await _resultService.Post(
                     id,
                     incomingResult.HeatProduction,
                     incomingResult.Electricity,
