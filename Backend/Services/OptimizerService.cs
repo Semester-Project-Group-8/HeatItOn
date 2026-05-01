@@ -51,7 +51,7 @@ namespace Backend.Services
         }
         public async Task<ActionResult<OptimizedResults>> Optimize(List<Asset> scenarioAssets)
         {
-            var allSources = (await _sourceService.ListSources())
+            var allSources = (await _sourceService.List())
                 .OrderBy(s => s.TimeFrom)
                 .ToList();
             OptimizedResults finalResults = new OptimizedResults

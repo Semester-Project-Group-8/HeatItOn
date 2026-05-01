@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,8 @@ using Frontend.Interfaces;
 
 namespace Frontend.ViewModels;
 
-public partial class SourceTabViewModel : 
+public class SourceTabViewModel : ViewModelBase
+public partial class SourceTabViewModel :
     ViewModelBase,
     IRefreshable
 {
@@ -26,7 +28,63 @@ public partial class SourceTabViewModel :
     // Sources
     private readonly ObservableCollection<Source> _allSources = [];
     public ObservableCollection<Source> Sources { get; } = [];
+    public ObservableCollection<Source> PagedSources { get; } = [];
     private Source? _selectedSource;
+
+    // Pagination
+    private int _currentPage = 1;
+    private const int PageSize = 15;
+
+    public int TotalPages => Math.Max(1, (int)Math.Ceiling(Sources.Count / (double)PageSize));
+    public bool CanGoPrev => _currentPage > 1;
+    public bool CanGoNext => _currentPage < TotalPages;
+    public string PageInfo => Sources.Count == 0
+        ? "No rows to display"
+        : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, Sources.Count)} of {Sources.Count} rows";
+    public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
+
+    public void NextPage()
+    {
+        if (!CanGoNext) return;
+        _currentPage++;
+        NotifyPageChange();
+        RefreshPagedSources();
+    }
+
+    public void PrevPage()
+    {
+        if (!CanGoPrev) return;
+        _currentPage--;
+        NotifyPageChange();
+        RefreshPagedSources();
+    }
+
+    public void GoToPage(object? page)
+    {
+        if (page is not int p) return;
+        if (p < 1 || p > TotalPages) return;
+        _currentPage = p;
+        NotifyPageChange();
+        RefreshPagedSources();
+    }
+
+    private void NotifyPageChange()
+    {
+        OnPropertyChanged(nameof(CurrentPage));
+        OnPropertyChanged(nameof(CanGoPrev));
+        OnPropertyChanged(nameof(CanGoNext));
+        OnPropertyChanged(nameof(PageInfo));
+        OnPropertyChanged(nameof(PageNumbers));
+    }
+
+    public int CurrentPage => _currentPage;
+
+    private void RefreshPagedSources()
+    {
+        PagedSources.Clear();
+        foreach (var s in Sources.Skip((_currentPage - 1) * PageSize).Take(PageSize))
+            PagedSources.Add(s);
+    }
 
     // Uploaded files
     public ObservableCollection<string> Files { get; } = [];
@@ -108,25 +166,32 @@ public partial class SourceTabViewModel :
                 MaxLimit = null
             }
         ];
-        _ = LoadFromBackend();
+        _ = LoadAsync();
     }
 
-    private async Task LoadFromBackend()
+    public async Task LoadAsync()
     {
         try
         {
-            var sources = await _client.GetAll();
+            var sources = await _client.GetAll() ?? [];
 
-            foreach (var source in sources)
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                source.FileName ??= "source.csv";
-                _allSources.Add(source);
+                _allSources.Clear();
+                Sources.Clear();
+                Files.Clear();
 
-                if (!Files.Contains(source.FileName))
-                    Files.Add(source.FileName);
-            }
+                foreach (var source in sources)
+                {
+                    source.FileName ??= "source.csv";
+                    _allSources.Add(source);
 
-            SelectedFile = Files.FirstOrDefault();
+                    if (!Files.Contains(source.FileName))
+                        Files.Add(source.FileName);
+                }
+
+                SelectedFile = Files.FirstOrDefault();
+            });
         }
         catch (Exception e)
         {
@@ -144,6 +209,10 @@ public partial class SourceTabViewModel :
         foreach (var source in _allSources.Where(s => s.FileName == SelectedFile))
             Sources.Add(source);
 
+        _currentPage = 1;
+        NotifyPageChange();
+        RefreshPagedSources();
+
         Dispatcher.UIThread.Post(() =>
         {
             BuildWinterSeries();
@@ -156,9 +225,9 @@ public partial class SourceTabViewModel :
         SourceCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
     }
 
-    public async Task Import()
+    public void Import()
     {
-        await SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
+            _ = SourceCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)
@@ -231,10 +300,5 @@ public partial class SourceTabViewModel :
             GeometrySize = 0,
             ScalesYAt = 1
         });
-    }
-
-    public void Refresh()
-    {
-        _ = LoadFromBackend();
     }
 }

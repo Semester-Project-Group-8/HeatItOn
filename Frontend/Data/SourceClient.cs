@@ -32,10 +32,10 @@ public class SourceClient : IClient<Source>
         return result ?? new List<Source>();
     }
 
-    public async Task Post(Source source)
+    public async Task<HttpContent> PostList(List<Source> source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
-        response.EnsureSuccessStatusCode();
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
+        return response.Content;
     }
 
     public async Task Update(Source source)

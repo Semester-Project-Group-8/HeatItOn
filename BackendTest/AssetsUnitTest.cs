@@ -39,7 +39,7 @@ public class AssetServiceTests : IDisposable
         );
 
         Assert.Equal(1, result);
-        var savedAsset = await _assetService.GetAsset(1);
+        var savedAsset = (await _assetService.Get(1)).First();
         Assert.Equal("Boiler", savedAsset.Name);
     }
 
@@ -58,7 +58,7 @@ public class AssetServiceTests : IDisposable
         );
 
         Assert.NotEqual(3, result);
-        var savedAsset = await _assetService.GetAsset(1);
+        var savedAsset = (await _assetService.Get(1)).First();
         Assert.NotEqual("MashaBoss", savedAsset.Name);
     }
 
@@ -93,7 +93,7 @@ public class AssetServiceTests : IDisposable
         };
         await _assetService.AddAssets(assets);
 
-        var result = await _assetService.ListAssets();
+        var result = await _assetService.List();
 
         Assert.Equal(2, result.Count());
     }
@@ -112,7 +112,7 @@ public class AssetServiceTests : IDisposable
         };
         await _assetService.AddAssets(assets);
 
-        var result = await _assetService.ListAssets();
+        var result = await _assetService.List();
 
         Assert.NotEqual(5, result.Count());
     }
@@ -122,7 +122,7 @@ public class AssetServiceTests : IDisposable
     {
         await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50);
 
-        var result = await _assetService.GetAsset(1);
+        var result = (await _assetService.Get(1)).First();
 
         Assert.NotNull(result);
         Assert.Equal("Test Asset", result.Name);
@@ -134,7 +134,7 @@ public class AssetServiceTests : IDisposable
     {
         await _assetService.AddAsset(1, "Test Asset", 100, 5000, 50, 10, 5, 50);
 
-        var result = await _assetService.GetAsset(1);
+        var result = (await _assetService.Get(1)).First();
 
         Assert.NotEqual("Test Asset1111", result.Name);
         Assert.NotEqual(1000, result.MaxHeat);
@@ -145,10 +145,9 @@ public class AssetServiceTests : IDisposable
     {
         await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50);
 
-        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55);
+        await _assetService.Put(1, new Asset { Name = "New Name", MaxHeat = 150, ProductionCost = 6000, CO2Emission = 60, GasConsumption = 12, OilConsumption = 6, MaxElectricity = 55 });
 
-        Assert.Equal(1, result);
-        var updatedAsset = await _assetService.GetAsset(1);
+        var updatedAsset = (await _assetService.Get(1)).First();
         Assert.Equal("New Name", updatedAsset.Name);
         Assert.Equal(150, updatedAsset.MaxHeat);
     }
@@ -158,10 +157,9 @@ public class AssetServiceTests : IDisposable
     {
         await _assetService.AddAsset(1, "Old Name", 100, 5000, 50, 10, 5, 50);
 
-        var result = await _assetService.UpdateAsset(1, "New Name", 150, 6000, 60, 12, 6, 55);
+        await _assetService.Put(1, new Asset { Name = "New Name", MaxHeat = 150, ProductionCost = 6000, CO2Emission = 60, GasConsumption = 12, OilConsumption = 6, MaxElectricity = 55 });
 
-        Assert.NotEqual(2, result);
-        var updatedAsset = await _assetService.GetAsset(1);
+        var updatedAsset = (await _assetService.Get(1)).First();
         Assert.NotEqual("Masha star", updatedAsset.Name);
         Assert.NotEqual(1, updatedAsset.MaxHeat);
     }
@@ -170,7 +168,7 @@ public class AssetServiceTests : IDisposable
     public async Task UpdateNonExistentAsset_EdgeCase()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await _assetService.UpdateAsset(999, "Name", 100, 5000, 50, 10, 5, 50));
+            await _assetService.Put(999, new Asset { Name = "Name", MaxHeat = 100, ProductionCost = 5000, CO2Emission = 50, GasConsumption = 10, OilConsumption = 5, MaxElectricity = 50 }));
     }
 
     [Fact]
@@ -178,15 +176,15 @@ public class AssetServiceTests : IDisposable
     {
         await _assetService.AddAsset(1, "Test", 100, 5000, 50, 10, 5, 50);
 
-        await _assetService.DeleteAsset(1);
+        await _assetService.Delete(1);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _assetService.GetAsset(1));
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _assetService.Get(1));
     }
 
     [Fact]
     public async Task DeleteNonExistentAsset_EdgeCase()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _assetService.DeleteAsset(999));
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _assetService.Delete(999));
     }
 
     [Fact]
@@ -205,7 +203,7 @@ public class AssetServiceTests : IDisposable
         var result = await _assetService.AddAssets(assets);
 
         Assert.Equal(2, result);
-        var allAssets = await _assetService.ListAssets();
+        var allAssets = await _assetService.List();
         Assert.Equal(2, allAssets.Count());
     }
 
@@ -225,7 +223,7 @@ public class AssetServiceTests : IDisposable
         var result = await _assetService.AddAssets(assets);
 
         Assert.NotEqual(6, result);
-        var allAssets = await _assetService.ListAssets();
+        var allAssets = await _assetService.List();
         Assert.NotEqual(1, allAssets.Count());
     }
 

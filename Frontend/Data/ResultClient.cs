@@ -28,7 +28,7 @@ public class ResultClient : IClient<Result>
         HttpResponseMessage response = await _client.GetAsync("");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Result>>();
-        return result;
+        return result ?? [];
     }
 
     public async Task Post(Result result)

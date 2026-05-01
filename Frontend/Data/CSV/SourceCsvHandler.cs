@@ -12,43 +12,47 @@ namespace Frontend.Data.CSV
     static class SourceCsvHandler
     { 
         
-        public static async Task ImportCsv(string location, IClient<Source> sourceClient) 
-        { 
-            List<Source> Sources = new List<Source>();
-            using (TextFieldParser parser = new TextFieldParser(location))
+        public static async Task ImportCsv(string location, IClient<Source> sourceClient)
+        {
+            try
             {
-                parser.SetDelimiters(",");
-                parser.HasFieldsEnclosedInQuotes = true;
-                while (!parser.EndOfData)
+                List<Source> Sources = new List<Source>();
+                using (TextFieldParser parser = new TextFieldParser(location))
                 {
-                    string[]? fields = parser.ReadFields();
-                    if (fields != null)
+                    parser.SetDelimiters(",");
+                    parser.HasFieldsEnclosedInQuotes = true;
+                    
+                    while (!parser.EndOfData)
                     {
-                        int i = 0;
-                        while (i < fields.Length)
+                        string[]? fields = parser.ReadFields();
+                        if (fields != null)
                         {
-                            if (IsDate(fields[i]))
+                            int i = 0;
+                            while (i < fields.Length)
                             {
-                                Source source = SourceConverter(fields[i], fields[i + 1], fields[i + 2], fields[i + 3]);
-                                Sources.Add(source);
-                                i = i + 3;
+                                if (IsDate(fields[i]))
+                                {
+                                    Source source = SourceConverter(fields[i], fields[i + 1], fields[i + 2], fields[i + 3]);
+                                    Sources.Add(source);
+                                    i = i + 3;
+                                }
+                                i++;
                             }
-                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine("error | read failed >> no fields found");
                         }
                     }
-                    else
-                    {
-                        Console.WriteLine("error | read failed >> no fields found");
-                    }
                 }
+
+                var asd = await sourceClient.PostList(Sources);
                 Console.WriteLine("completed | csv file read");
             }
-            List<Task> insertedSources = new List<Task>();
-            foreach (var source in Sources)
+            catch (Exception exception)
             {
-                insertedSources.Add(sourceClient.Post(source));
+                Console.WriteLine(exception);
             }
-            await Task.WhenAll(insertedSources);
         }
         private static bool IsDate(string value)
         {

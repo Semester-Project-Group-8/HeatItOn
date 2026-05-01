@@ -38,7 +38,10 @@ namespace Frontend.Data.CSV
 
         public static async Task ImportCsv(string location, IClient<Asset> assetClient)
         {
-            List<Asset> assetsToImport = new List<Asset>();
+            if (!System.IO.File.Exists(location))
+                throw new System.IO.FileNotFoundException($"Asset CSV file not found: {location}");
+
+            List<Asset> Assets = new List<Asset>();
 
             using (TextFieldParser parser = new TextFieldParser(location))
             {

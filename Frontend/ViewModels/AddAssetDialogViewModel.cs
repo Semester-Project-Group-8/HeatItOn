@@ -69,7 +69,7 @@ public class AddAssetDialogViewModel : ViewModelBase
         private set => SetProperty(ref _isEditMode, value);
     }
 
-    public string Image
+    public string? Image
     {
         get => _image;
         set => SetProperty(ref _image, value);
