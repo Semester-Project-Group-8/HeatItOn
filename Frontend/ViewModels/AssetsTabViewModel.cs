@@ -6,11 +6,16 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using Frontend.Models;
 using System.IO;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 
 namespace Frontend.ViewModels;
 
@@ -24,16 +29,42 @@ public class AssetsTabViewModel : ViewModelBase
     private bool _isScenario2Selected;
     private bool _isCustomScenarioSelected;
     private AddAssetDialogViewModel? _currentDialog;
+    private ManagerButtonViewModel? _currentManagerDialog;
 
     public ObservableCollection<AssetCardItem> AssetItems { get; } = new();
     public bool HasAssets => AssetItems.Count > 0;
     public ICommand OpenAddAssetDialogCommand { get; }
+    public ICommand OpenManagerButtonViewCommand { get; }
+    public ICommand StartOptimizationCommand { get; }
     
     public AddAssetDialogViewModel? CurrentDialog
     {
         get => _currentDialog;
-        private set => SetProperty(ref _currentDialog, value);
+        private set
+        {
+            if (SetProperty(ref _currentDialog, value))
+            {
+                OnPropertyChanged(nameof(HasOpenDialog));
+                OnPropertyChanged(nameof(IsUiEnabled));
+            }
+        }
     }
+
+    public ManagerButtonViewModel? CurrentManagerDialog
+    {
+        get => _currentManagerDialog;
+        private set
+        {
+            if (SetProperty(ref _currentManagerDialog, value))
+            {
+                OnPropertyChanged(nameof(HasOpenDialog));
+                OnPropertyChanged(nameof(IsUiEnabled));
+            }
+        }
+    }
+
+    public bool HasOpenDialog => CurrentDialog != null || CurrentManagerDialog != null;
+    public bool IsUiEnabled => !HasOpenDialog;
 
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
     public string StatusMessage
@@ -82,8 +113,37 @@ public class AssetsTabViewModel : ViewModelBase
         _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAssets));
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
+        OpenManagerButtonViewCommand = new RelayCommand(OpenManagerButtonView);
+        StartOptimizationCommand = new RelayCommand(StartOptimization);
         _ = LoadFromBackendAsync();
     }
+
+    private void OpenManagerButtonView()
+    {
+        var managerVm = new ManagerButtonViewModel();
+        managerVm.AddRequested += () =>
+        {
+            CurrentManagerDialog = null;
+            OpenAddAssetDialog();
+        };
+        managerVm.ImportRequested += () =>
+        {
+            CurrentManagerDialog = null;
+            _ = ImportAssets();
+        };
+        managerVm.ExportRequested += () =>
+        {
+            CurrentManagerDialog = null;
+            ExportAssets();
+        };
+        managerVm.CancelRequested += () =>
+        {
+            CurrentManagerDialog = null;
+        };
+
+        CurrentManagerDialog = managerVm;
+    }
+
     public async void StartOptimization()
     {
         try
@@ -103,13 +163,34 @@ public class AssetsTabViewModel : ViewModelBase
            Console.WriteLine(e); 
         }
     }
-    public void ImportAssets()
+    public async Task ImportAssets()
     {
-        AssetCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
+        try
+        {
+            var csvPath = Path.Combine(AppContext.BaseDirectory, "assets.csv");
+            await AssetCsvHandler.ImportCsv(csvPath, _assetClient);
+            await LoadFromBackendAsync();
+            StatusMessage = "Assets imported successfully.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Import failed: {ex.Message}";
+            Console.WriteLine($"Error importing assets: {ex}");
+        }
     }
+
     public void ExportAssets()
     {
-        AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+        try
+        {
+            AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+            StatusMessage = "Assets exported to assets_export.csv.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+            Console.WriteLine($"Error exporting assets: {ex}");
+        }
     }
 
     private void OpenAddAssetDialog()
@@ -255,12 +336,28 @@ public class AssetsTabViewModel : ViewModelBase
         if (asset.MaxElectricity != 0)
             details.Add($"Max electricity: {FormatDecimal(asset.MaxElectricity)} MW");
 
-        var cardItem = new AssetCardItem(
+        var assetType = DeriveAssetType(asset.Name);
+        var electricityDisplay = asset.MaxElectricity == 0 ? "—"
+            : $"{(asset.MaxElectricity > 0 ? "+" : "")}{FormatDecimal(asset.MaxElectricity)} MW";
+
+        return new AssetCardItem(
             string.IsNullOrWhiteSpace(asset.Name) ? $"Asset {asset.Id}" : asset.Name,
-                LoadFromResource(string.IsNullOrWhiteSpace(asset.ImageName) ? "placeholder.png" : asset.ImageName),
-                details,
-                asset);
-        return cardItem;
+            LoadFromResource(string.IsNullOrWhiteSpace(asset.ImageName) ? "placeholder.png" : asset.ImageName),
+            details,
+            assetType,
+            $"{FormatDecimal(asset.MaxHeat)} MW",
+            $"{asset.ProductionCost} DKK",
+            $"{asset.CO2Emission} kg",
+            electricityDisplay,
+            asset);
+    }
+
+    private static string DeriveAssetType(string name)
+    {
+        if (name.Contains("Motor", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
+        if (name.Contains("Electric", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
+        if (name.Contains("Oil", StringComparison.OrdinalIgnoreCase)) return "OIL";
+        return "GAS";
     }
 
     private static string FormatDecimal(float value)
@@ -284,23 +381,84 @@ public class AssetCardItem : ViewModelBase
 {
     private bool _isSelected;
 
+    private static readonly IBrush SelectedBorderBrush = new SolidColorBrush(Color.Parse("#E06020"));
+    private static readonly IBrush UnselectedBorderBrush = new SolidColorBrush(Color.Parse("#E0E0E0"));
+
     public string Name { get; }
     public Bitmap ImagePath { get; }
     public IReadOnlyList<string> Details { get; }
     public Asset? OriginalAsset { get; }
     public ICommand? EditCommand { get; set; }
 
+    public string AssetType { get; }
+    public IBrush TypeAccentBrush { get; }
+    public IBrush BannerBrush { get; }
+    public string MaxHeatDisplay { get; }
+    public string CostDisplay { get; }
+    public string CO2Display { get; }
+    public string ElectricityDisplay { get; }
+
+    public IBrush CardBorderBrush => _isSelected ? SelectedBorderBrush : UnselectedBorderBrush;
+
     public bool IsSelected
     {
         get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
+        set
+        {
+            if (SetProperty(ref _isSelected, value))
+                OnPropertyChanged(nameof(CardBorderBrush));
+        }
     }
 
-    public AssetCardItem(string name, Bitmap imagePath, IReadOnlyList<string> details, Asset? originalAsset = null)
+    public AssetCardItem(string name, Bitmap imagePath, IReadOnlyList<string> details,
+        string assetType, string maxHeatDisplay, string costDisplay,
+        string co2Display, string electricityDisplay, Asset? originalAsset = null)
     {
         Name = name;
         ImagePath = imagePath;
         Details = details;
+        AssetType = assetType;
+        (TypeAccentBrush, BannerBrush) = GetTypeBrushes(assetType);
+        MaxHeatDisplay = maxHeatDisplay;
+        CostDisplay = costDisplay;
+        CO2Display = co2Display;
+        ElectricityDisplay = electricityDisplay;
         OriginalAsset = originalAsset;
     }
+
+    private static (IBrush accent, IBrush banner) GetTypeBrushes(string type) => type switch
+    {
+        "OIL" => (
+            new SolidColorBrush(Color.Parse("#8B6040")),
+            new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops { new GradientStop(Color.Parse("#D0C8BC"), 0), new GradientStop(Color.Parse("#EDE8E2"), 1) }
+            }),
+        "MOTOR" => (
+            new SolidColorBrush(Color.Parse("#6040A0")),
+            new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops { new GradientStop(Color.Parse("#C8C0E0"), 0), new GradientStop(Color.Parse("#E8E4F5"), 1) }
+            }),
+        "ELECTRIC" => (
+            new SolidColorBrush(Color.Parse("#208040")),
+            new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops { new GradientStop(Color.Parse("#B8D4C0"), 0), new GradientStop(Color.Parse("#DCF0E3"), 1) }
+            }),
+        _ => (
+            new SolidColorBrush(Color.Parse("#E06020")),
+            new LinearGradientBrush
+            {
+                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                GradientStops = new GradientStops { new GradientStop(Color.Parse("#BFD9EE"), 0), new GradientStop(Color.Parse("#E5F0F8"), 1) }
+            })
+    };
 }

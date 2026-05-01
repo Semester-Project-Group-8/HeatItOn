@@ -1,13 +1,14 @@
 ﻿using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
 {
     [Route("Source")]
     [ApiController]
-    public class SourceController : ControllerBase
+    public class SourceController : ControllerBase, IController<Source, Source>
     {
         private readonly SourceService _sourceService;
         private readonly IHubContext<BackendHub> _hubContext;
@@ -18,12 +19,12 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllSources()
+        public async Task<IActionResult> List()
         {
             try
             {
-                var sources = await _sourceService.ListSources();
-                return Ok(sources);
+                var Sources = await _sourceService.List();
+                return Ok(Sources);
             }
             catch (InvalidOperationException ex)
             {
@@ -31,8 +32,22 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                var source = await _sourceService.Get(id);
+                return Ok(source);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
+
         [HttpPost("Add")]
-        public async Task<IActionResult> AddSource([FromBody] Source source)
+        public async Task<IActionResult> Post([FromBody] Source source)
         {
             try
             {
@@ -70,7 +85,7 @@ namespace Backend.Controllers
                 throw;
             }
         }
-        [HttpGet("{month:int}")]
+        [HttpGet("Month/{month:int}")]
         public async Task<IActionResult> GetByMonth(int month)
         {
             try
@@ -92,11 +107,11 @@ namespace Backend.Controllers
         }
 
         [HttpPut("Update/{id:int}")]
-        public async Task<IActionResult> UpdateSource(int id, [FromBody] Source source)
+        public async Task<IActionResult> Put(int id, [FromBody] Source source)
         {
             try
             {
-                await _sourceService.UpdateSource(id, source.TimeFrom, source.TimeTo, source.HeatDemand, source.ElectricityPrice);
+                await _sourceService.Put(id, source);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Ok(new { Message = "Source updated successfully." });
             }
@@ -111,11 +126,11 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("Delete/{id:int}")]
-        public async Task<IActionResult> DeleteSource(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                await _sourceService.DeleteSource(id);
+                await _sourceService.Delete(id);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Ok(new { Message = "Source deleted successfully." });
             }

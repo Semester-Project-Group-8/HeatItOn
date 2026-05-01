@@ -1,16 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
 namespace Backend.Services
 {
-    public class SourceService
+    public class SourceService:IService<Source>
     {
         private readonly BackendDbContext _dbContext;
         public SourceService(BackendDbContext dbContext)
         {
             _dbContext=dbContext;
         }
-        public async Task<IEnumerable<Source>> ListSources()
+
+        public async Task<List<Source>> List()
         {
             try
             {
@@ -42,6 +43,11 @@ namespace Backend.Services
         }
         public async Task<int> AddSource(int id, DateTime From, DateTime Til, float Heat, float Electro)
         {
+            if (Heat < 0)
+                throw new ArgumentException("Heat demand cannot be negative.");
+            if (From > Til)
+                throw new ArgumentException("From date must be before To date.");
+
             var exists = await _dbContext.Sources.AnyAsync(s => s.Id == id);
             if (exists)
                 throw new InvalidOperationException($"Source with ID {id} already exists.");
@@ -69,8 +75,19 @@ namespace Backend.Services
                 throw new InvalidOperationException($"Source with ID {id} already exists.");
             }
         }
+        public Task<Source> Post() => throw new NotSupportedException("Use AddSource instead.");
+
+        public async Task<List<Source>> Get(int id)
+        {
+            var source = await _dbContext.Sources.FindAsync(id);
+            if (source == null)
+                throw new KeyNotFoundException($"Source with ID {id} not found.");
+            return new List<Source> { source };
+        }
         public async Task<IEnumerable<Source>> ListByMonth(int month)
         {
+            if (month < 1 || month > 12)
+                throw new ArgumentException("Month must be between 1 and 12.");
             try
             {
                 return await _dbContext.Sources
@@ -84,6 +101,8 @@ namespace Backend.Services
 
         }
         public async Task<Source> GetSource(int id)
+
+        public async Task<Source> Get(int id)
         {
             var source = await _dbContext.Sources.FindAsync(id);
             if (source == null)
@@ -93,6 +112,7 @@ namespace Backend.Services
 
             return source;
         }
+
         public async Task<Source> ListByHour(DateTime date)
         {
             return await _dbContext.Sources
@@ -100,14 +120,12 @@ namespace Backend.Services
                         d.TimeFrom.Date == date.Date &&
                         d.TimeFrom.Hour == date.Hour);
         }
-        //update function - get item by id, update item, save changes
-        public async Task<int> UpdateSource(int id, DateTime From, DateTime Til, float Heat, float Electro)
+
+        public async Task Put(int id, DateTime From, DateTime Til, float Heat, float Electro)
         {
             var source = await _dbContext.Sources.FindAsync(id);
             if (source == null)
-            {
                 throw new KeyNotFoundException($"Source with ID {id} not found.");
-            }
 
             source.TimeFrom = From;
             source.TimeTo = Til;
@@ -120,22 +138,42 @@ namespace Backend.Services
                 var result = await _dbContext.SaveChangesAsync();
                 if (result <= 0)
                     throw new InvalidOperationException("Source was not updated.");
-
-                return result;
             }
             catch (DbUpdateException)
             {
                 throw new InvalidOperationException($"Source with ID {id} could not be updated due to a database error.");
             }
         }
-        //delete - get item by id, delete item, save changes
-        public async Task<int> DeleteSource(int id)
+        public async Task Put(int id, Source value)
         {
             var source = await _dbContext.Sources.FindAsync(id);
             if (source == null)
-            {
                 throw new KeyNotFoundException($"Source with ID {id} not found.");
+
+            source.TimeFrom = value.TimeFrom;
+            source.TimeTo = value.TimeTo;
+            source.HeatDemand = value.HeatDemand;
+            source.ElectricityPrice = value.ElectricityPrice;
+
+            try
+            {
+                _dbContext.Sources.Update(source);
+                var result = await _dbContext.SaveChangesAsync();
+                if (result <= 0)
+                    throw new InvalidOperationException("Source was not updated.");
+
             }
+            catch (DbUpdateException)
+            {
+                throw new InvalidOperationException($"Source with ID {id} could not be updated due to a database error.");
+            }
+        }
+
+        public async Task Delete(int id)
+        {
+            var source = await _dbContext.Sources.FindAsync(id);
+            if (source == null)
+                throw new KeyNotFoundException($"Source with ID {id} not found.");
 
             try
             {
@@ -144,7 +182,6 @@ namespace Backend.Services
                 if (result <= 0)
                     throw new InvalidOperationException("Source was not deleted.");
 
-                return result;
             }
             catch (DbUpdateException)
             {

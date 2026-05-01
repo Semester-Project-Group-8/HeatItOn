@@ -1,13 +1,14 @@
 using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
 {
     [Route("Result")]
     [ApiController]
-    public class ResultController : ControllerBase
+    public class ResultController : ControllerBase, IController<Result, Result>
     {
         private readonly ResultService _resultService;
         private readonly IHubContext<BackendHub> _hubContext;
@@ -17,11 +18,11 @@ namespace Backend.Controllers
             _hubContext = hubContext;
         }
 
-        // GetAllResults
+        // List
         [HttpGet]
-        public async Task<IActionResult> GetAllResults()
+        public async Task<IActionResult> List()
         {
-            var Results = await _resultService.ListResult();
+            var Results = await _resultService.List();
             if (Results == null)
             {
                 return NotFound("No results found.");
@@ -29,14 +30,14 @@ namespace Backend.Controllers
             return Ok(Results);
         }
 
-        // GetResultById
+        // Get
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetResult(int id)
+        public async Task<IActionResult> Get(int id)
         {
             try
             {
-                var result = await _resultService.GetResultById(id);
-                return Ok(result);
+                var results = await _resultService.Get(id);
+                return Ok(results.First());
             }
 
             catch (KeyNotFoundException ex)
@@ -61,9 +62,9 @@ namespace Backend.Controllers
             }
         }
 
-        // AddResult ( for a single result )
+        // Post (for a single result)
         [HttpPost("Add")]
-        public async Task<IActionResult> AddResult([FromBody] Result incomingResult) // Renamed to avoid collision
+        public async Task<IActionResult> Post([FromBody] Result incomingResult)
         {
             var rowsAffected = await _resultService.AddResult(
                 incomingResult.Id,
@@ -98,14 +99,14 @@ namespace Backend.Controllers
             return BadRequest("Failed to add the list of results.");
         }
 
-        // UpdateResult
+        // Put
         [HttpPut("Update/{id:int}")]
-        public async Task<IActionResult> UpdateResult(int id, [FromBody] Result incomingResult) // Renamed
+        public async Task<IActionResult> Put(int id, [FromBody] Result incomingResult)
         {
             try
             {
                 var rowsAffected = await _resultService.UpdateResult(
-                    incomingResult.Id,
+                    id,
                     incomingResult.HeatProduction,
                     incomingResult.Electricity,
                     incomingResult.ProductionCost,
@@ -128,19 +129,16 @@ namespace Backend.Controllers
             }
         }
 
-        // DeleteResult
+        // Delete
         [HttpDelete("Delete/{id:int}")]
-        public async Task<IActionResult> DeleteResult(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var rowsAffected = await _resultService.DeleteResult(id);
-                if (rowsAffected > 0)
-                {
-                    await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-                    return Ok(new { Message = "Result deleted successfully." });
-                }
-                return BadRequest("Failed to delete Result.");
+         
+                await _resultService.Delete(id);
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
+                return Ok(new { Message = "Result deleted successfully." });
             }
 
             catch (KeyNotFoundException ex)

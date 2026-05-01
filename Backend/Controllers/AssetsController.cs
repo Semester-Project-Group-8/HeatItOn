@@ -1,6 +1,7 @@
 using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -9,7 +10,7 @@ namespace Backend.Controllers
     [Route("Asset")]
     [ApiController]
 
-    public class AssetsController : ControllerBase
+    public class AssetsController : ControllerBase, IController<Asset, Asset>
     {
         private readonly AssetsService _assetsService;
         private readonly IHubContext<BackendHub> _hubContext;
@@ -20,11 +21,11 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAssets()
+        public async Task<IActionResult> List()
         {
             try
             {
-                var assets = await _assetsService.ListAssets();
+                var assets = await _assetsService.List();
                 return Ok(assets);
             }
             catch (InvalidOperationException ex)
@@ -34,12 +35,12 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAsset(int id)
+        public async Task<IActionResult> Get(int id)
         {
             try
             {
-                var asset = await _assetsService.GetAsset(id);
-                return Ok(asset);
+                var assets = await _assetsService.Get(id);
+                return Ok(assets.First());
             }
             catch (KeyNotFoundException)
             {
@@ -48,7 +49,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> AddAsset([FromBody] Asset asset)
+        public async Task<IActionResult> Post([FromBody] Asset asset)
         {
             try
             {
@@ -75,14 +76,13 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteAsset(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var asset = await _assetsService.GetAsset(id);
-                await _assetsService.DeleteAsset(id);
+                await _assetsService.Delete(id);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
-                return NoContent();
+                return Ok();
             }
             catch (KeyNotFoundException)
             {
@@ -95,11 +95,11 @@ namespace Backend.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateAsset(int id, [FromBody] Asset asset)
+        public async Task<IActionResult> Put(int id, [FromBody] Asset asset)
         {
             try
             {
-                await _assetsService.UpdateAsset(id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageName);
+                await _assetsService.Put(id, asset);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return Ok();
             }

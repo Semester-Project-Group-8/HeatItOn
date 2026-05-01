@@ -49,7 +49,7 @@ namespace BackendTest
                 oilConsumption: 5f,
                 maxElectricity: 0f
             );
-            Asset asset = await _assetsService.GetAsset(1);
+            Asset asset = (await _assetsService.Get(1)).First();
             Source s = new Source
             {
                 Id = 1,
@@ -76,7 +76,7 @@ namespace BackendTest
                 oilConsumption: 5f,
                 maxElectricity: 10f
             );
-            Asset asset = await _assetsService.GetAsset(1);
+            Asset asset = (await _assetsService.Get(1)).First();
             Source s = new Source
             {
                 Id = 1,
@@ -103,7 +103,7 @@ namespace BackendTest
                 oilConsumption: 5f,
                 maxElectricity: -10f
             );
-            Asset asset = await _assetsService.GetAsset(1);
+            Asset asset = (await _assetsService.Get(1)).First();
             Source s = new Source
             {
                 Id = 1,
@@ -131,7 +131,7 @@ namespace BackendTest
                 oilConsumption: 5f,
                 maxElectricity: 0f
             );
-            Asset asset = await _assetsService.GetAsset(1);
+            Asset asset = (await _assetsService.Get(1)).First();
             Source s = new Source
             {
                 Id = 1,
@@ -159,7 +159,7 @@ namespace BackendTest
                 oilConsumption: 5f,
                 maxElectricity: 0f
             );
-            Asset asset = await _assetsService.GetAsset(1);
+            Asset asset = (await _assetsService.Get(1)).First();
             Source s = new Source
             {
                 Id = 1,

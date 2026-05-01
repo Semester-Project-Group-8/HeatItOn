@@ -1,6 +1,7 @@
 using Backend.Hubs;
 using Backend.Models;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 namespace Backend.Controllers
@@ -8,7 +9,7 @@ namespace Backend.Controllers
     [Route("ResultList")]
     [ApiController]
 
-    public class ResultListController : ControllerBase
+    public class ResultListController : ControllerBase, IController<ResultList, ResultList>
     {
         private readonly ResultListService _resultListService;
         private readonly IHubContext<BackendHub> _hubContext;
@@ -19,7 +20,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllResultLists()
+        public async Task<IActionResult> List()
         {
             try
             {
@@ -33,7 +34,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetResultList(int id)
+        public async Task<IActionResult> Get(int id)
         {
             try
             {
@@ -46,7 +47,7 @@ namespace Backend.Controllers
             }
         }
         [HttpPost("Add")]
-        public async Task<IActionResult> AddResultList([FromBody] ResultList resultList)
+        public async Task<IActionResult> Post([FromBody] ResultList resultList)
         {
             List<ResultList> list = new List<ResultList> { resultList };
             var result = await _resultListService.AddResultList(list);
@@ -55,11 +56,17 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Adds")]
-        public async Task<IActionResult> AddResultList([FromBody] List<ResultList> resultLists)
+        public async Task<IActionResult> AddResultLists([FromBody] List<ResultList> resultLists)
         {
             var result = await _resultListService.AddResultList(resultLists);
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", "ResultList");
             return Ok(result);
+        }
+
+        [HttpPut("{id:int}")]
+        public Task<IActionResult> Put(int id, [FromBody] ResultList resultList)
+        {
+            return Task.FromResult<IActionResult>(StatusCode(StatusCodes.Status501NotImplemented, new { message = "Update is not supported for ResultList." }));
         }
 
         [HttpPost("Create")]
@@ -82,7 +89,7 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteResultList(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {

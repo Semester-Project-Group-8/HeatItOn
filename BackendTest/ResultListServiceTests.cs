@@ -60,7 +60,7 @@ public class ResultListServiceTests : IDisposable
         var saved = await _resultListService.GetResultList(id);
         Assert.Equal(new DateTime(2026, 4, 10, 8, 0, 0), saved.TimeFrom);
         Assert.Single(saved.Results);
-        Assert.Equal(0, saved.Results.First().Id);
+        Assert.Equal(1, saved.Results.First().Id);
         Assert.Equal(1, saved.Results.First().AssetId);
     }
 
