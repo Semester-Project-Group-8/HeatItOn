@@ -178,44 +178,6 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Border>
-                            <RadioButton Classes="scenario-card"
-                                         GroupName="Scenarios"
-                                         IsChecked="{Binding IsCustomScenarioSelected}">
-                                <StackPanel Spacing="4">
-                                    <TextBlock Text="CUSTOM"
-                                               Foreground="#E06020"
-                                               FontSize="10" FontWeight="Bold" LetterSpacing="1.5"/>
-                                    <TextBlock Text="CONFIGURE"
-                                               FontSize="16" FontWeight="Bold"/>
-                                    <TextBlock Text="Manually select assets for optimizer"
-                                               Foreground="#999999" FontSize="12"
-                                               TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </RadioButton>
-
-                            <Rectangle Height="1" Fill="#E8E8E8" Margin="0,12,0,16"/>
-
-                            <Button Classes="action-primary"
-                                    Command="{Binding StartOptimization}"
-                                    Content="▶  OPTIMIZE"/>
-
-                            <Button Classes="action-secondary"
-                                    Command="{Binding OpenAddAssetDialogCommand}"
-                                    Content="+ Add Asset"/>
-
-                            <Button Classes="action-secondary"
-                                    Command="{Binding ImportAssets}"
-                                    Content="↑ Import CSV"/>
-
-                            <Button Classes="action-secondary"
-                                    Command="{Binding ExportAssets}"
-                                    Content="↓ Export CSV"/>
-
-                            <Rectangle Height="1" Fill="#E8E8E8" Margin="0,8,0,0"/>
-
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
             </SplitView.Pane>
             <SplitView.Content>
                 <Grid RowDefinitions="Auto,*,Auto" Margin="5">
