@@ -98,9 +98,9 @@
     </UserControl.Styles>
 
     <Grid RowDefinitions="*">
-        <SplitView Grid.Row="0" IsPaneOpen="True" OpenPaneLength="340" PanePlacement="Left"
-                   DisplayMode="Inline"
-                   IsEnabled="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNull}}">
+        <SplitView Grid.Row="0" IsPaneOpen="True" OpenPaneLength="200" PanePlacement="Left"
+               DisplayMode="Inline"
+               IsEnabled="{Binding IsUiEnabled}">
             <SplitView.Pane>
                 <Border BorderBrush="#E8E8E8" BorderThickness="0,0,1,0">
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -168,7 +168,11 @@
                             <Button Classes="action-secondary"
                                     Command="{Binding ExportAssets}"
                                     Content="↓ Export CSV"/>
-
+                            <Grid Grid.Row="2" ColumnDefinitions="Auto,*,Auto" Margin="0,8,0,0">
+                                <Button Grid.Column="0" Content="Manager" Width="150" Height="50" FontSize="30"
+                                        Command="{Binding OpenManagerButtonViewCommand}"/>
+                                <Button Command="{Binding StartOptimizationCommand}" Grid.Column="2" Content="Optimize" Width="150" Height="50" FontSize="30"/>
+                            </Grid>
                             <Rectangle Height="1" Fill="#E8E8E8" Margin="0,8,0,0"/>
 
                         </StackPanel>
@@ -331,7 +335,7 @@
         <Panel Grid.Row="0" 
                Background="Black"
                Opacity="0.3"
-               IsVisible="{Binding CurrentDialog, Converter={x:Static ObjectConverters.IsNotNull}}"
+             IsVisible="{Binding HasOpenDialog}"
                IsHitTestVisible="True"/>
 
         <Panel Grid.Row="0"
@@ -340,6 +344,14 @@
                VerticalAlignment="Center"
                IsHitTestVisible="True">
             <v:AddAssetDialog DataContext="{Binding CurrentDialog}"/>
+        </Panel>
+
+        <Panel Grid.Row="0"
+               IsVisible="{Binding CurrentManagerDialog, Converter={x:Static ObjectConverters.IsNotNull}}"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center"
+               IsHitTestVisible="True">
+            <v:ManagerButtonView DataContext="{Binding CurrentManagerDialog}"/>
         </Panel>
     </Grid>
 </UserControl>

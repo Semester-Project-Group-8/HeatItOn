@@ -1,12 +1,13 @@
 using Backend.Models;
 using Backend.Services;
+using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 namespace Backend.Controllers
 {
     [Route("Asset")]
     [ApiController]
 
-    public class AssetsController : ControllerBase
+    public class AssetsController : ControllerBase, IController<Asset, Asset>
     {
         private readonly AssetsService _assetsService;
         public AssetsController(AssetsService assetsService)
@@ -15,7 +16,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllAssets()
+        public async Task<IActionResult> List()
         {
             try
             {
@@ -29,7 +30,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAsset(int id)
+        public async Task<IActionResult> Get(int id)
         {
             try
             {
@@ -43,7 +44,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("Add")]
-        public async Task<IActionResult> AddAsset([FromBody] Asset asset)
+        public async Task<IActionResult> Post([FromBody] Asset asset)
         {
             try
             {
@@ -69,7 +70,7 @@ namespace Backend.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteAsset(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
@@ -87,7 +88,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateAsset(int id, [FromBody] Asset asset)
+        public async Task<IActionResult> Put(int id, [FromBody] Asset asset)
         {
             try
             {

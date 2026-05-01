@@ -31,16 +31,42 @@ public class AssetsTabViewModel :
     private bool _isScenario2Selected;
     private bool _isCustomScenarioSelected;
     private AddAssetDialogViewModel? _currentDialog;
+    private ManagerButtonViewModel? _currentManagerDialog;
 
     public ObservableCollection<AssetCardItem> AssetItems { get; } = new();
     public bool HasAssets => AssetItems.Count > 0;
     public ICommand OpenAddAssetDialogCommand { get; }
+    public ICommand OpenManagerButtonViewCommand { get; }
+    public ICommand StartOptimizationCommand { get; }
     
     public AddAssetDialogViewModel? CurrentDialog
     {
         get => _currentDialog;
-        private set => SetProperty(ref _currentDialog, value);
+        private set
+        {
+            if (SetProperty(ref _currentDialog, value))
+            {
+                OnPropertyChanged(nameof(HasOpenDialog));
+                OnPropertyChanged(nameof(IsUiEnabled));
+            }
+        }
     }
+
+    public ManagerButtonViewModel? CurrentManagerDialog
+    {
+        get => _currentManagerDialog;
+        private set
+        {
+            if (SetProperty(ref _currentManagerDialog, value))
+            {
+                OnPropertyChanged(nameof(HasOpenDialog));
+                OnPropertyChanged(nameof(IsUiEnabled));
+            }
+        }
+    }
+
+    public bool HasOpenDialog => CurrentDialog != null || CurrentManagerDialog != null;
+    public bool IsUiEnabled => !HasOpenDialog;
 
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
     public string StatusMessage
@@ -90,8 +116,37 @@ public class AssetsTabViewModel :
         _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, __) => OnPropertyChanged(nameof(HasAssets));
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
+        OpenManagerButtonViewCommand = new RelayCommand(OpenManagerButtonView);
+        StartOptimizationCommand = new RelayCommand(StartOptimization);
         _ = LoadFromBackendAsync();
     }
+
+    private void OpenManagerButtonView()
+    {
+        var managerVm = new ManagerButtonViewModel();
+        managerVm.AddRequested += () =>
+        {
+            CurrentManagerDialog = null;
+            OpenAddAssetDialog();
+        };
+        managerVm.ImportRequested += () =>
+        {
+            CurrentManagerDialog = null;
+            _ = ImportAssets();
+        };
+        managerVm.ExportRequested += () =>
+        {
+            CurrentManagerDialog = null;
+            ExportAssets();
+        };
+        managerVm.CancelRequested += () =>
+        {
+            CurrentManagerDialog = null;
+        };
+
+        CurrentManagerDialog = managerVm;
+    }
+
     public async void StartOptimization()
     {
         List<Asset> scenarioAssets= new List<Asset>();
@@ -104,13 +159,34 @@ public class AssetsTabViewModel :
         }
         await _optimizerClient.Optimize(scenarioAssets);
     }
-    public void ImportAssets()
+    public async Task ImportAssets()
     {
-        AssetCsvHandler.ImportCsv(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
+        try
+        {
+            var csvPath = Path.Combine(AppContext.BaseDirectory, "assets.csv");
+            await AssetCsvHandler.ImportCsv(csvPath, _assetClient);
+            await LoadFromBackendAsync();
+            StatusMessage = "Assets imported successfully.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Import failed: {ex.Message}";
+            Console.WriteLine($"Error importing assets: {ex}");
+        }
     }
+
     public void ExportAssets()
     {
-        AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+        try
+        {
+            AssetCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+            StatusMessage = "Assets exported to assets_export.csv.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+            Console.WriteLine($"Error exporting assets: {ex}");
+        }
     }
 
     private void OpenAddAssetDialog()

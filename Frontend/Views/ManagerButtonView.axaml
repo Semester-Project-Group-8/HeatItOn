@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Frontend.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="Frontend.Views.ManagerButtonView"
+             x:DataType="vm:ManagerButtonViewModel"
+             Background="White"
+             BorderBrush="Black"
+             BorderThickness="2"
+             Padding="20">
+    <StackPanel MinWidth="300" Spacing="10">
+        <Button Content="Add new Asset"
+                Height="44"
+                FontSize="18"
+                Command="{Binding AddNewAssetCommand}"/>
+        <Button Content="Import Assets"
+                Height="44"
+                FontSize="18"
+                Command="{Binding ImportAssetsCommand}"/>
+        <Button Content="Export Assets"
+                Height="44"
+                FontSize="18"
+                Command="{Binding ExportAssetsCommand}"/>
+        <Button Content="Cancel"
+                Height="44"
+                FontSize="18"
+                Command="{Binding CancelCommand}"/>
+    </StackPanel>
+</UserControl>
