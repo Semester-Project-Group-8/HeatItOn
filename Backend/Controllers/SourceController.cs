@@ -33,7 +33,7 @@ namespace Backend.Controllers
         {
             try
             {
-                var source = await _sourceService.GetSource(id);
+                var source = await _sourceService.Get(id);
                 return Ok(source);
             }
             catch (KeyNotFoundException)
