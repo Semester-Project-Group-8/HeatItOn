@@ -101,17 +101,6 @@ namespace Backend.Services
 
         }
 
-        public async Task<Source> Get(int id)
-        {
-            var source = await _dbContext.Sources.FindAsync(id);
-            if (source == null)
-            {
-                throw new KeyNotFoundException($"Source with ID {id} not found.");
-            }
-
-            return source;
-        }
-
         public async Task<Source> ListByHour(DateTime date)
         {
             return await _dbContext.Sources

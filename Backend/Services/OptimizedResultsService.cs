@@ -44,6 +44,12 @@ public class OptimizedResultsService: IService<OptimizedResults>
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<int> UpdateOptimizedResults(OptimizedResults optimizedResults)
+    {
+        _dbContext.OptimizedResults.Update(optimizedResults);
+        return await _dbContext.SaveChangesAsync();
+    }
+
     public async Task Delete(int id)
     {
         var result = await _dbContext.OptimizedResults.FindAsync(id);
