@@ -3,7 +3,6 @@
              xmlns:models="using:Frontend.Models"
              xmlns:vm="using:Frontend.ViewModels"
              xmlns:avalonia="clr-namespace:LiveChartsCore.SkiaSharpView.Avalonia;assembly=LiveChartsCore.SkiaSharpView.Avalonia"
-             xmlns:models="using:Frontend.Models"
              x:Class="Frontend.Views.ResultsTabView"
              x:DataType="vm:ResultsTabViewModel"
              x:Name="RootControl">
@@ -483,6 +482,7 @@
 
                         </Grid>
                     </Border>
+                    </StackPanel>
 
                     <TextBlock Text="// PERFORMANCE CHARTS"
                                FontSize="10" FontWeight="Bold"

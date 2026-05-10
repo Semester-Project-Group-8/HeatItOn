@@ -107,12 +107,6 @@
             </DockPanel>
         </Border>
 
-       
-                
-            
-            <!-- EMPTY STATE -->
-            <Border Grid.ColumnSpan="2" Background="#10AAAAAA"
-                    IsVisible="{Binding !Sources.Count}">
         <Grid>
 
             <!-- Content when data is present -->
@@ -159,24 +153,33 @@
                         YAxes="{Binding DualAxes}"
                         Height="250" />
                 </Border>
-                            </StackPanel>
-                        </Border>
 
                     </Grid>
 
                     <!-- TABLE SECTION -->
-                    <TextBlock Text="// SOURCE DATA TABLE"
-                               FontSize="10"
-                               FontWeight="Bold"
-                               Foreground="#AAAAAA"
-                               LetterSpacing="1.5"/>
+                    <Grid Margin="0,0,0,8">
+                        <TextBlock Text="// SOURCE DATA TABLE"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="#AAAAAA"
+                                   LetterSpacing="1.5"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="Delete Selected"
+                                Command="{Binding DeleteSelected}"
+                                CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
+                                HorizontalAlignment="Right"
+                                Classes="export-btn"
+                                Background="#FFE06020"
+                                Foreground="White"/>
+                    </Grid>
 
                     <Border Background="White"
                             CornerRadius="12"
                             ClipToBounds="True">
                         <Grid RowDefinitions="*,Auto">
 
-                            <DataGrid Grid.Row="0"
+                            <DataGrid x:Name="SourceDataGrid"
+                                      Grid.Row="0"
                                       ItemsSource="{Binding PagedSources}"
                                       HeadersVisibility="Column"
                                       AutoGenerateColumns="False"
@@ -184,13 +187,16 @@
                                       BorderThickness="0"
                                       RowBackground="White"
                                       HorizontalAlignment="Stretch"
-                                      IsReadOnly="True"
+                                      IsReadOnly="False"
+                                      SelectionMode="Extended"
+                                      CellEditEnded="SourceDataGrid_CellEditEnded"
                                       CanUserReorderColumns="False"
                                       CanUserResizeColumns="False"
                                       CanUserSortColumns="True">
                                 <DataGrid.Columns>
                                     <DataGridTemplateColumn Header="ID"
                                                            Width="*"
+                                                           IsReadOnly="True"
                                                            SortMemberPath="Id">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

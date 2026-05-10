@@ -11,6 +11,8 @@ namespace Backend.Services
             _dbContext=dbContext;
         }
 
+        public Task<Asset> Post() => throw new NotSupportedException();
+
         public async Task<List<Asset>> List()
         {
             try
@@ -76,7 +78,6 @@ namespace Backend.Services
                 throw new InvalidOperationException($"Asset with ID {id} already exists.");
             }
         }
-        
 
         public async Task<Asset> Get(int id)
         {

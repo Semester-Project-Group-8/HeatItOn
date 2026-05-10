@@ -43,10 +43,14 @@ public class SourceClient
         return response.Content;
     }
 
-    public async Task<Source?> Patch(Source source)
+    public async Task<Source?> Put(Source source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(source));
-        return await response.Content.ReadFromJsonAsync<Source>();
+        HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/Update/{source.Id}", JsonContent.Create(source));
+        if (response.IsSuccessStatusCode && response.Content.Headers.ContentLength > 0) 
+        {
+            try { return await response.Content.ReadFromJsonAsync<Source>(); } catch { return null; }
+        }
+        return null;
     }
 
     public async Task<Source?> Delete(int id)

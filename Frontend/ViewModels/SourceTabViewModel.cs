@@ -17,10 +17,7 @@ using LiveChartsCore.Measure;
 
 namespace Frontend.ViewModels;
 
-public class SourceTabViewModel : ViewModelBase
-public partial class SourceTabViewModel :
-    ViewModelBase,
-    IRefreshable
+public partial class SourceTabViewModel : ViewModelBase
 {
     // Api connection
     private readonly SourceClient _client;
@@ -103,7 +100,7 @@ public partial class SourceTabViewModel :
         set
         {
             if (SetProperty(ref _selectedFile, value))
-                SelectFile();
+                RefreshSelectedFile();
         }
     }
 
@@ -190,7 +187,8 @@ public partial class SourceTabViewModel :
                         Files.Add(source.FileName);
                 }
 
-                SelectedFile = Files.FirstOrDefault();
+                _selectedFile = Files.FirstOrDefault();
+                RefreshSelectedFile();
             });
         }
         catch (Exception e)
@@ -199,7 +197,7 @@ public partial class SourceTabViewModel :
         }
     }
 
-    private void SelectFile()
+    private void RefreshSelectedFile()
     {
         Sources.Clear();
 
@@ -218,6 +216,41 @@ public partial class SourceTabViewModel :
             BuildWinterSeries();
             BuildSummerSeries();
         });
+    }
+
+    public async void UpdateSource(Source source)
+    {
+        try
+        {
+            await _client.Put(source);
+            RefreshSelectedFile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    public async void DeleteSelected(System.Collections.IList? selectedItems)
+    {
+        if (selectedItems == null || selectedItems.Count == 0) return;
+
+        var itemsToDelete = selectedItems.Cast<Source>().ToList();
+
+        try
+        {
+            foreach (var item in itemsToDelete)
+            {
+                await _client.Delete(item.Id);
+                _allSources.Remove(item);
+            }
+
+            RefreshSelectedFile();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     public void Export()
