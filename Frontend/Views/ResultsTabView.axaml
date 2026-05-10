@@ -508,6 +508,7 @@
 
                         </Grid>
                     </Border>
+                    </StackPanel>
 
                     <TextBlock Text="// PERFORMANCE CHARTS"
                                FontSize="10" FontWeight="Bold"
