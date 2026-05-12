@@ -66,7 +66,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await _sourceService.AddSources(sources);
+                await _sourceService.PostList(sources);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
                 return Created();
             }
@@ -88,13 +88,6 @@ namespace Backend.Controllers
             {
                 return StatusCode(503, new { message = ex.Message });
             }
-        }
-
-        [HttpGet("{date:DateTime}")]
-        public async Task<IActionResult> GetByHour(DateTime date)
-        {
-            var sources = await _sourceService.ListByHour(date);
-            return Ok(sources);
         }
 
         [HttpPut("Update/{id:int}")]

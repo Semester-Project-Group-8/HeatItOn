@@ -31,10 +31,9 @@ public class OptimizedResultsService: IService<OptimizedResults>
 
     public Task<OptimizedResults> Post() => throw new NotSupportedException("Use AddOptimizedResults instead.");
 
-    public async Task<int> AddOptimizedResults(OptimizedResults optimizedResults)
+    public async Task Post(OptimizedResults optimizedResults)
     {
         await _dbContext.OptimizedResults.AddAsync(optimizedResults);
-        return await _dbContext.SaveChangesAsync();
     }
 
     public async Task Put(int id, OptimizedResults value)

@@ -7,7 +7,7 @@ namespace Backend.Services
     {
         Task<List<T>> List();
         Task<T> Get(int id);
-        Task<T> Post();
+        Task Post(T model);
         Task Put(int id, T value);
         Task Delete(int id);
     }
