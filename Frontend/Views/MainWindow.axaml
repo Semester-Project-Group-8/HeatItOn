@@ -74,19 +74,6 @@
 
                             <ItemsPresenter Name="PART_ItemsPresenter" DockPanel.Dock="Left"
                                             ItemsPanel="{TemplateBinding ItemsPanel}"/>
-
-                            <Button DockPanel.Dock="Right"
-                                    Content="Refresh"
-                                    Command="{Binding Refresh}"
-                                    Margin="8,6"
-                                    Padding="12,6"
-                                    Background="Transparent"
-                                    BorderBrush="#E06020"
-                                    BorderThickness="1"
-                                    Foreground="#E06020"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Right"/>
-
                         </DockPanel>
                     </Border>
 

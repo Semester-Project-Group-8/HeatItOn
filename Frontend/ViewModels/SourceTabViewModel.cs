@@ -18,9 +18,6 @@ using LiveChartsCore.Measure;
 namespace Frontend.ViewModels;
 
 public class SourceTabViewModel : ViewModelBase
-public partial class SourceTabViewModel :
-    ViewModelBase,
-    IRefreshable
 {
     // Api connection
     private readonly SourceClient _client;
@@ -227,7 +224,7 @@ public partial class SourceTabViewModel :
 
     public void Import()
     {
-        await CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
+        _ = CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
     }
 
     private static bool IsWinter(Source s)
