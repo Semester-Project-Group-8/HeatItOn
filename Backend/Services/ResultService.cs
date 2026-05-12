@@ -19,11 +19,6 @@ namespace Backend.Services
 
 		public async Task<int> Post(List<Result> result)
 		{
-			if (result == null || result.Count == 0)
-			{
-				Console.WriteLine("Error | No results sent.");
-				return 0;
-			}
 			await _dbContext.Results.AddRangeAsync(result);
 			return await _dbContext.SaveChangesAsync();
 		}

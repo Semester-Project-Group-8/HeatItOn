@@ -13,7 +13,8 @@ namespace Backend.Services
 
         public async Task Post(Asset asset)
         {
-            await _dbContext.Assets.AddAsync(asset);
+            var result = await _dbContext.Assets.AddAsync(asset);
+            await _dbContext.SaveChangesAsync();
         }
         
         public async Task Put(int id, Asset value)

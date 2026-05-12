@@ -31,10 +31,8 @@ namespace Backend.Services
             {
                 await _dbContext.Sources.AddRangeAsync(source);
                 var result = await _dbContext.SaveChangesAsync();
-                if (result <= 0)
-                    throw new InvalidOperationException("Sources were not saved.");
-
-                return result;
+                Console.WriteLine($"{result} sources uploaded");
+                return result <= 0 ? throw new InvalidOperationException("Sources were not saved.") : result;
             }
             catch (DbUpdateException)
             {
@@ -44,7 +42,7 @@ namespace Backend.Services
 
         public async Task Post(Source source)
         {
-            await _dbContext.Sources.AddAsync(source);
+            var result = await _dbContext.Sources.AddAsync(source);
         }
 
         public async Task<IEnumerable<Source>> ListByMonth(int month)
