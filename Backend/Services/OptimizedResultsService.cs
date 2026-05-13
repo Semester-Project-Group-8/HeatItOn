@@ -34,6 +34,7 @@ public class OptimizedResultsService: IService<OptimizedResults>
     public async Task Post(OptimizedResults optimizedResults)
     {
         var result = await _dbContext.OptimizedResults.AddAsync(optimizedResults);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task Put(int id, OptimizedResults value)
