@@ -179,12 +179,8 @@ public static class CsvHandler
             }
             Console.WriteLine("completed | csv file read");
         }
-        List<Task> insertedSources = new List<Task>();
-        foreach (var source in sources)
-        {
-            insertedSources.Add(sourceClient.Post(source));
-        }
-        await Task.WhenAll(insertedSources);
+
+        await sourceClient.PostList(sources);
     }
     private static bool IsDate(string value)
     {

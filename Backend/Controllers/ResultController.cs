@@ -66,23 +66,8 @@ namespace Backend.Controllers
         [HttpPost("Add")]
         public async Task<IActionResult> Post([FromBody] Result incomingResult)
         {
-            var rowsAffected = await _resultService.Post(
-                incomingResult.Id,
-                incomingResult.HeatProduction,
-                incomingResult.Electricity,
-                incomingResult.ProductionCost,
-                incomingResult.PrimaryEnergyConsumed,
-                incomingResult.CO2Produced,
-                incomingResult.AssetId
-            );
-
-            if (rowsAffected > 0)
-            {
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-                return Created($"/Result/{incomingResult.Id}", incomingResult);
-            }
-
-            return BadRequest("Failed to add Result.");
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
+            return Created($"/Result/{incomingResult.Id}", incomingResult);
         }
 
         // AddResultList

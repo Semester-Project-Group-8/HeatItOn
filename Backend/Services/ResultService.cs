@@ -19,11 +19,6 @@ namespace Backend.Services
 
 		public async Task<int> Post(List<Result> result)
 		{
-			if (result == null || result.Count == 0)
-			{
-				Console.WriteLine("Error | No results sent.");
-				return 0;
-			}
 			await _dbContext.Results.AddRangeAsync(result);
 			return await _dbContext.SaveChangesAsync();
 		}
@@ -46,22 +41,9 @@ namespace Backend.Services
 			return result;
 		}
 
-		public Task<Result> Post() => throw new NotSupportedException("Use AddResult instead.");
-
-		public async Task<int> Post(int id, float heatProduction, float electricity, float productionCost, float primaryEnergyConsumed, int co2Produced, int assetId)
+		public async Task Post(Result result)
 		{
-			Result result = new Result
-			{
-				Id = id,
-				HeatProduction = heatProduction,
-				Electricity = electricity,
-				ProductionCost = productionCost,
-				PrimaryEnergyConsumed = primaryEnergyConsumed,
-				CO2Produced = co2Produced,
-				AssetId = assetId,
-			};
 			await _dbContext.Results.AddAsync(result);
-			return await _dbContext.SaveChangesAsync();
 		}
 
 		public async Task Put(int id, Result value)

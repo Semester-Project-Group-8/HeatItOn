@@ -22,7 +22,7 @@ namespace Backend.Services
                 throw new InvalidOperationException("Sources could not be loaded.");
             }
         }
-        public async Task<int> Post(List<Source> source)
+        public async Task<int> PostList(List<Source> source)
         {
             if (source == null || source.Count == 0)
                 throw new ArgumentException("No sources sent.");
@@ -31,17 +31,19 @@ namespace Backend.Services
             {
                 await _dbContext.Sources.AddRangeAsync(source);
                 var result = await _dbContext.SaveChangesAsync();
-                if (result <= 0)
-                    throw new InvalidOperationException("Sources were not saved.");
-
-                return result;
+                Console.WriteLine($"{result} sources uploaded");
+                return result <= 0 ? throw new InvalidOperationException("Sources were not saved.") : result;
             }
             catch (DbUpdateException)
             {
                 throw new InvalidOperationException("Sources could not be saved due to a database error.");
             }
         }
-        public Task<Source> Post() => throw new NotSupportedException("Use AddSource instead.");
+
+        public async Task Post(Source source)
+        {
+            var result = await _dbContext.Sources.AddAsync(source);
+        }
 
         public async Task<IEnumerable<Source>> ListByMonth(int month)
         {
@@ -59,8 +61,6 @@ namespace Backend.Services
             }
 
         }
-        public async Task<Source> GetSource(int id)
-
         public async Task<Source> Get(int id)
         {
             var source = await _dbContext.Sources.FindAsync(id);
