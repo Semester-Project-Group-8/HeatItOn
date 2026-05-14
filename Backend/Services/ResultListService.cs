@@ -84,7 +84,7 @@ namespace Backend.Services
         {
             foreach (var result in results)
             {
-                await _dbContext.ResultList.AddAsync(result);
+                await _dbContext.ResultList.AddRangeAsync(result);
             }
             return await _dbContext.SaveChangesAsync();
         }

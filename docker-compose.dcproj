@@ -10,4 +10,7 @@
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="HeatItOn_UML_Diagram.puml" />
+  </ItemGroup>
 </Project>

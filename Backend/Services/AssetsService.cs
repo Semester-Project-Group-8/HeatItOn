@@ -15,6 +15,40 @@ namespace Backend.Services
 
         public async Task<List<Asset>> List()
         {
+            var result = await _dbContext.Assets.AddAsync(asset);
+            await _dbContext.SaveChangesAsync();
+        }
+        
+        public async Task Put(int id, Asset value)
+        {
+            var asset = await _dbContext.Assets.FindAsync(id);
+            if (asset == null)
+                throw new KeyNotFoundException($"Asset with ID {id} not found.");
+
+            asset.Name = value.Name;
+            asset.MaxHeat = value.MaxHeat;
+            asset.ProductionCost = value.ProductionCost;
+            asset.CO2Emission = value.CO2Emission;
+            asset.GasConsumption = value.GasConsumption;
+            asset.OilConsumption = value.OilConsumption;
+            asset.MaxElectricity = value.MaxElectricity;
+            asset.ImageName = value.ImageName;
+
+            try
+            {
+                _dbContext.Assets.Update(asset);
+                var result = await _dbContext.SaveChangesAsync();
+                if (result <= 0)
+                    throw new InvalidOperationException("Asset was not updated.");
+            }
+            catch (DbUpdateException)
+            {
+                throw new InvalidOperationException($"Asset with ID {id} could not be updated due to a database error.");
+            }
+        }
+
+        public async Task<List<Asset>> List()
+        {
             try
             {
                 return await _dbContext.Assets.ToListAsync();
@@ -22,60 +56,6 @@ namespace Backend.Services
             catch (Exception)
             {
                 throw new InvalidOperationException("Assets could not be loaded.");
-            }
-        }
-
-        public async Task<int> AddAssets(List<Asset> assets)
-        {
-            if (assets == null || assets.Count == 0)
-                throw new ArgumentException("No assets sent.");
-            try
-            {
-                await _dbContext.Assets.AddRangeAsync(assets);
-                var result = await _dbContext.SaveChangesAsync();
-                if (result <= 0)
-                    throw new InvalidOperationException("Assets were not saved.");
-
-                return result;
-            }
-            catch (DbUpdateException)
-            {
-                throw new InvalidOperationException("Assets could not be saved due to a database error.");
-            }
-        }
-        
-
-        public async Task<int> Post(int id, string name, float maxHeat, int productionCost, int co2Emission, float gasConsumption, float oilConsumption, float maxElectricity, string? imageName = null)
-        {
-            var exists = await _dbContext.Assets.AnyAsync(a => a.Id == id);
-            if (exists)
-                throw new InvalidOperationException($"Asset with ID {id} already exists.");
-
-            Asset asset = new Asset
-            {
-                Id= id,
-                Name = name,
-                MaxHeat= maxHeat,
-                ProductionCost= productionCost,
-                CO2Emission= co2Emission,
-                GasConsumption= gasConsumption,
-                OilConsumption= oilConsumption,
-                MaxElectricity= maxElectricity,
-                ImageName = imageName
-            };
-            try
-            {
-                await _dbContext.Assets.AddAsync(asset);
-                var savedRows = await _dbContext.SaveChangesAsync();
-
-                if (savedRows <= 0)
-                    throw new InvalidOperationException("Asset was not saved.");
-
-                return savedRows;
-            }
-            catch (DbUpdateException)
-            {
-                throw new InvalidOperationException($"Asset with ID {id} already exists.");
             }
         }
 
@@ -106,33 +86,6 @@ namespace Backend.Services
         }
         
 
-        public async Task Put(int id, Asset value)
-        {
-            var asset = await _dbContext.Assets.FindAsync(id);
-            if (asset == null)
-                throw new KeyNotFoundException($"Asset with ID {id} not found.");
-
-            asset.Name = value.Name;
-            asset.MaxHeat = value.MaxHeat;
-            asset.ProductionCost = value.ProductionCost;
-            asset.CO2Emission = value.CO2Emission;
-            asset.GasConsumption = value.GasConsumption;
-            asset.OilConsumption = value.OilConsumption;
-            asset.MaxElectricity = value.MaxElectricity;
-            asset.ImageName = value.ImageName;
-
-            try
-            {
-                _dbContext.Assets.Update(asset);
-                var result = await _dbContext.SaveChangesAsync();
-                if (result <= 0)
-                    throw new InvalidOperationException("Asset was not updated.");
-            }
-            catch (DbUpdateException)
-            {
-                throw new InvalidOperationException($"Asset with ID {id} could not be updated due to a database error.");
-            }
-        }
 
     }
 }

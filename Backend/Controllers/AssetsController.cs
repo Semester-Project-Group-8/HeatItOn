@@ -53,7 +53,7 @@ namespace Backend.Controllers
         {
             try
             {
-                await _assetsService.Post(asset.Id, asset.Name, asset.MaxHeat, asset.ProductionCost, asset.CO2Emission, asset.GasConsumption, asset.OilConsumption, asset.MaxElectricity, asset.ImageName);
+                await _assetsService.Post(asset);
                 await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
                 return Created();
             }

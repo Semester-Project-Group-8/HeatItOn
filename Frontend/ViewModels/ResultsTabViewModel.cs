@@ -308,7 +308,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
     public void Export()
     {
-        ResultCsvHandler.ExportCsv(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
+        CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
     }
 
     private void RebuildRows()

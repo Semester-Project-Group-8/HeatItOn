@@ -37,9 +37,8 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     [HttpPost("Add")]
     public async Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
     { 
-        var result = await _optimizedResultsService.AddOptimizedResults(optimizedResults);
-        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "OptimizedResults");
-        return Ok(result);
+        await _optimizedResultsService.Post(optimizedResults);
+        return Ok();
     }
 
     [HttpPut("Update/{id:int}")]

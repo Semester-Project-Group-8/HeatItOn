@@ -619,6 +619,7 @@
                         </Border>
                     </StackPanel>
                 </StackPanel>
+                </StackPanel>
             </ScrollViewer>
 
             <!-- Empty state -->
