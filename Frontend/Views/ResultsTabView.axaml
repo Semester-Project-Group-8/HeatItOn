@@ -15,22 +15,33 @@
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <ControlTemplate>
-                    <Border Name="ItemBorder"
-                            CornerRadius="10"
-                            BorderThickness="1.5"
-                            BorderBrush="#E0E0E0"
-                            Background="#F5F5F5"
-                            Padding="14,12"
-                            Cursor="Hand">
-                        <Border.Transitions>
-                            <Transitions>
-                                <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
-                                <BrushTransition Property="Background"  Duration="0:0:0.15"/>
-                            </Transitions>
-                        </Border.Transitions>
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          HorizontalAlignment="Stretch"/>
-                    </Border>
+                    <Grid>
+                        <Border Name="ItemBorder"
+                                CornerRadius="10"
+                                BorderThickness="1.5"
+                                BorderBrush="#E0E0E0"
+                                Background="#F5F5F5"
+                                Padding="14,12"
+                                Cursor="Hand">
+                            <Border.Transitions>
+                                <Transitions>
+                                    <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+                                    <BrushTransition Property="Background"  Duration="0:0:0.15"/>
+                                </Transitions>
+                            </Border.Transitions>
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              HorizontalAlignment="Stretch"/>
+                        </Border>
+                        <Button Name="DeleteBtn"
+                                Classes="delete-btn"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Margin="0,8,8,0"
+                                Tag="{TemplateBinding Content}"
+                                IsVisible="False">
+                            <TextBlock Text="X" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Button>
+                    </Grid>
                 </ControlTemplate>
             </Setter>
         </Style>
@@ -48,6 +59,21 @@
             <Setter Property="Background" Value="#FFE8D8"/>
         </Style>
 
+        <Style Selector="ListBoxItem:pointerover /template/ Button#DeleteBtn">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+
+        <Style Selector="Button.delete-btn">
+            <Setter Property="Background" Value="#FFE0D8"/>
+            <Setter Property="Foreground" Value="#CC3333"/>
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="CornerRadius" Value="13"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
         <Style Selector="ListBox">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -166,7 +192,7 @@
                              ItemsSource="{Binding OptimizedResults}"
                              SelectedItem="{Binding SelectedOptimizedResult}">
                         <ListBox.ItemTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="models:OptimizedResults">
                                 <StackPanel Spacing="4">
                                     <TextBlock Text="{Binding Name}"
                                                FontSize="13"

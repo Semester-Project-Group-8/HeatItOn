@@ -46,9 +46,14 @@ public class OptimizedResultsService: IService<OptimizedResults>
 
     public async Task Delete(int id)
     {
-        var result = await _dbContext.OptimizedResults.FindAsync(id);
+        var result = await _dbContext.OptimizedResults
+            .Include(r => r.ResultsForHours)
+                .ThenInclude(h => h.Results)
+            .FirstOrDefaultAsync(r => r.Id == id);
         if (result == null)
             throw new KeyNotFoundException($"OptimizedResults with ID {id} not found.");
+        _dbContext.Results.RemoveRange(result.ResultsForHours.SelectMany(h => h.Results));
+        _dbContext.ResultList.RemoveRange(result.ResultsForHours);
         _dbContext.OptimizedResults.Remove(result);
         await _dbContext.SaveChangesAsync();
     }

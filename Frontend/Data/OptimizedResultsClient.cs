@@ -31,8 +31,9 @@ public class OptimizedResultsClient
         return result;
     }
 
-    public async void Delete(int id)
+    public async Task Delete(int id)
     {
         HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
+        response.EnsureSuccessStatusCode();
     }
 }
