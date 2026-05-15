@@ -21,7 +21,7 @@ namespace Frontend.ViewModels;
 
 public class AssetsTabViewModel : ViewModelBase
 {
-    private readonly AssetClient _assetClient;
+    private readonly IClient<Asset> _assetClient;
     private readonly OptimizerClient _optimizerClient;
     private readonly List<AssetCardItem> _allAssetItems = new();
     private string _statusMessage = string.Empty;
@@ -107,7 +107,7 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
 
-    public AssetsTabViewModel(AssetClient assetClient, OptimizerClient optimizerClient)
+    public AssetsTabViewModel(IClient<Asset> assetClient, OptimizerClient optimizerClient)
     {
         _assetClient = assetClient;
         _optimizerClient = optimizerClient;
