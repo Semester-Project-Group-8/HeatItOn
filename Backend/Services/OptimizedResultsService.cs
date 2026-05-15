@@ -29,8 +29,6 @@ public class OptimizedResultsService: IService<OptimizedResults>
         return result;
     }
 
-    public Task<OptimizedResults> Post() => throw new NotSupportedException("Use AddOptimizedResults instead.");
-
     public async Task Post(OptimizedResults optimizedResults)
     {
         var result = await _dbContext.OptimizedResults.AddAsync(optimizedResults);

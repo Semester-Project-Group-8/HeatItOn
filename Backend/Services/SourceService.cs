@@ -22,48 +22,8 @@ namespace Backend.Services
                 throw new InvalidOperationException("Sources could not be loaded.");
             }
         }
-        public async Task<Source> Post(Source source)
-        {
-            if (source == null)
-                throw new ArgumentException("No sources sent.");
-            await _dbContext.Sources.AddAsync(source);
-            await _dbContext.SaveChangesAsync();
-            return source;
-        }
-
-        public async Task<int> AddSource(int id, DateTime timeFrom, DateTime timeTo, float heatDemand, float electricityPrice)
-        {
-            if (heatDemand < 0)
-                throw new ArgumentException("Heat demand cannot be negative.");
-
-            if (timeFrom > timeTo)
-                throw new ArgumentException("TimeFrom cannot be after TimeTo.");
-
-            var source = new Source
-            {
-                Id = id,
-                TimeFrom = timeFrom,
-                TimeTo = timeTo,
-                HeatDemand = heatDemand,
-                ElectricityPrice = electricityPrice
-            };
-
-            await Post(source);
-            return 1;
-        }
-
-        public async Task<int> AddSources(List<Source> sources)
-        {
-             await _dbContext.Sources.AddRangeAsync(sources);
-             return await _dbContext.SaveChangesAsync();
-        }
-
-        public async Task<IEnumerable<Source>> ListByHour(DateTime date)
-        {
-             return await _dbContext.Sources.Where(s => s.TimeFrom.Date == date.Date && s.TimeFrom.Hour == date.Hour).ToListAsync();
-        }
         
-        public async Task<int> Post(List<Source> source)
+        public async Task<int> PostList(List<Source> source)
         {
             if (source == null || source.Count == 0)
                 throw new ArgumentException("No sources sent.");
@@ -84,6 +44,7 @@ namespace Backend.Services
         public async Task Post(Source source)
         {
             var result = await _dbContext.Sources.AddAsync(source);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Source>> ListByMonth(int month)
@@ -137,19 +98,7 @@ namespace Backend.Services
                 throw new InvalidOperationException($"Source with ID {id} could not be updated due to a database error.");
             }
         }
-
-        public Task Put(int id, DateTime timeFrom, DateTime timeTo, float heatDemand, float electricityPrice)
-        {
-            return Put(id, new Source
-            {
-                Id = id,
-                TimeFrom = timeFrom,
-                TimeTo = timeTo,
-                HeatDemand = heatDemand,
-                ElectricityPrice = electricityPrice
-            });
-        }
-
+        
         public async Task Delete(int id)
         {
             var source = await _dbContext.Sources.FindAsync(id);

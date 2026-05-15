@@ -23,12 +23,12 @@ public class AssetClient : IClient<Asset>
         return await response.Content.ReadFromJsonAsync<Asset>();
     }
 
-    public async Task<List<Asset>?> GetAll()
+    public async Task<List<Asset>> GetAll()
     {
         HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Asset>>();
-        return result;
+        return result ?? [];
     }
 
     public async Task Post(Asset asset)

@@ -11,11 +11,9 @@ namespace Backend.Services
             _dbContext=dbContext;
         }
 
-        public Task<Asset> Post() => throw new NotSupportedException();
-
-        public async Task<List<Asset>> List()
+        public async Task Post(Asset value)
         {
-            var result = await _dbContext.Assets.AddAsync(asset);
+            var result = await _dbContext.Assets.AddAsync(value);
             await _dbContext.SaveChangesAsync();
         }
         
