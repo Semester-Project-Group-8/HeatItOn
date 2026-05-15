@@ -57,7 +57,7 @@ namespace Backend.Services
             OptimizedResults finalResults = new OptimizedResults
             {
                 Name = $"results_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}",
-                ResultsForHours = new List<ResultList>()
+                ResultsForHours = new List<ResultByHour>()
             };
             foreach (Source source in allSources)
             {
@@ -67,7 +67,7 @@ namespace Backend.Services
                 bool allowOverproduction = true;
                 DateTime maintenanceFrom = DateTime.Parse("2025-09-09T20:00:00");
                 DateTime maintenanceTil = maintenanceFrom.AddHours(45);
-                ResultList resultOfHour = new ResultList
+                ResultByHour resultOfHour = new ResultByHour
                 {
                     TimeFrom = source.TimeFrom,
                     TimeTo = source.TimeTo,

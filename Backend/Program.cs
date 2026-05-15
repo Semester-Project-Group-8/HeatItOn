@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
+using Backend.ExceptionHandling;
 using Backend.Services;
 using Backend.Hubs;
 //using Backend.Data;
@@ -44,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.MapHub<BackendHub>("/datahub");
 
 app.UseAuthorization();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

@@ -11,14 +11,14 @@ namespace Backend.Services
             _dbContext=dbContext;
         }
 
-        public async Task<IEnumerable<ResultList>> ListResultLists()
+        public async Task<IEnumerable<ResultByHour>> ListResultLists()
         {
             return await _dbContext.ResultList
                 .Include(rl => rl.Results)
                 .ToListAsync();
         }
 
-        public async Task<ResultList> Get(int id)
+        public async Task<ResultByHour> Get(int id)
         {
             var resultList = await _dbContext.ResultList
                 .Include(rl => rl.Results)
@@ -68,7 +68,7 @@ namespace Backend.Services
                 result.Id = 0;
             }
 
-            var newResultList = new ResultList
+            var newResultList = new ResultByHour
             {
                 TimeFrom = timeFrom,
                 TimeTo = timeTo,
@@ -80,7 +80,7 @@ namespace Backend.Services
             return newResultList.Id;
         }
 
-        public async Task<int> Post(List<ResultList> results)
+        public async Task<int> Post(List<ResultByHour> results)
         {
             foreach (var result in results)
             {

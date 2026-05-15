@@ -5,100 +5,61 @@ using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Backend.Controllers
+namespace Backend.Controllers;
+
+[Route("Asset")]
+[ApiController]
+public class AssetsController : ControllerBase, IController<Asset, Asset>
 {
-    [Route("Asset")]
-    [ApiController]
+    private readonly AssetsService _assetsService;
+    private readonly IHubContext<BackendHub> _hubContext;
 
-    public class AssetsController : ControllerBase, IController<Asset, Asset>
+    public AssetsController(AssetsService assetsService, IHubContext<BackendHub> hubContext)
     {
-        private readonly AssetsService _assetsService;
-        private readonly IHubContext<BackendHub> _hubContext;
-        public AssetsController(AssetsService assetsService, IHubContext<BackendHub> hubContext)
-        {
-            _assetsService = assetsService;
-            _hubContext = hubContext;
-        }
+        _assetsService = assetsService;
+        _hubContext = hubContext;
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> List()
-        {
-            try
-            {
-                var assets = await _assetsService.List();
-                return Ok(assets);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(503, new { message = ex.Message });
-            }
-        }
+    [HttpGet]
+    public async Task<IActionResult> List()
+    {
+        var assets = await _assetsService.List();
+        return Ok(assets);
+    }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            try
-            {
-                var assets = await _assetsService.Get(id);
-                return Ok(assets);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-        }
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var assets = await _assetsService.Get(id);
+        return Ok(assets);
+    }
 
-        [HttpPost("Add")]
-        public async Task<IActionResult> Post([FromBody] Asset asset)
-        {
-            try
-            {
-                await _assetsService.Post(asset);
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
-                return Created();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-        }
+    [HttpPost("Add")]
+    public async Task<IActionResult> Post([FromBody] Asset asset)
+    {
+        // Checking received data validity
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        await _assetsService.Post(asset);
+        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
+        return Created();
+    }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                await _assetsService.Delete(id);
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
-                return Ok();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-        }
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _assetsService.Delete(id);
+        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
+        return Ok();
+    }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Asset asset)
-        {
-            try
-            {
-                await _assetsService.Put(id, asset);
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
-                return Ok();
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-        }
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(int id, [FromBody] Asset asset)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
+        await _assetsService.Put(id, asset);
+        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
+        return Ok();
     }
 }

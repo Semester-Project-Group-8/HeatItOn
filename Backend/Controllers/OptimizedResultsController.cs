@@ -13,8 +13,9 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
 {
     private readonly OptimizedResultsService _optimizedResultsService;
     private readonly IHubContext<BackendHub> _hubContext;
-    
-    public OptimizedResultsController(OptimizedResultsService optimizedResultsService, IHubContext<BackendHub> hubContext)
+
+    public OptimizedResultsController(OptimizedResultsService optimizedResultsService,
+        IHubContext<BackendHub> hubContext)
     {
         _optimizedResultsService = optimizedResultsService;
         _hubContext = hubContext;
@@ -26,7 +27,7 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
         var result = await _optimizedResultsService.List();
         return Ok(result);
     }
-    
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
@@ -36,7 +37,9 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
 
     [HttpPost("Add")]
     public async Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
-    { 
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
         await _optimizedResultsService.Post(optimizedResults);
         return Ok();
     }
@@ -44,6 +47,8 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     [HttpPut("Update/{id:int}")]
     public async Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        
         optimizedResults.Id = id;
         await _optimizedResultsService.Put(id, optimizedResults);
         return Ok();
