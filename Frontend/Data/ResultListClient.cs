@@ -6,7 +6,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class ResultListClient
+public class ResultListClient : IClient<ResultList>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "ResultList";
@@ -15,17 +15,34 @@ public class ResultListClient
     {
         _client = httpClient;
     }
-    public async Task<List<ResultList>?> ListResultLists()
-    {
-        var response = await _client.GetAsync(UrlExtension);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<List<ResultList>>();
-    }
-    
-    public async Task<ResultList?> GetResultListById(int id)
+
+    public async Task<ResultList?> Get(int id)
     {
         var response = await _client.GetAsync($"{UrlExtension}/{id}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ResultList>();
+    }
+
+    public async Task<List<ResultList>> GetAll()
+    {
+        var response = await _client.GetAsync(UrlExtension);
+        response.EnsureSuccessStatusCode();
+        var results = await response.Content.ReadFromJsonAsync<List<ResultList>>();
+        return results ?? [];
+    }
+
+    public async Task Post(ResultList resultList)
+    {
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
+    }
+
+    public async Task Put(ResultList resultList)
+    {
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
+    }
+
+    public async Task Delete(int id)
+    {
+        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}" );
     }
 }

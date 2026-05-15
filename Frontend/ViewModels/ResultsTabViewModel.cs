@@ -21,11 +21,11 @@ namespace Frontend.ViewModels;
 
 public class ResultsTabViewModel : INotifyPropertyChanged
 {
-    private readonly OptimizedResultsClient _client;
+    private readonly IClient<OptimizedResults> _client;
     private List<ResultTableRow> _allRows = [];
     private OptimizedResults? _selectedOptimizedResult;
 
-    public ResultsTabViewModel(OptimizedResultsClient client)
+    public ResultsTabViewModel(IClient<OptimizedResults> client)
     {
         _client = client;
         _ = LoadAsync();

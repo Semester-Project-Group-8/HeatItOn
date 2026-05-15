@@ -20,7 +20,7 @@ namespace Frontend.ViewModels;
 public class SourceTabViewModel : ViewModelBase
 {
     // Api connection
-    private readonly SourceClient _client;
+    private readonly IClient<Source> _client;
 
     // Sources
     private readonly ObservableCollection<Source> _allSources = [];
@@ -110,7 +110,7 @@ public class SourceTabViewModel : ViewModelBase
         set => SetProperty(ref _selectedSource, value);
     }
 
-    public SourceTabViewModel(SourceClient client)
+    public SourceTabViewModel(IClient<Source> client)
     {
         _client = client;
         TimeAxis =
@@ -224,7 +224,7 @@ public class SourceTabViewModel : ViewModelBase
 
     public void Import()
     {
-        _ = CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client);
+        _ = CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
     }
 
     private static bool IsWinter(Source s)

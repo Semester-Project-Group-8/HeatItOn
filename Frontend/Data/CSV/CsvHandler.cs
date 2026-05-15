@@ -11,7 +11,7 @@ namespace Frontend.Data.CSV;
 public static class CsvHandler
 {
     // Asset
-    public static async void ExportAsset(string location, AssetClient assetClient)
+    public static async void ExportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
@@ -39,7 +39,7 @@ public static class CsvHandler
         }
     }
 
-    public static async void ImportAsset(string location, AssetClient assetClient)
+    public static async void ImportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {

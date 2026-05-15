@@ -6,7 +6,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class AssetClient
+public class AssetClient : IClient<Asset>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Asset";
