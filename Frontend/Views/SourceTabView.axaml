@@ -157,26 +157,27 @@
             </ScrollViewer>
         </Border>
 
-        <!-- TABLE SECTION -->
-        <Grid>
-            <TextBlock Text="// SOURCE DATA TABLE"
-                   FontSize="10"
-                   FontWeight="Bold"
-                   Foreground="#AAAAAA"
-                   LetterSpacing="1.5" />
-            <Button Content="Delete Selected"
-                    Command="{Binding DeleteSelected}"
-                    CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
-                    HorizontalAlignment="Right"
-                    Classes="export-btn"
-                    Background="#FFE06020"
-                    Foreground="White"/>
-        </Grid>
+                    <!-- TABLE SECTION -->
+                    <Grid Margin="0,0,0,8">
+                        <TextBlock Text="// SOURCE DATA TABLE"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="#AAAAAA"
+                                   LetterSpacing="1.5"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="Delete Selected"
+                                Command="{Binding DeleteSelected}"
+                                CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
+                                HorizontalAlignment="Right"
+                                Classes="export-btn"
+                                Background="#FFE06020"
+                                Foreground="White"/>
+                    </Grid>
 
-        <Border Background="White"
-                CornerRadius="12"
-                ClipToBounds="True">
-            <Grid RowDefinitions="*,Auto">
+                    <Border Background="White"
+                            CornerRadius="12"
+                            ClipToBounds="True">
+                        <Grid RowDefinitions="*,Auto">
 
                             <DataGrid x:Name="SourceDataGrid"
                                       Grid.Row="0"

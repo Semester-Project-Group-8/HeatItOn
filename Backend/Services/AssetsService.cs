@@ -11,7 +11,9 @@ namespace Backend.Services
             _dbContext=dbContext;
         }
 
-        public async Task Post(Asset asset)
+        public Task<Asset> Post() => throw new NotSupportedException();
+
+        public async Task<List<Asset>> List()
         {
             var result = await _dbContext.Assets.AddAsync(asset);
             await _dbContext.SaveChangesAsync();
@@ -56,7 +58,7 @@ namespace Backend.Services
                 throw new InvalidOperationException("Assets could not be loaded.");
             }
         }
-        
+
         public async Task<Asset> Get(int id)
         {
             var asset = await _dbContext.Assets.FindAsync(id);
