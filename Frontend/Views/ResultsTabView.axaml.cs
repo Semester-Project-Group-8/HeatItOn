@@ -1,6 +1,7 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Frontend.Models;
 using Frontend.ViewModels;
 
 namespace Frontend.Views;
@@ -10,6 +11,17 @@ public partial class ResultsTabView : UserControl
     public ResultsTabView()
     {
         InitializeComponent();
+        AddHandler(Button.ClickEvent, OnAnyButtonClick, RoutingStrategies.Bubble);
+    }
+
+    private async void OnAnyButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (e.Source is Button { Name: "DeleteBtn", Tag: OptimizedResults result } &&
+            DataContext is ResultsTabViewModel viewModel)
+        {
+            await viewModel.DeleteResult(result);
+            e.Handled = true;
+        }
     }
 
     private void OnSearchClick(object? sender, RoutedEventArgs e)

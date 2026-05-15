@@ -311,6 +311,15 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
     }
 
+    public async Task DeleteResult(OptimizedResults result)
+    {
+        await _client.Delete(result.Id);
+        OptimizedResults.Remove(result);
+        if (SelectedOptimizedResult == result)
+            SelectedOptimizedResult = null;
+        OnPropertyChanged(nameof(HasNoOptimizedResults));
+    }
+
     private void RebuildRows()
     {
         Rows.Clear();
