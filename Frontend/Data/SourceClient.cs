@@ -43,7 +43,7 @@ public class SourceClient : IClient<Source>
 
     public async Task Put(Source source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(source));
+        HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/Update/{source.Id}", JsonContent.Create(source));
     }
 
     public async Task Delete(int id)

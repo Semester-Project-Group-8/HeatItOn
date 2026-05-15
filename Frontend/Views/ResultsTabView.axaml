@@ -508,6 +508,7 @@
 
                         </Grid>
                     </Border>
+                    </StackPanel>
 
                     <TextBlock Text="// PERFORMANCE CHARTS"
                                FontSize="10" FontWeight="Bold"
@@ -643,7 +644,6 @@
                                 TooltipTextPaint="#111827" />
                         </Border>
                     </StackPanel>
-                </StackPanel>
                 </StackPanel>
             </ScrollViewer>
 

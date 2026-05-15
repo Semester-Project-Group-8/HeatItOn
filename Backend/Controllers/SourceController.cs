@@ -76,19 +76,6 @@ namespace Backend.Controllers
                 throw;
             }
         }
-        [HttpGet("Month/{month:int}")]
-        public async Task<IActionResult> GetByMonth(int month)
-        {
-            try
-            {
-                var sources = await _sourceService.ListByMonth(month);
-                return Ok(sources);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return StatusCode(503, new { message = ex.Message });
-            }
-        }
 
         [HttpPut("Update/{id:int}")]
         public async Task<IActionResult> Put(int id, [FromBody] Source source)

@@ -118,6 +118,11 @@ public class AssetsTabViewModel : ViewModelBase
         _ = LoadFromBackendAsync();
     }
 
+    public AssetsTabViewModel(SourceClient _, AssetClient assetClient, OptimizerClient optimizerClient)
+        : this(assetClient, optimizerClient)
+    {
+    }
+
     private void OpenManagerButtonView()
     {
         var managerVm = new ManagerButtonViewModel();

@@ -15,6 +15,7 @@ public class MainWindowViewModel : ViewModelBase
     public SourceTabViewModel SourceTab {get; private set;}
     public AssetsTabViewModel AssetsTab  {get; private set;}
     public ResultsTabViewModel ResultTab   {get; private set;}
+    public RelayCommand Refresh { get; }
 
     public MainWindowViewModel(
         IClient<Source> sourceClient,
@@ -25,15 +26,13 @@ public class MainWindowViewModel : ViewModelBase
         SourceTab = new SourceTabViewModel(sourceClient);
         AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient);
         ResultTab = new ResultsTabViewModel(optimizedResultsClient);
-        try
+        Refresh = new RelayCommand(() =>
         {
-            _ = InitializeSignalRAsync();
-        }
-        catch (Exception e)
-        {
-            Task.Delay(5000);
-            _ = InitializeSignalRAsync();
-        }
+            _ = AssetsTab.LoadFromBackendAsync();
+            _ = SourceTab.LoadAsync();
+            _ = ResultTab.LoadAsync();
+        });
+        _ = InitializeSignalRAsync();
     }
 
     private async Task InitializeSignalRAsync()

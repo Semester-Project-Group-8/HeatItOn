@@ -79,6 +79,7 @@ namespace Backend.Services
             await _dbContext.SaveChangesAsync();
             return newResultList.Id;
         }
+
         public async Task<int> Post(List<ResultList> results)
         {
             foreach (var result in results)

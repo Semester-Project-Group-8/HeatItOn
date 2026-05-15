@@ -22,6 +22,7 @@ namespace Backend.Services
                 throw new InvalidOperationException("Sources could not be loaded.");
             }
         }
+        
         public async Task<int> PostList(List<Source> source)
         {
             if (source == null || source.Count == 0)
@@ -43,6 +44,7 @@ namespace Backend.Services
         public async Task Post(Source source)
         {
             var result = await _dbContext.Sources.AddAsync(source);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Source>> ListByMonth(int month)
@@ -96,7 +98,7 @@ namespace Backend.Services
                 throw new InvalidOperationException($"Source with ID {id} could not be updated due to a database error.");
             }
         }
-
+        
         public async Task Delete(int id)
         {
             var source = await _dbContext.Sources.FindAsync(id);

@@ -11,44 +11,44 @@
 
     <UserControl.Styles>
         <Style Selector="DataGridColumnHeader">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="#AAAAAA" />
-            <Setter Property="FontSize" Value="10" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Padding" Value="12,12" />
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,12"/>
         </Style>
         <Style Selector="DataGridColumnHeader:pointerover /template/ Grid">
-            <Setter Property="Background" Value="#F8F8F8" />
+            <Setter Property="Background" Value="#F8F8F8"/>
         </Style>
         <Style Selector="DataGridRow">
-            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="MinHeight" Value="44"/>
         </Style>
         <Style Selector="DataGridCell">
-            <Setter Property="Padding" Value="12,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="BorderBrush" Value="#F0F0F0" />
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="#F0F0F0"/>
         </Style>
 
         <!-- Pagination button -->
         <Style Selector="Button.page-btn">
-            <Setter Property="MinWidth" Value="32" />
-            <Setter Property="Height" Value="32" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Background" Value="#F0F0F0" />
-            <Setter Property="Foreground" Value="#444444" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Padding" Value="6,0" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="MinWidth" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Background" Value="#F0F0F0"/>
+            <Setter Property="Foreground" Value="#444444"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="6,0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
         </Style>
         <Style Selector="Button.page-btn:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#E0E0E0" />
+            <Setter Property="Background" Value="#E0E0E0"/>
         </Style>
         <Style Selector="Button.page-btn.active">
-            <Setter Property="Background" Value="#E06020" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Background" Value="#E06020"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Styles>
 
@@ -68,7 +68,7 @@
                            FontSize="10"
                            FontWeight="Bold"
                            Foreground="#AAAAAA"
-                           LetterSpacing="1.5" />
+                           LetterSpacing="1.5"/>
 
                 <!-- Import/Export buttons pinned to bottom -->
                 <Border DockPanel.Dock="Bottom"
@@ -80,12 +80,12 @@
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"
                                 Content="↓  Export Source"
-                                Command="{Binding Export}" />
+                                Command="{Binding Export}"/>
                         <Button Classes="export-btn"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"
                                 Content="↑ Import Source"
-                                Command="{Binding Import}" />
+                                Command="{Binding Import}"/>
                     </StackPanel>
                 </Border>
 
@@ -157,114 +157,128 @@
             </ScrollViewer>
         </Border>
 
-        <!-- TABLE SECTION -->
-        <TextBlock Text="// SOURCE DATA TABLE"
-                   FontSize="10"
-                   FontWeight="Bold"
-                   Foreground="#AAAAAA"
-                   LetterSpacing="1.5" />
-
-        <Border Background="White"
-                CornerRadius="12"
-                ClipToBounds="True">
-            <Grid RowDefinitions="*,Auto">
-
-                <DataGrid Grid.Row="0"
-                          ItemsSource="{Binding PagedSources}"
-                          HeadersVisibility="Column"
-                          AutoGenerateColumns="False"
-                          GridLinesVisibility="Horizontal"
-                          BorderThickness="0"
-                          RowBackground="White"
-                          HorizontalAlignment="Stretch"
-                          IsReadOnly="True"
-                          CanUserReorderColumns="False"
-                          CanUserResizeColumns="False"
-                          CanUserSortColumns="True">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="ID"
-                                                Width="*"
-                                                SortMemberPath="Id">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Id}"
-                                               Foreground="#E06020"
-                                               Padding="12,0"
-                                               VerticalAlignment="Center" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="FROM"
-                                            Binding="{Binding TimeFrom}"
-                                            Width="2*" />
-                        <DataGridTextColumn Header="TO"
-                                            Binding="{Binding TimeTo}"
-                                            Width="2*" />
-                        <DataGridTextColumn Header="HEAT DEMAND (MW)"
-                                            Binding="{Binding HeatDemand}"
-                                            Width="2*" />
-                        <DataGridTextColumn Header="ELECTRICITY PRICE (DKK/MWH)"
-                                            Binding="{Binding ElectricityPrice}"
-                                            Width="2*" />
-                    </DataGrid.Columns>
-                </DataGrid>
-
-                <!-- Pagination footer -->
-                <Border Grid.Row="1"
-                        Padding="16,10"
-                        BorderBrush="#F0F0F0"
-                        BorderThickness="0,1,0,0">
-                    <Grid ColumnDefinitions="*,Auto">
-
-                        <TextBlock Grid.Column="0"
-                                   Text="{Binding PageInfo}"
-                                   VerticalAlignment="Center"
+                    <!-- TABLE SECTION -->
+                    <Grid Margin="0,0,0,8">
+                        <TextBlock Text="// SOURCE DATA TABLE"
+                                   FontSize="10"
+                                   FontWeight="Bold"
                                    Foreground="#AAAAAA"
-                                   FontSize="12" />
-
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    Spacing="4"
-                                    VerticalAlignment="Center">
-
-                            <Button Content="&#x2039;"
-                                    Command="{Binding PrevPage}"
-                                    IsEnabled="{Binding CanGoPrev}"
-                                    Classes="page-btn"
-                                    FontSize="16" />
-
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                          VerticalScrollBarVisibility="Disabled"
-                                          MaxWidth="300">
-                                <ItemsControl ItemsSource="{Binding PageNumbers}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" Spacing="4" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button Content="{Binding}"
-                                                    Command="{Binding ((vm:SourceTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
-                                                    CommandParameter="{Binding}"
-                                                    Classes="page-btn" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-
-                            <Button Content="&#x203A;"
-                                    Command="{Binding NextPage}"
-                                    IsEnabled="{Binding CanGoNext}"
-                                    Classes="page-btn"
-                                    FontSize="16" />
-
-                        </StackPanel>
+                                   LetterSpacing="1.5"
+                                   VerticalAlignment="Center"/>
+                        <Button Content="Delete Selected"
+                                Command="{Binding DeleteSelected}"
+                                CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
+                                HorizontalAlignment="Right"
+                                Classes="export-btn"
+                                Background="#FFE06020"
+                                Foreground="White"/>
                     </Grid>
-                </Border>
 
-            </Grid>
-        </Border>
+                    <Border Background="White"
+                            CornerRadius="12"
+                            ClipToBounds="True">
+                        <Grid RowDefinitions="*,Auto">
+
+                            <DataGrid x:Name="SourceDataGrid"
+                                      Grid.Row="0"
+                                      ItemsSource="{Binding PagedSources}"
+                                      HeadersVisibility="Column"
+                                      AutoGenerateColumns="False"
+                                      GridLinesVisibility="Horizontal"
+                                      BorderThickness="0"
+                                      RowBackground="White"
+                                      HorizontalAlignment="Stretch"
+                                      IsReadOnly="False"
+                                      SelectionMode="Extended"
+                                      CellEditEnded="SourceDataGrid_CellEditEnded"
+                                      CanUserReorderColumns="False"
+                                      CanUserResizeColumns="False"
+                                      CanUserSortColumns="True">
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="ID"
+                                                           Width="*"
+                                                           IsReadOnly="True"
+                                                           SortMemberPath="Id">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Id}"
+                                                           Foreground="#E06020"
+                                                           Padding="12,0"
+                                                           VerticalAlignment="Center"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="FROM"
+                                                        Binding="{Binding TimeFrom}"
+                                                        Width="2*"/>
+                                    <DataGridTextColumn Header="TO"
+                                                        Binding="{Binding TimeTo}"
+                                                        Width="2*"/>
+                                    <DataGridTextColumn Header="HEAT DEMAND (MW)"
+                                                        Binding="{Binding HeatDemand}"
+                                                        Width="2*"/>
+                                    <DataGridTextColumn Header="ELECTRICITY PRICE (DKK/MWH)"
+                                                        Binding="{Binding ElectricityPrice}"
+                                                        Width="2*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- Pagination footer -->
+                            <Border Grid.Row="1"
+                                    Padding="16,10"
+                                    BorderBrush="#F0F0F0"
+                                    BorderThickness="0,1,0,0">
+                                <Grid ColumnDefinitions="*,Auto">
+
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding PageInfo}"
+                                               VerticalAlignment="Center"
+                                               Foreground="#AAAAAA"
+                                               FontSize="12"/>
+
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                Spacing="4"
+                                                VerticalAlignment="Center">
+
+                                        <Button Content="&#x2039;"
+                                                Command="{Binding PrevPage}"
+                                                IsEnabled="{Binding CanGoPrev}"
+                                                Classes="page-btn"
+                                                FontSize="16"/>
+
+                                        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                      VerticalScrollBarVisibility="Disabled"
+                                                      MaxWidth="300">
+                                            <ItemsControl ItemsSource="{Binding PageNumbers}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Content="{Binding}"
+                                                                Command="{Binding ((vm:SourceTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
+                                                                CommandParameter="{Binding}"
+                                                                Classes="page-btn"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+
+                                        <Button Content="&#x203A;"
+                                                Command="{Binding NextPage}"
+                                                IsEnabled="{Binding CanGoNext}"
+                                                Classes="page-btn"
+                                                FontSize="16"/>
+
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                        </Grid>
+                    </Border>
 
         <!-- EMPTY STATE -->
         <Border Background="#10AAAAAA"
