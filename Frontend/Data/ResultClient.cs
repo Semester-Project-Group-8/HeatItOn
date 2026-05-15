@@ -6,9 +6,10 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class ResultClient
+public class ResultClient : IClient<Result>
 {
     private readonly HttpClient _client;
+    private const  string UrlExtension = "Result";
 
     public ResultClient(HttpClient httpClient)
     {
@@ -17,34 +18,30 @@ public class ResultClient
 
     public async Task<Result?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync(id.ToString());
+        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
     public async Task<List<Result>> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync("");
+        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}");
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<List<Result>>();
-        return result ?? [];
+        return await response.Content.ReadFromJsonAsync<List<Result>>() ?? [];
     }
 
-    public async Task<string> Post(Result result)
+    public async Task Post(Result result)
     {
-        HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
-        return await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(result));
     }
 
-    public async Task<Result?> Patch(Result result)
+    public async Task Put(Result result)
     {
-        HttpResponseMessage response = await _client.PostAsync("", JsonContent.Create(result));
-        return await response.Content.ReadFromJsonAsync<Result>();
+        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(result));
     }
 
-    public async Task<Result?> Delete(int id)
+    public async Task Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync(id.ToString() );
-        return await response.Content.ReadFromJsonAsync<Result>();
+        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}" );
     }
 }

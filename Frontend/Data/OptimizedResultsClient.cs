@@ -6,7 +6,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class OptimizedResultsClient
+public class OptimizedResultsClient : IClient<OptimizedResults>
 {
     private readonly HttpClient _client;
     private const string urlExtension = "OptimizedResults";
@@ -31,7 +31,17 @@ public class OptimizedResultsClient
         return result;
     }
 
-    public async void Delete(int id)
+    public async Task Post(OptimizedResults item)
+    {
+        HttpResponseMessage response = await _client.PostAsJsonAsync($"{urlExtension}", item);
+    }
+
+    public async Task Put(OptimizedResults item)
+    {
+        HttpResponseMessage response = await _client.PutAsJsonAsync($"{urlExtension}", item);
+    }
+
+    public async Task Delete(int id)
     {
         HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
     }

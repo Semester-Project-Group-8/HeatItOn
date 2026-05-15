@@ -6,7 +6,7 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class SourceClient
+public class SourceClient : IClient<Source>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Source";
@@ -23,35 +23,31 @@ public class SourceClient
         return await response.Content.ReadFromJsonAsync<Source>();
     }
 
-    public async Task<List<Source>?> GetAll()
+    public async Task<List<Source>> GetAll()
     {
         HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Source>>();
-        return result;
+        return result ?? [];
     }
 
-    public async Task<string> Post(Source source)
+    public async Task Post(Source source)
     {
         HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
-        return await response.Content.ReadAsStringAsync();
     }
 
-    public async Task<HttpContent> PostList(List<Source> source)
+    public async Task PostList(List<Source> source)
     {
         HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
-        return response.Content;
     }
 
-    public async Task<Source?> Patch(Source source)
+    public async Task Put(Source source)
     {
         HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(source));
-        return await response.Content.ReadFromJsonAsync<Source>();
     }
 
-    public async Task<Source?> Delete(int id)
+    public async Task Delete(int id)
     {
         HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}" );
-        return await response.Content.ReadFromJsonAsync<Source>();
     }
 }

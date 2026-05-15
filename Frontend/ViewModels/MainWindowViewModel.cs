@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Frontend.Data;
+using Frontend.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Tmds.DBus.Protocol;
 
@@ -16,15 +17,23 @@ public class MainWindowViewModel : ViewModelBase
     public ResultsTabViewModel ResultTab   {get; private set;}
 
     public MainWindowViewModel(
-        SourceClient sourceClient,
-        AssetClient assetClient,
+        IClient<Source> sourceClient,
+        IClient<Asset> assetClient,
         OptimizerClient optimizerClient,
-        OptimizedResultsClient optimizedResultsClient)
+        IClient<OptimizedResults> optimizedResultsClient)
     {
         SourceTab = new SourceTabViewModel(sourceClient);
         AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient);
         ResultTab = new ResultsTabViewModel(optimizedResultsClient);
-        _ = InitializeSignalRAsync();
+        try
+        {
+            _ = InitializeSignalRAsync();
+        }
+        catch (Exception e)
+        {
+            Task.Delay(5000);
+            _ = InitializeSignalRAsync();
+        }
     }
 
     private async Task InitializeSignalRAsync()
@@ -57,7 +66,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"SignalR connection failed: {ex.Message}");
+            throw new Exception("SignalR initialization failed", ex);
         }
     }
 }
