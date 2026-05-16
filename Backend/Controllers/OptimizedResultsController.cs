@@ -36,22 +36,15 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     }
 
     [HttpPost("Add")]
-    public async Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
+    public Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        await _optimizedResultsService.Post(optimizedResults);
-        return Ok();
+        throw new UnauthorizedAccessException("You are not authorized to create it.");
     }
 
     [HttpPut("Update/{id:int}")]
-    public async Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
+    public Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        optimizedResults.Id = id;
-        await _optimizedResultsService.Put(id, optimizedResults);
-        return Ok();
+        throw new  UnauthorizedAccessException("You are not authorized to modify it.");
     }
 
     [HttpDelete("Delete/{id:int}")]

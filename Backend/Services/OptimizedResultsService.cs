@@ -58,7 +58,7 @@ public class OptimizedResultsService: IService<OptimizedResults>
         if (result == null)
             throw new KeyNotFoundException($"OptimizedResults with ID {id} not found.");
         _dbContext.Results.RemoveRange(result.ResultsForHours.SelectMany(h => h.Results));
-        _dbContext.ResultList.RemoveRange(result.ResultsForHours);
+        _dbContext.ResultByHours.RemoveRange(result.ResultsForHours);
         _dbContext.OptimizedResults.Remove(result);
         await _dbContext.SaveChangesAsync();
     }

@@ -9,7 +9,7 @@ namespace Backend.Data
         public DbSet<Source> Sources { get; set; }
         public DbSet<Asset> Assets{ get; set; }
         public DbSet<Result> Results{ get; set; }
-        public DbSet<ResultByHour> ResultList { get; set; }
+        public DbSet<ResultByHour> ResultByHours { get; set; }
         public DbSet<OptimizedResults> OptimizedResults { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)

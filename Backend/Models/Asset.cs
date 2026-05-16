@@ -29,6 +29,7 @@ namespace Backend.Models
         [Required(ErrorMessage = "Asset MaxElectricity is required")]
         [Range(float.MinValue, float.MaxValue, ErrorMessage = "Asset MaxElectricity is out of range")]
         public float MaxElectricity { get; set; }
+        [RegularExpression("^.+\\.png$")]
         public string? ImageName { get; set; } = null;
     }
 }

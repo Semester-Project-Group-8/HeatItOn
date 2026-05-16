@@ -46,35 +46,23 @@ public class ResultController : ControllerBase, IController<Result, Result>
 
     // Post (for a single result)
     [HttpPost("Add")]
-    public async Task<IActionResult> Post([FromBody] Result incomingResult)
+    public Task<IActionResult> Post([FromBody] Result incomingResult)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        var created = _resultService.Post(incomingResult);
-        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-        return Created($"/Result/{incomingResult.Id}", incomingResult);
+        throw new UnauthorizedAccessException("You are not authorized to create it.");
     }
 
     // AddResultList
     [HttpPost("AddList")]
-    public async Task<IActionResult> AddResultList([FromBody] List<Result> results)
+    public Task<IActionResult> AddResultList([FromBody] List<Result> results)
     {
-        if (results.Any(result => !ModelState.IsValid)) return BadRequest(ModelState);
-        
-        await _resultService.Post(results);
-        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-        return Ok(new { Message = $"{results.Count} results added successfully." });
+        throw new  UnauthorizedAccessException("You are not authorized to create it.");
     }
 
     // Put
     [HttpPut("Update/{id:int}")]
-    public async Task<IActionResult> Put(int id, [FromBody] Result result)
+    public Task<IActionResult> Put(int id, [FromBody] Result result)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        await _resultService.Put(id, result);
-        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-        return Ok(new { Message = "Result updated successfully." });
+        throw new UnauthorizedAccessException("You are not authorized to modify it.");
     }
 
     // Delete
