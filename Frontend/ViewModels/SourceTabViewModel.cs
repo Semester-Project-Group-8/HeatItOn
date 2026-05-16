@@ -269,8 +269,6 @@ public partial class SourceTabViewModel : ViewModelBase
             Console.WriteLine(ex);
         }
     }
-
-    public void Export()
     public async void Export()
     {
         bool success = await CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());

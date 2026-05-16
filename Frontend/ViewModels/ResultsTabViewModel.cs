@@ -66,6 +66,35 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     }
     public ICommand CloseNotificationCommand { get; }
 
+    private bool _isDeleteConfirmOpen;
+    public bool IsDeleteConfirmOpen
+    {
+        get => _isDeleteConfirmOpen;
+        set { _isDeleteConfirmOpen = value; OnPropertyChanged(); }
+    }
+
+    private OptimizedResults? _pendingDeleteResult;
+
+    public void RequestDeleteResult(OptimizedResults result)
+    {
+        _pendingDeleteResult = result;
+        IsDeleteConfirmOpen = true;
+    }
+
+    public async void ConfirmDelete()
+    {
+        IsDeleteConfirmOpen = false;
+        if (_pendingDeleteResult == null) return;
+        await DeleteResult(_pendingDeleteResult);
+        _pendingDeleteResult = null;
+    }
+
+    public void CancelDelete()
+    {
+        _pendingDeleteResult = null;
+        IsDeleteConfirmOpen = false;
+    }
+
     public void NextPage()
     {
         if (!CanGoNext) return;
