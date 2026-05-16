@@ -170,13 +170,8 @@
                 </Border>
             </SplitView.Pane>
             <SplitView.Content>
-                <Grid RowDefinitions="Auto,*,Auto" Margin="5">
-                    <TextBlock Grid.Row="0"
-                               IsVisible="{Binding HasStatusMessage}"
-                               Text="{Binding StatusMessage}"
-                               Margin="0,0,0,8"
-                               Opacity="0.8" />
-                    <ScrollViewer Grid.Row="1"
+                <Grid RowDefinitions="*,Auto" Margin="5">
+                    <ScrollViewer Grid.Row="0"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding AssetItems}">
@@ -343,5 +338,30 @@
                IsHitTestVisible="True">
             <v:ManagerButtonView DataContext="{Binding CurrentManagerDialog}" />
         </Panel>
+        <Popup Grid.Row="0"
+               IsOpen="{Binding IsNotificationOpen, Mode=TwoWay}"
+               IsLightDismissEnabled="True"
+               Placement="Center">
+            <Border Background="White"
+                    BorderBrush="#CCCCCC"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="24">
+                <StackPanel Spacing="12" Width="260">
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="14" FontWeight="Bold" />
+                    <Button Content="OK"
+                            HorizontalAlignment="Center"
+                            Background="#E06020"
+                            Foreground="White"
+                            Padding="24,8"
+                            CornerRadius="6"
+                            Command="{Binding CloseNotificationCommand}" />
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
+
+
 </UserControl>
+

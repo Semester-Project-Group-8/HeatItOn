@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
@@ -39,6 +40,21 @@ public partial class SourceTabViewModel : ViewModelBase
         ? "No rows to display"
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, Sources.Count)} of {Sources.Count} rows";
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
+    private bool _isNotificationOpen;
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        set => SetProperty(ref _isNotificationOpen, value);
+    }
+
+    private string _statusMessage = string.Empty;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set => SetProperty(ref _statusMessage, value);
+    }
+
+    public ICommand CloseNotificationCommand { get; }
 
     public void NextPage()
     {
@@ -113,6 +129,7 @@ public partial class SourceTabViewModel : ViewModelBase
     public SourceTabViewModel(IClient<Source> client)
     {
         _client = client;
+        CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
         TimeAxis =
         [
             new Axis
@@ -254,13 +271,18 @@ public partial class SourceTabViewModel : ViewModelBase
     }
 
     public void Export()
+    public async void Export()
     {
-        CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
+        bool success = await CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
+        StatusMessage = success ? "Source data was exported successfully." : "Export failed: no source data to export.";
+        IsNotificationOpen = true;
     }
 
     public void Import()
     {
         _ = CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
+        StatusMessage = "Source data was imported successfully.";
+        IsNotificationOpen = true;
     }
 
     private static bool IsWinter(Source s)

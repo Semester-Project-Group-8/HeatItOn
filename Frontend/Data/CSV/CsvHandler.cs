@@ -11,7 +11,7 @@ namespace Frontend.Data.CSV;
 public static class CsvHandler
 {
     // Asset
-    public static async void ExportAsset(string location, IClient<Asset> assetClient)
+    public static async Task<bool> ExportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
@@ -27,15 +27,18 @@ public static class CsvHandler
 
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | asset csv file export");
+                return true;
             }
             else
             {
                 Console.WriteLine("error | no assets found for export");
+                return false;
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"error | asset csv file export failed >> {e.Message}");
+            return false;
         }
     }
 
@@ -123,7 +126,7 @@ public static class CsvHandler
     }
     
     // Result
-    public static async void ExportResult(string location, List<ResultTableRow>? results)
+    public static async Task<bool> ExportResult(string location, List<ResultTableRow>? results)
     {
         try
         {
@@ -137,15 +140,18 @@ public static class CsvHandler
 
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | optimized result csv file export");
+                return true;
             }
             else
             {
                 Console.WriteLine("error | no results found for export");
+                return false;
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"error | optimized result csv file export failed >> {e.Message}");
+            return false;
         }
     }
     public static async Task ImportSource(string location, SourceClient sourceClient) 
@@ -187,12 +193,12 @@ public static class CsvHandler
         return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
     }
 
-    public static async void ExportSource(string location, List<Source>? sources)
+    public static async Task<bool> ExportSource(string location, List<Source>? sources)
     {
         try
         {
-            if (sources != null)
-            {   
+            if (sources is { Count: > 0 })
+            {
                 List<string> lines =
                 [
                     "TimeFrom,TimeTo,HeatDemand,ElectricityPrice"
@@ -200,15 +206,18 @@ public static class CsvHandler
                 lines.AddRange(sources.Select(source => $"{source.TimeFrom.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.TimeTo.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.HeatDemand.ToString("00.00", CultureInfo.InvariantCulture)},{source.ElectricityPrice.ToString(CultureInfo.InvariantCulture)}"));
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | csv file export");
+                return true;
             }
             else
             {
                 Console.WriteLine("error | no sources found for export");
+                return false;
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"error | csv file export failed >> {e.Message}");
+            return false;
         }
     }
     private static readonly CultureInfo CsvCulture = new CultureInfo("da-DK");

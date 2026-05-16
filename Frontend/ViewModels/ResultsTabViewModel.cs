@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Input;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     public ResultsTabViewModel(IClient<OptimizedResults> client)
     {
         _client = client;
+        CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
+    
         _ = LoadAsync();
     }
 
@@ -48,6 +51,20 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         ? "No rows to display"
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, _filteredRows.Count)} of {_filteredRows.Count} rows";
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
+    private bool _isNotificationOpen;
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        set { _isNotificationOpen = value; OnPropertyChanged(); }
+    }
+
+    private string _statusMessage = string.Empty;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set { _statusMessage = value; OnPropertyChanged(); }
+    }
+    public ICommand CloseNotificationCommand { get; }
 
     public void NextPage()
     {
@@ -306,9 +323,11 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         });
     }
 
-    public void Export()
+    public async void Export()
     {
-        CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
+        bool success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
+        StatusMessage = success ? "Result exported successfully." : "Export failed: no results to export.";
+        IsNotificationOpen = true;
     }
 
     public async Task DeleteResult(OptimizedResults result)
@@ -318,6 +337,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         if (SelectedOptimizedResult == result)
             SelectedOptimizedResult = null;
         OnPropertyChanged(nameof(HasNoOptimizedResults));
+        StatusMessage = "Result deleted successfully.";
+        IsNotificationOpen = true;
     }
 
     private void RebuildRows()

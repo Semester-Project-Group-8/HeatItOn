@@ -36,6 +36,14 @@ public class AssetsTabViewModel : ViewModelBase
     public ICommand OpenAddAssetDialogCommand { get; }
     public ICommand OpenManagerButtonViewCommand { get; }
     public ICommand StartOptimizationCommand { get; }
+
+    private bool _isNotificationOpen;
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        set => SetProperty(ref _isNotificationOpen, value);
+    }
+    public ICommand CloseNotificationCommand { get; }
     
     public AddAssetDialogViewModel? CurrentDialog
     {
@@ -115,6 +123,7 @@ public class AssetsTabViewModel : ViewModelBase
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
         OpenManagerButtonViewCommand = new RelayCommand(OpenManagerButtonView);
         StartOptimizationCommand = new RelayCommand(StartOptimization);
+        CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
         _ = LoadFromBackendAsync();
     }
 
@@ -135,11 +144,15 @@ public class AssetsTabViewModel : ViewModelBase
         {
             CurrentManagerDialog = null;
             _ = ImportAssets();
+            StatusMessage = "Assets were imported successfully.";
+            IsNotificationOpen = true;
         };
-        managerVm.ExportRequested += () =>
+        managerVm.ExportRequested += async () =>
         {
             CurrentManagerDialog = null;
-            ExportAssets();
+            bool success = await ExportAssets();
+            StatusMessage = success ? "Assets were exported successfully." : "Export failed: no assets to export.";
+            IsNotificationOpen = true;
         };
         managerVm.CancelRequested += () =>
         {
@@ -167,15 +180,17 @@ public class AssetsTabViewModel : ViewModelBase
         {
            Console.WriteLine(e); 
         }
+        StatusMessage = "Data was optimized successfully.";
+        IsNotificationOpen = true;
     }
     public async Task ImportAssets()
     {
         CsvHandler.ImportAsset(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
     }
 
-    public void ExportAssets()
+    public async Task<bool> ExportAssets()
     {
-        CsvHandler.ExportAsset(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+        return await CsvHandler.ExportAsset(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
     }
 
     private void OpenAddAssetDialog()
