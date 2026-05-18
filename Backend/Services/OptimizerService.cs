@@ -109,16 +109,16 @@ namespace Backend.Services
                         continue;
                     }
                     Result newResult = CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction);
-                    if(PTES!=null && scenarioAssets[usedGenerators]==PTES)//if we used heat from storage substract
-                    {
-                        PTES.MaxHeat -= targetHeatProduction;
-                    }
                     if (heatOfTheHour >= source.HeatDemand && newResult.ProductionCost >= 0)//if we met demand or if we dont make money by overproducing stop
                     {
                         allowOverproduction=false;
                     }
-                    if(allowOverproduction)
+                    if(allowOverproduction || (PTES != null && scenarioAssets[usedGenerators] == PTES && heatOfTheHour<source.HeatDemand))
                     {
+                        if(PTES != null && scenarioAssets[usedGenerators] == PTES)//if we used heat from storage substract
+                        {
+                            PTES.MaxHeat -= targetHeatProduction;
+                        }
                         resultOfHour.Results.Add(newResult);
                         heatOfTheHour += targetHeatProduction;
                         usedGenerators++;
