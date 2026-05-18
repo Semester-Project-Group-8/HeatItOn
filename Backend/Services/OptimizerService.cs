@@ -23,6 +23,8 @@ namespace Backend.Services
         }
         private int DeterminePrimaryEnergyConsumed(Asset asset)
         {
+            if (asset.ProductionCost == 0)
+                return 3;//heat storage
             if (asset.GasConsumption > asset.OilConsumption && -asset.GasConsumption < asset.MaxElectricity)
                 return 0;//gas
             if (asset.OilConsumption > asset.GasConsumption && -asset.OilConsumption < asset.MaxElectricity)
@@ -51,6 +53,12 @@ namespace Backend.Services
         }
         public async Task<ActionResult<OptimizedResults>> Optimize(List<Asset> scenarioAssets)
         {
+            Asset? PTES;//Pit Thermal Energy Storage
+            PTES = scenarioAssets.FirstOrDefault(asset => asset.ProductionCost == 0);
+            if (PTES != null)
+            {
+                //scenarioAssets.Remove(PTES);
+            }
             var allSources = (await _sourceService.List())
                 .OrderBy(s => s.TimeFrom)
                 .ToList();
@@ -75,17 +83,17 @@ namespace Backend.Services
                 };
                 while(usedGenerators<scenarioAssets.Count() && (heatOfTheHour < source.HeatDemand || allowOverproduction))
                 {
-                    if(scenarioAssets[usedGenerators].Name=="Gas boiler 1" && maintenanceFrom <= source.TimeFrom && source.TimeFrom < maintenanceTil)
+                    if(scenarioAssets[usedGenerators].Name=="Gas boiler 1" && maintenanceFrom <= source.TimeFrom && source.TimeFrom < maintenanceTil)//maintenance
                     {
                         usedGenerators++;
                         continue;
                     }
                     float targetHeatProduction = 0;
-                    if (source.HeatDemand - heatOfTheHour > scenarioAssets[usedGenerators].MaxHeat || heatOfTheHour >= source.HeatDemand)
+                    if (source.HeatDemand - heatOfTheHour > scenarioAssets[usedGenerators].MaxHeat || heatOfTheHour >= source.HeatDemand)//demand higher than asset can generate
                     {
                         targetHeatProduction = scenarioAssets[usedGenerators].MaxHeat;
                     }
-                    else
+                    else//check if we profit by overproduction
                     {
                         targetHeatProduction = source.HeatDemand - heatOfTheHour;
                         Result partialProductionResult = CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction);
@@ -95,8 +103,17 @@ namespace Backend.Services
                             targetHeatProduction = scenarioAssets[usedGenerators].MaxHeat;
                         }
                     }
+                    if(PTES != null && scenarioAssets[usedGenerators] == PTES && PTES.MaxHeat==0)//if we dont store any heat skipp
+                    {
+                        usedGenerators++;
+                        continue;
+                    }
                     Result newResult = CalculateAssetResult(scenarioAssets[usedGenerators], source, targetHeatProduction);
-                    if (heatOfTheHour >= source.HeatDemand && newResult.ProductionCost >= 0)
+                    if(PTES!=null && scenarioAssets[usedGenerators]==PTES)//if we used heat from storage substract
+                    {
+                        PTES.MaxHeat -= targetHeatProduction;
+                    }
+                    if (heatOfTheHour >= source.HeatDemand && newResult.ProductionCost >= 0)//if we met demand or if we dont make money by overproducing stop
                     {
                         allowOverproduction=false;
                     }
@@ -107,94 +124,23 @@ namespace Backend.Services
                         usedGenerators++;
                     }
                 }
+                if(PTES!=null && heatOfTheHour>source.HeatDemand)//save extra heat
+                {
+                    float overProduction = heatOfTheHour - source.HeatDemand;
+                    if(overProduction>30)
+                    {
+                        overProduction = 30;//Max transfer is 30 MWh
+                    }
+                    if(PTES.MaxHeat+overProduction<=30000)//Max capacity is 30000MW(th)
+                    {
+                        PTES.MaxHeat += overProduction;
+                    }
+                }
                 finalResults.ResultsForHours.Add(resultOfHour);
             }
             await _resultListService.PostList(finalResults.ResultsForHours);
             await _optimizedResultsService.Post(finalResults);
             return finalResults;
         }
-
-        /*
-        public async Task<float> CalculateNetProductionCost(int assetId, DateTime date, float heatTarget)
-        {
-            Asset asset = await _assetService.GetAsset(assetId);
-            float generatedHeat = heatTarget;
-            if (generatedHeat > asset.MaxHeat)
-            {
-                generatedHeat = asset.MaxHeat;
-            }
-            float netProductionCost = asset.ProductionCost * generatedHeat;
-            if (asset.MaxElectricity < 0)
-            {
-                Source source = await _sourceService.ListByHour(date);
-                netProductionCost += source.ElectricityPrice * asset.MaxElectricity * -1;
-            }
-            if (asset.MaxElectricity > 0)
-            {
-                Source source = await _sourceService.ListByHour(date);
-                netProductionCost -= source.ElectricityPrice * asset.MaxElectricity;
-            }
-            return netProductionCost;
-        }
-
-        public async Task<ActionResult<OptimizedResults>> Optimize(List<Asset> ScenarioAssets)//Task<List<ResultList>>
-        {
-            var AllSources = await _sourceService.ListSources();
-            //var ScenarioAssets = await _assetService.ListAssets();
-            List<(Asset asset, float cost)> prices = new();
-            List<ResultList> optimizedData = new List<ResultList>();
-            int maintencance = 0;
-            foreach (var source in AllSources)
-            {
-                ResultList resultOfHour=new ResultList();
-                resultOfHour.TimeFrom = source.TimeFrom;
-                resultOfHour.TimeTo = source.TimeTo;
-                prices.Clear();
-
-                foreach (var asset in ScenarioAssets)
-                {
-                    if (asset.Id == 2 && maintencance > 0)//if generator no.2 under maintenance period skip
-                    {
-                        continue;
-                    }
-                    float cost = await CalculateNetProductionCost(asset.Id, source.TimeFrom);
-                    prices.Add((asset, cost));
-                }
-                prices.Sort((a, b) => a.cost.CompareTo(b.cost));
-                float metEnergy = 0;
-                int usedGenerators = 0;
-                while (metEnergy < source.HeatDemand && usedGenerators<=prices.Count())
-                {
-                    metEnergy += prices[usedGenerators].asset.MaxHeat;
-                    Result result = new Result
-                    {
-                        //Id = prices[usedGenerators].asset.Id,
-                        HeatProduction = prices[usedGenerators].asset.MaxHeat,
-                        Electricity = prices[usedGenerators].asset.MaxElectricity,
-                        ProductionCost = prices[usedGenerators].cost,
-                        PrimaryEnergyConsumed = //0 gas 1 oil 2 electricity 3 other
-                            prices[usedGenerators].asset.GasConsumption != 0 ? 0 :
-                            prices[usedGenerators].asset.OilConsumption != 0 ? 1 :
-                            prices[usedGenerators].asset.MaxElectricity > 0 ? 2 : 3,
-                        CO2Produced = prices[usedGenerators].asset.CO2Emission,
-                        AssetId = prices[usedGenerators].asset.Id
-                    };
-                    usedGenerators++;
-                    resultOfHour.Results.Add(result);
-                }
-                await _resultService.AddResult(resultOfHour.Results);//change when AddResult exists
-                optimizedData.Add(resultOfHour);
-                maintencance--;
-            }
-            await _resultListService.AddResultList(optimizedData);
-            OptimizedResults optimizedResult = new OptimizedResults
-            {
-                //Id= 1,
-                Name = $"result_{DateTime.Now:yyyy_MM_dd_HH_mm}",
-                ResultsForHours= optimizedData
-            };
-            await _optimizedResultsService.AddOptimizedResults(optimizedResult);
-            return optimizedResult;
-        }*/
     }
 }
