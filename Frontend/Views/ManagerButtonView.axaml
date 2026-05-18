@@ -31,7 +31,7 @@
                         Command="{Binding AddNewAssetCommand}"/>
                 <Button Content="Import Assets"
                         Classes="action-secondary"
-                        Command="{Binding ImportAssetsCommand}"/>
+                        Click="ImportAssetsButton_Click"/>
                 <Button Content="Export Assets"
                         Classes="action-secondary"
                         Command="{Binding ExportAssetsCommand}"/>

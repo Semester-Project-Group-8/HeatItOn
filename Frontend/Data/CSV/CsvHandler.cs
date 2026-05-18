@@ -39,7 +39,7 @@ public static class CsvHandler
         }
     }
 
-    public static async void ImportAsset(string location, IClient<Asset> assetClient)
+    public static async Task ImportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
