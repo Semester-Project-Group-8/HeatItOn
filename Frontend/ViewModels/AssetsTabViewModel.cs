@@ -342,6 +342,7 @@ public class AssetsTabViewModel : ViewModelBase
         if (name.Contains("Motor", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
         if (name.Contains("Electric", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
         if (name.Contains("Oil", StringComparison.OrdinalIgnoreCase)) return "OIL";
+        if (name.Contains("PTES", StringComparison.OrdinalIgnoreCase)) return "STORAGE";
         return "GAS";
     }
 
