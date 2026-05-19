@@ -39,18 +39,19 @@ namespace BackendTest
         [Fact]
         public async Task CalculateNetProductionCost_PositiveCase()
         {
-            var result = await _assetsService.AddAsset(
-                id: 1,
-                name: "Boiler",
-                maxHeat: 100f,
-                productionCost: 5000,
-                co2Emission: 50,
-                gasConsumption: 10f,
-                oilConsumption: 5f,
-                maxElectricity: 0f
+            await _assetsService.Post(
+               new Asset { Id = 1,
+                Name = "Boiler",
+                MaxHeat = 100f,
+                ProductionCost = 5000,
+                CO2Emission = 50,
+                GasConsumption = 10f,
+                OilConsumption = 5f,
+                MaxElectricity = 0f
+               }
             );
-            Asset asset = (await _assetsService.Get(1)).First();
-            Source s = new Source
+            Asset asset = await _assetsService.Get(1);
+            Source source = new Source
             {
                 Id = 1,
                 TimeFrom = new DateTime(2018, 8, 11, 00, 00, 00),
@@ -58,25 +59,26 @@ namespace BackendTest
                 HeatDemand = 53f,
                 ElectricityPrice = 1f
             };
-            await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+            await _sourceService.Post(source);
             float correct = 500000;
-            Result received = _optimizerService.CalculateAssetResult(asset,s, asset.MaxHeat);
+            Result received = _optimizerService.CalculateAssetResult(asset, source, asset.MaxHeat);
             Assert.Equal(correct, received.ProductionCost);
         }
         [Fact]
         public async Task CalculateNetProductionCost_PositiveCaseMakePower()
         {
-            var result = await _assetsService.AddAsset(
-                id: 1,
-                name: "Boiler",
-                maxHeat: 100f,
-                productionCost: 5000,
-                co2Emission: 50,
-                gasConsumption: 10f,
-                oilConsumption: 5f,
-                maxElectricity: 10f
+            await _assetsService.Post(
+                new Asset { Id = 1,
+                    Name = "Boiler",
+                    MaxHeat = 100f,
+                    ProductionCost = 5000,
+                    CO2Emission = 50,
+                    GasConsumption = 10f,
+                    OilConsumption = 5f,
+                    MaxElectricity = 10f
+                }
             );
-            Asset asset = (await _assetsService.Get(1)).First();
+            Asset asset = await _assetsService.Get(1);
             Source s = new Source
             {
                 Id = 1,
@@ -85,7 +87,7 @@ namespace BackendTest
                 HeatDemand = 53f,
                 ElectricityPrice = 1f
             };
-            await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+            await _sourceService.Post(s);
             float correct = 499990;
             Result received = _optimizerService.CalculateAssetResult(asset, s, asset.MaxHeat);
             Assert.Equal(correct, received.ProductionCost);
@@ -93,17 +95,18 @@ namespace BackendTest
         [Fact]
         public async Task CalculateNetProductionCost_UsePowerPositiveCase()
         {
-            var result = await _assetsService.AddAsset(
-                id: 1,
-                name: "Boiler",
-                maxHeat: 100f,
-                productionCost: 5000,
-                co2Emission: 50,
-                gasConsumption: 10f,
-                oilConsumption: 5f,
-                maxElectricity: -10f
+            await _assetsService.Post(
+                new Asset { Id = 1,
+                    Name = "Boiler",
+                    MaxHeat = 100f,
+                    ProductionCost = 5000,
+                    CO2Emission = 50,
+                    GasConsumption = 10f,
+                    OilConsumption = 5f,
+                    MaxElectricity = -10f
+                }
             );
-            Asset asset = (await _assetsService.Get(1)).First();
+            Asset asset = await _assetsService.Get(1);
             Source s = new Source
             {
                 Id = 1,
@@ -112,7 +115,7 @@ namespace BackendTest
                 HeatDemand = 53f,
                 ElectricityPrice = 1f
             };
-            await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+            await _sourceService.Post(s);
             float correct = 500010;
             Result received = _optimizerService.CalculateAssetResult(asset, s, asset.MaxHeat);
             Assert.Equal(correct, received.ProductionCost);
@@ -121,17 +124,18 @@ namespace BackendTest
         [Fact]
         public async Task CalculateNetProductionCost_NegativeCase()
         {
-            var result = await _assetsService.AddAsset(
-                id: 1,
-                name: "Boiler",
-                maxHeat: 100f,
-                productionCost: 5000,
-                co2Emission: 50,
-                gasConsumption: 10f,
-                oilConsumption: 5f,
-                maxElectricity: 0f
+            await _assetsService.Post(
+               new Asset { Id = 1,
+                Name = "Boiler",
+                MaxHeat = 100f,
+                ProductionCost = 5000,
+                CO2Emission = 50,
+                GasConsumption = 10f,
+                OilConsumption = 5f,
+                MaxElectricity = 0f
+               }
             );
-            Asset asset = (await _assetsService.Get(1)).First();
+            Asset asset = await _assetsService.Get(1);
             Source s = new Source
             {
                 Id = 1,
@@ -140,7 +144,7 @@ namespace BackendTest
                 HeatDemand = 53f,
                 ElectricityPrice = 245f
             };
-            await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+            await _sourceService.Post(s);
             float correct = 5;
             Result received = _optimizerService.CalculateAssetResult(asset, s, asset.MaxHeat);
             Assert.NotEqual(correct, received.ProductionCost);
@@ -149,17 +153,18 @@ namespace BackendTest
         [Fact]
         public async Task CalculateNetProductionCost_EdgeCase()
         {
-            var result = await _assetsService.AddAsset(
-                id: 1,
-                name: "Boiler",
-                maxHeat: 100f,
-                productionCost: 0,
-                co2Emission: 50,
-                gasConsumption: 10f,
-                oilConsumption: 5f,
-                maxElectricity: 0f
+            await _assetsService.Post(
+               new Asset { Id = 1,
+                Name = "Boiler",
+                MaxHeat = 100f,
+                ProductionCost = 0,
+                CO2Emission = 50,
+                GasConsumption = 10f,
+                OilConsumption = 5f,
+                MaxElectricity = 0f
+               }
             );
-            Asset asset = (await _assetsService.Get(1)).First();
+            Asset asset = await _assetsService.Get(1);
             Source s = new Source
             {
                 Id = 1,
@@ -168,7 +173,7 @@ namespace BackendTest
                 HeatDemand = 53f,
                 ElectricityPrice = 245f
             };
-            await _sourceService.AddSource(s.Id, s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice);
+            await _sourceService.Post(s);
             float correct = 0;
             Result received = _optimizerService.CalculateAssetResult(asset, s, asset.MaxHeat);
             Assert.Equal(correct, received.ProductionCost);

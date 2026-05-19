@@ -43,8 +43,18 @@ namespace Backend.Services
 
         public async Task Post(Source source)
         {
-            var result = await _dbContext.Sources.AddAsync(source);
-            await _dbContext.SaveChangesAsync();
+            if (await _dbContext.Sources.AnyAsync(s => s.Id == source.Id))
+                throw new InvalidOperationException("Source with this ID already exists.");
+            await _dbContext.Sources.AddAsync(source);
+
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new InvalidOperationException("Source could not be saved.");
+            }
         }
 
         public async Task<IEnumerable<Source>> ListByMonth(int month)
