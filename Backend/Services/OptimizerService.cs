@@ -131,7 +131,7 @@ namespace Backend.Services
                     {
                         overProduction = 30;//Max transfer is 30 MWh
                     }
-                    if(PTES.MaxHeat+overProduction<=30000)//Max capacity is 30000MW(th)
+                    if(PTES.MaxHeat+overProduction<=300)//Max capacity is 30000MW(th)
                     {
                         PTES.MaxHeat += overProduction;
                     }
