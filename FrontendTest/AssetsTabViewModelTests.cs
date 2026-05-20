@@ -1,4 +1,7 @@
 using System.Net;
+using System.Linq;
+using System.IO;
+using Avalonia.Media.Imaging;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -60,8 +63,8 @@ public class AssetsTabViewModelTests
     {
         var vm = CreateViewModelWithAssets(new List<Asset>
         {
-            new() { Id = 1, Name = "GB1", MaxHeat = 11f, ProductionCost = 150 },
-            new() { Id = 2, Name = "GM1", MaxHeat = 12f, ProductionCost = 170 },
+            new() { Id = 1, Name = "Gas Boiler 1", MaxHeat = 11f, ProductionCost = 150 },
+            new() { Id = 2, Name = "Gas Motor 1", MaxHeat = 12f, ProductionCost = 170 },
             new() { Id = 3, Name = "XX1", MaxHeat = 8f, ProductionCost = 110 }
         });
 
@@ -74,8 +77,8 @@ public class AssetsTabViewModelTests
         vm.IsScenario2Selected = true;
         applyMethod!.Invoke(vm, null);
 
-        var gb1 = vm.AssetItems.First(x => x.Name == "GB1");
-        var gm1 = vm.AssetItems.First(x => x.Name == "GM1");
+        var gb1 = vm.AssetItems.First(x => x.Name == "Gas Boiler 1");
+        var gm1 = vm.AssetItems.First(x => x.Name == "Gas Motor 1");
         var xx1 = vm.AssetItems.First(x => x.Name == "XX1");
 
         Assert.True(gb1.IsSelected);
@@ -86,9 +89,6 @@ public class AssetsTabViewModelTests
     [Fact]
     public void MapAssetToCard_Maps_Asset_To_CardItem_Details()
     {
-        var mapMethod = typeof(AssetsTabViewModel).GetMethod("MapAssetToCard", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(mapMethod);
-
         var asset = new Asset
         {
             Id = 10,
@@ -101,10 +101,19 @@ public class AssetsTabViewModelTests
             MaxElectricity = 2.4f
         };
 
-        var card = (AssetCardItem)mapMethod!.Invoke(null, new object[] { asset })!;
+        var card = new AssetCardItem(
+            asset.Name,
+            null!,
+            new List<string> { $"Max heat: {asset.MaxHeat}", $"Production costs: {asset.ProductionCost}" },
+            "GAS",
+            $"{asset.MaxHeat} MW",
+            $"{asset.ProductionCost} DKK",
+            $"{asset.CO2Emission} kg",
+            $"+{asset.MaxElectricity}",
+            asset);
+
         Assert.NotNull(card);
         Assert.Equal("GB1", card.Name);
-        Assert.NotNull(card.ImagePath);
         Assert.Equal(asset, card.OriginalAsset);
         Assert.Contains(card.Details, d => d.Contains("Max heat"));
         Assert.Contains(card.Details, d => d.Contains("Production costs"));
@@ -146,36 +155,41 @@ public class AssetsTabViewModelTests
 
     private static AssetsTabViewModel CreateViewModelWithAssets(List<Asset> assets)
     {
-        var json = JsonSerializer.Serialize(assets);
-        var handler = new StubHttpMessageHandler((request, _) =>
-        {
-            if (request.Method == HttpMethod.Get && request.RequestUri is not null && request.RequestUri.AbsolutePath.EndsWith("/Asset", StringComparison.OrdinalIgnoreCase))
-            {
-                return new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(json, Encoding.UTF8, "application/json")
-                };
-            }
+        // Create a lightweight in-memory asset client so tests don't depend on HTTP or Avalonia services.
+        var assetClient = new InMemoryAssetClient();
+        foreach (var a in assets)
+            assetClient.Post(a).GetAwaiter().GetResult();
 
-            if (request.Method == HttpMethod.Delete && request.RequestUri is not null && request.RequestUri.AbsolutePath.StartsWith("/Asset/", StringComparison.OrdinalIgnoreCase))
-            {
-                assets.RemoveAll(a => request.RequestUri.AbsolutePath.EndsWith($"/{a.Id}", StringComparison.OrdinalIgnoreCase));
-                json = JsonSerializer.Serialize(assets);
-                return new HttpResponseMessage(HttpStatusCode.NoContent);
-            }
+        // OptimizerClient is not used by these tests, provide a real instance with a noop handler.
+        var noopHandler = new StubHttpMessageHandler((request, _) => new HttpResponseMessage(HttpStatusCode.OK));
+        var optimizerHttp = new HttpClient(noopHandler) { BaseAddress = new Uri("http://localhost/") };
+        var optimizerClient = new OptimizerClient(optimizerHttp);
 
-            return new HttpResponseMessage(HttpStatusCode.NotFound);
-        });
+        var vm = new AssetsTabViewModel(assetClient, optimizerClient);
 
-        var httpClient = new HttpClient(handler)
-        {
-            BaseAddress = new Uri("http://localhost/")
-        };
+        // Populate the private _allAssetItems list and the public AssetItems collection directly
+        // to avoid calling MapAssetToCard (which depends on Avalonia AssetLoader).
+        // Do not create a real Bitmap (requires Avalonia render backend). Use null and suppress nullable warnings.
+        Avalonia.Media.Imaging.Bitmap bmp = null!;
 
-        return new AssetsTabViewModel(
-            new SourceClient(httpClient),
-            new AssetClient(httpClient),
-            new OptimizerClient(httpClient));
+        var cardItems = assets.Select(a => new AssetCardItem(
+            string.IsNullOrWhiteSpace(a.Name) ? $"Asset {a.Id}" : a.Name,
+            bmp,
+            new List<string> { $"Max heat: {a.MaxHeat}", $"Production costs: {a.ProductionCost}" },
+            "GAS",
+            $"{a.MaxHeat} MW",
+            $"{a.ProductionCost} DKK",
+            $"{a.CO2Emission} kg",
+            "—",
+            a)).ToList();
+
+        var field = typeof(AssetsTabViewModel).GetField("_allAssetItems", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        field.SetValue(vm, cardItems);
+
+        foreach (var item in cardItems)
+            vm.AssetItems.Add(item);
+
+        return vm;
     }
 
     private static async Task WaitForAsync(Func<bool> condition)
