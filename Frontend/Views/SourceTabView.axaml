@@ -299,28 +299,21 @@
             </Border>
             
         </DockPanel>
-        <Popup Grid.Row="0"
-               IsOpen="{Binding IsNotificationOpen, Mode=TwoWay}"
-               IsLightDismissEnabled="True"
-               Placement="Center">
-            <Border Background="White"
-                    BorderBrush="#CCCCCC"
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Padding="24">
-                <StackPanel Spacing="12" Width="260">
-                    <TextBlock Text="{Binding StatusMessage}"
-                               FontSize="14" FontWeight="Bold" />
-                    <Button Content="OK"
-                            HorizontalAlignment="Center"
-                            Background="#E06020"
-                            Foreground="White"
-                            Padding="24,8"
-                            CornerRadius="6"
-                            Command="{Binding CloseNotificationCommand}" />
-                </StackPanel>
-            </Border>
-        </Popup>
+        <Border Grid.Row="0"
+                IsVisible="{Binding IsNotificationOpen}"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,24"
+                Background="White"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="24"
+                IsHitTestVisible="False">
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="14" FontWeight="Bold"
+                       Width="260" />
+        </Border>
     </Grid>
     
 </UserControl>

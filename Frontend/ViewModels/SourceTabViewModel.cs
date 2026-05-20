@@ -54,7 +54,7 @@ public partial class SourceTabViewModel : ViewModelBase
         private set => SetProperty(ref _statusMessage, value);
     }
 
-    public ICommand CloseNotificationCommand { get; }
+    private readonly DispatcherTimer _dismissTimer;
 
     public void NextPage()
     {
@@ -129,7 +129,8 @@ public partial class SourceTabViewModel : ViewModelBase
     public SourceTabViewModel(IClient<Source> client)
     {
         _client = client;
-        CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
+        _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
         TimeAxis =
         [
             new Axis
@@ -235,12 +236,21 @@ public partial class SourceTabViewModel : ViewModelBase
         });
     }
 
+    private void ShowNotification(string message)
+    {
+        StatusMessage = message;
+        IsNotificationOpen = true;
+        _dismissTimer.Stop();
+        _dismissTimer.Start();
+    }
+
     public async void UpdateSource(Source source)
     {
         try
         {
             await _client.Put(source);
             RefreshSelectedFile();
+            ShowNotification("Source updated successfully.");
         }
         catch (Exception ex)
         {
@@ -263,6 +273,7 @@ public partial class SourceTabViewModel : ViewModelBase
             }
 
             RefreshSelectedFile();
+            ShowNotification("Source deleted successfully.");
         }
         catch (Exception ex)
         {
@@ -272,15 +283,14 @@ public partial class SourceTabViewModel : ViewModelBase
     public async void Export()
     {
         bool success = await CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
-        StatusMessage = success ? "Source data was exported successfully." : "Export failed: no source data to export.";
-        IsNotificationOpen = true;
+        ShowNotification(success ? "Source data was exported successfully." : "Export failed: no source data to export.");
     }
 
-    public void Import()
+    public async void Import()
     {
-        _ = CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
-        StatusMessage = "Source data was imported successfully.";
-        IsNotificationOpen = true;
+        await CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
+        await LoadAsync();
+        ShowNotification("Source data was imported successfully.");
     }
 
     private static bool IsWinter(Source s)

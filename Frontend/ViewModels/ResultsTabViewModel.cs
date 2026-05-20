@@ -26,12 +26,23 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     private List<ResultTableRow> _allRows = [];
     private OptimizedResults? _selectedOptimizedResult;
 
+    private readonly DispatcherTimer _dismissTimer;
+
     public ResultsTabViewModel(IClient<OptimizedResults> client)
     {
         _client = client;
         CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
-    
+        _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
         _ = LoadAsync();
+    }
+
+    private void ShowNotification(string message)
+    {
+        StatusMessage = message;
+        IsNotificationOpen = true;
+        _dismissTimer.Stop();
+        _dismissTimer.Start();
     }
 
     private int _currentPage = 1;
@@ -355,8 +366,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     public async void Export()
     {
         bool success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
-        StatusMessage = success ? "Result exported successfully." : "Export failed: no results to export.";
-        IsNotificationOpen = true;
+        ShowNotification(success ? "Result exported successfully." : "Export failed: no results to export.");
     }
 
     public async Task DeleteResult(OptimizedResults result)

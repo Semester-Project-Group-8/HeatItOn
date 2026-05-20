@@ -43,7 +43,7 @@ public class AssetsTabViewModel : ViewModelBase
         get => _isNotificationOpen;
         set => SetProperty(ref _isNotificationOpen, value);
     }
-    public ICommand CloseNotificationCommand { get; }
+    private readonly DispatcherTimer _dismissTimer;
     
     public AddAssetDialogViewModel? CurrentDialog
     {
@@ -123,13 +123,22 @@ public class AssetsTabViewModel : ViewModelBase
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
         OpenManagerButtonViewCommand = new RelayCommand(OpenManagerButtonView);
         StartOptimizationCommand = new RelayCommand(StartOptimization);
-        CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
+        _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
         _ = LoadFromBackendAsync();
     }
 
     public AssetsTabViewModel(SourceClient _, AssetClient assetClient, OptimizerClient optimizerClient)
         : this(assetClient, optimizerClient)
     {
+    }
+
+    private void ShowNotification(string message)
+    {
+        StatusMessage = message;
+        IsNotificationOpen = true;
+        _dismissTimer.Stop();
+        _dismissTimer.Start();
     }
 
     private void OpenManagerButtonView()
@@ -140,19 +149,18 @@ public class AssetsTabViewModel : ViewModelBase
             CurrentManagerDialog = null;
             OpenAddAssetDialog();
         };
-        managerVm.ImportRequested += () =>
+        managerVm.ImportRequested += async () =>
         {
             CurrentManagerDialog = null;
-            _ = ImportAssets();
-            StatusMessage = "Assets were imported successfully.";
-            IsNotificationOpen = true;
+            await ImportAssets();
+            await LoadFromBackendAsync();
+            ShowNotification("Assets were imported successfully.");
         };
         managerVm.ExportRequested += async () =>
         {
             CurrentManagerDialog = null;
             bool success = await ExportAssets();
-            StatusMessage = success ? "Assets were exported successfully." : "Export failed: no assets to export.";
-            IsNotificationOpen = true;
+            ShowNotification(success ? "Assets were exported successfully." : "Export failed: no assets to export.");
         };
         managerVm.CancelRequested += () =>
         {
@@ -180,8 +188,7 @@ public class AssetsTabViewModel : ViewModelBase
         {
            Console.WriteLine(e); 
         }
-        StatusMessage = "Data was optimized successfully.";
-        IsNotificationOpen = true;
+        ShowNotification("Data was optimized successfully.");
     }
     public async Task ImportAssets()
     {
@@ -202,7 +209,11 @@ public class AssetsTabViewModel : ViewModelBase
             {
                 await _assetClient.Post(asset);
                 await LoadFromBackendAsync();
-                CurrentDialog = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    CurrentDialog = null;
+                    ShowNotification("Asset added successfully.");
+                });
             }
             catch (Exception ex)
             {
@@ -227,7 +238,11 @@ public class AssetsTabViewModel : ViewModelBase
             {
                 await _assetClient.Put(editedAsset);
                 await LoadFromBackendAsync();
-                CurrentDialog = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    CurrentDialog = null;
+                    ShowNotification("Asset updated successfully.");
+                });
             }
             catch (Exception ex)
             {
@@ -246,7 +261,11 @@ public class AssetsTabViewModel : ViewModelBase
             {
                 await _assetClient.Delete(asset.Id);
                 await LoadFromBackendAsync();
-                CurrentDialog = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    CurrentDialog = null;
+                    ShowNotification("Asset deleted successfully.");
+                });
             }
             catch (Exception ex)
             {
@@ -285,7 +304,6 @@ public class AssetsTabViewModel : ViewModelBase
                     AssetItems.Add(item);
 
                 ApplyScenarioSelection();
-                StatusMessage = string.Empty;
             });
         }
         catch (Exception ex)
