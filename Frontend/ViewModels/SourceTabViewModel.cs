@@ -279,6 +279,15 @@ public partial class SourceTabViewModel : ViewModelBase
             await CsvHandler.ImportSource(filePath, (SourceClient)_client);
 
             await LoadAsync();
+            string? recentlyImported = System.IO.Path.GetFileName(filePath);
+            SelectedFile = null;
+            SelectedFile = recentlyImported;
+
+            OnPropertyChanged(nameof(Sources));
+            OnPropertyChanged(nameof(PagedSources));
+            OnPropertyChanged(nameof(HasSources));
+            NotifyPageChange();
+
             StatusMessage = "Sources imported successfully from: " + System.IO.Path.GetFileName(filePath);
         }
         catch (Exception ex)
