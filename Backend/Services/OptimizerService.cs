@@ -10,10 +10,10 @@ namespace Backend.Services
         readonly AssetsService _assetService;
         readonly SourceService _sourceService;
         readonly ResultService _resultService;
-        readonly ResultListService _resultListService;
+        readonly ResultByHourService _resultListService;
         readonly OptimizedResultsService _optimizedResultsService;
 
-        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultListService resultListService, OptimizedResultsService optimizedResultsService)
+        public OptimizerService(AssetsService assetService, SourceService sourceService,ResultService resultService,ResultByHourService resultListService, OptimizedResultsService optimizedResultsService)
         {
             _assetService = assetService;
             _sourceService = sourceService;
@@ -57,7 +57,7 @@ namespace Backend.Services
             OptimizedResults finalResults = new OptimizedResults
             {
                 Name = $"results_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}",
-                ResultsForHours = new List<ResultList>()
+                ResultsForHours = new List<ResultByHour>()
             };
             foreach (Source source in allSources)
             {
@@ -67,7 +67,7 @@ namespace Backend.Services
                 bool allowOverproduction = true;
                 DateTime maintenanceFrom = DateTime.Parse("2025-09-09T20:00:00");
                 DateTime maintenanceTil = maintenanceFrom.AddHours(45);
-                ResultList resultOfHour = new ResultList
+                ResultByHour resultOfHour = new ResultByHour
                 {
                     TimeFrom = source.TimeFrom,
                     TimeTo = source.TimeTo,
@@ -109,7 +109,7 @@ namespace Backend.Services
                 }
                 finalResults.ResultsForHours.Add(resultOfHour);
             }
-            await _resultListService.Post(finalResults.ResultsForHours);
+            await _resultListService.PostList(finalResults.ResultsForHours);
             await _optimizedResultsService.Post(finalResults);
             return finalResults;
         }

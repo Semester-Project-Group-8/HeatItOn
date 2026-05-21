@@ -13,8 +13,9 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
 {
     private readonly OptimizedResultsService _optimizedResultsService;
     private readonly IHubContext<BackendHub> _hubContext;
-    
-    public OptimizedResultsController(OptimizedResultsService optimizedResultsService, IHubContext<BackendHub> hubContext)
+
+    public OptimizedResultsController(OptimizedResultsService optimizedResultsService,
+        IHubContext<BackendHub> hubContext)
     {
         _optimizedResultsService = optimizedResultsService;
         _hubContext = hubContext;
@@ -26,7 +27,7 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
         var result = await _optimizedResultsService.List();
         return Ok(result);
     }
-    
+
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id)
     {
@@ -35,18 +36,15 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     }
 
     [HttpPost("Add")]
-    public async Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
-    { 
-        await _optimizedResultsService.Post(optimizedResults);
-        return Ok();
+    public Task<IActionResult> Post([FromBody] OptimizedResults optimizedResults)
+    {
+        throw new UnauthorizedAccessException("You are not authorized to create it.");
     }
 
     [HttpPut("Update/{id:int}")]
-    public async Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
+    public Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
     {
-        optimizedResults.Id = id;
-        await _optimizedResultsService.Put(id, optimizedResults);
-        return Ok();
+        throw new  UnauthorizedAccessException("You are not authorized to modify it.");
     }
 
     [HttpDelete("Delete/{id:int}")]

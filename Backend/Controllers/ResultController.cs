@@ -4,118 +4,73 @@ using Backend.Services;
 using Backend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-namespace Backend.Controllers
+
+namespace Backend.Controllers;
+
+[Route("Result")]
+[ApiController]
+public class ResultController : ControllerBase, IController<Result, Result>
 {
-    [Route("Result")]
-    [ApiController]
-    public class ResultController : ControllerBase, IController<Result, Result>
+    private readonly ResultService _resultService;
+    private readonly IHubContext<BackendHub> _hubContext;
+
+    public ResultController(ResultService resultService, IHubContext<BackendHub> hubContext)
     {
-        private readonly ResultService _resultService;
-        private readonly IHubContext<BackendHub> _hubContext;
-        public ResultController(ResultService ResultService, IHubContext<BackendHub> hubContext)
-        {
-            _resultService = ResultService;
-            _hubContext = hubContext;
-        }
+        _resultService = resultService;
+        _hubContext = hubContext;
+    }
 
-        // List
-        [HttpGet]
-        public async Task<IActionResult> List()
-        {
-            var Results = await _resultService.List();
-            if (Results == null)
-            {
-                return NotFound("No results found.");
-            }
-            return Ok(Results);
-        }
+    // List
+    [HttpGet]
+    public async Task<IActionResult> List()
+    {
+        var Results = await _resultService.List();
+        return Ok(Results);
+    }
 
-        // Get
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            try
-            {
-                var results = await _resultService.Get(id);
-                return Ok(results);
-            }
+    // Get
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var results = await _resultService.Get(id);
+        return Ok(results);
+    }
 
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+    // GetResultByAssetId
+    [HttpGet("Asset/{assetId:int}")]
+    public async Task<IActionResult> GetByAssetId(int assetId)
+    {
+        var result = await _resultService.Get(assetId);
+        return Ok(result);
+    }
 
-        // GetResultByAssetId
-        [HttpGet("Asset/{assetId:int}")]
-        public async Task<IActionResult> GetByAssetId(int assetId)
-        {
-            try
-            {
-                var result = await _resultService.Get(assetId);
-                return Ok(result);
-            }
+    // Post (for a single result)
+    [HttpPost("Add")]
+    public Task<IActionResult> Post([FromBody] Result incomingResult)
+    {
+        throw new UnauthorizedAccessException("You are not authorized to create it.");
+    }
 
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+    // AddResultList
+    [HttpPost("AddList")]
+    public Task<IActionResult> AddResultList([FromBody] List<Result> results)
+    {
+        throw new  UnauthorizedAccessException("You are not authorized to create it.");
+    }
 
-        // Post (for a single result)
-        [HttpPost("Add")]
-        public async Task<IActionResult> Post([FromBody] Result incomingResult)
-        {
-            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-            return Created($"/Result/{incomingResult.Id}", incomingResult);
-        }
+    // Put
+    [HttpPut("Update/{id:int}")]
+    public Task<IActionResult> Put(int id, [FromBody] Result result)
+    {
+        throw new UnauthorizedAccessException("You are not authorized to modify it.");
+    }
 
-        // AddResultList
-        [HttpPost("AddList")]
-        public async Task<IActionResult> AddResultList([FromBody] List<Result> results)
-        {
-            var rowsAffected = await _resultService.Post(results);
-            if (rowsAffected > 0)
-            {
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-                return Ok(new { Message = $"{results.Count} results added successfully." });
-            }
-
-            return BadRequest("Failed to add the list of results.");
-        }
-
-        // Put
-        [HttpPut("Update/{id:int}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Result result)
-        {
-            try
-            {
-                await _resultService.Put(id, result);
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-                return Ok(new { Message = "Result updated successfully." });
-            }
-
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
-        // Delete
-        [HttpDelete("Delete/{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                await _resultService.Delete(id);
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
-                return Ok(new { Message = "Result deleted successfully." });
-            }
-
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
+    // Delete
+    [HttpDelete("Delete/{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _resultService.Delete(id);
+        await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Result");
+        return Ok(new { Message = "Result deleted successfully." });
     }
 }
