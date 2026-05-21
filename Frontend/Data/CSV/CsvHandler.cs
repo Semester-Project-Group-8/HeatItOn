@@ -160,7 +160,7 @@ public static class CsvHandler
         List<Source> sources = new List<Source>();
         using (TextFieldParser parser = new TextFieldParser(location))
         {
-            parser.SetDelimiters(",");
+            parser.SetDelimiters(",", ";");
             parser.HasFieldsEnclosedInQuotes = true;
             while (!parser.EndOfData)
             {
@@ -187,11 +187,17 @@ public static class CsvHandler
             Console.WriteLine("completed | csv file read");
         }
 
+        if (sources.Count == 0)
+        {
+            throw new FormatException("Invalid file format. Please upload a valid Sources CSV.");
+        }
+
         await sourceClient.PostList(sources);
     }
     private static bool IsDate(string value)
     {
-        return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
+        return DateTime.TryParse(value, new CultureInfo("da-DK"), DateTimeStyles.None, out _) ||
+               DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
     }
 
     public static async void ExportSource(string location, List<Source>? sources)

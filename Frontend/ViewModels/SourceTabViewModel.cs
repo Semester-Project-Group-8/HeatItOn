@@ -40,6 +40,18 @@ public partial class SourceTabViewModel : ViewModelBase
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, Sources.Count)} of {Sources.Count} rows";
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
 
+    private string _statusMessage = string.Empty;
+    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set
+        {
+            if (SetProperty(ref _statusMessage, value))
+                OnPropertyChanged(nameof(HasStatusMessage));
+        }
+    }
+
     public void NextPage()
     {
         if (!CanGoNext) return;
@@ -258,9 +270,22 @@ public partial class SourceTabViewModel : ViewModelBase
         CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
     }
 
-    public void Import()
+    public async Task Import(string filePath)
     {
-        _ = CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
+        try
+        {
+            if (string.IsNullOrWhiteSpace(filePath)) return;
+
+            await CsvHandler.ImportSource(filePath, (SourceClient)_client);
+
+            await LoadAsync();
+            StatusMessage = "Sources imported successfully from: " + System.IO.Path.GetFileName(filePath);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Import failed: {ex.Message}";
+            Console.WriteLine($"Error importing sources: {ex}");
+        }
     }
 
     private static bool IsWinter(Source s)
