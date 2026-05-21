@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Input;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -25,10 +26,23 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     private List<ResultTableRow> _allRows = [];
     private OptimizedResults? _selectedOptimizedResult;
 
+    private readonly DispatcherTimer _dismissTimer;
+
     public ResultsTabViewModel(IClient<OptimizedResults> client)
     {
         _client = client;
+        CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
+        _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
         _ = LoadAsync();
+    }
+
+    private void ShowNotification(string message)
+    {
+        StatusMessage = message;
+        IsNotificationOpen = true;
+        _dismissTimer.Stop();
+        _dismissTimer.Start();
     }
 
     private int _currentPage = 1;
@@ -48,6 +62,49 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         ? "No rows to display"
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, _filteredRows.Count)} of {_filteredRows.Count} rows";
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
+    private bool _isNotificationOpen;
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        set { _isNotificationOpen = value; OnPropertyChanged(); }
+    }
+
+    private string _statusMessage = string.Empty;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set { _statusMessage = value; OnPropertyChanged(); }
+    }
+    public ICommand CloseNotificationCommand { get; }
+
+    private bool _isDeleteConfirmOpen;
+    public bool IsDeleteConfirmOpen
+    {
+        get => _isDeleteConfirmOpen;
+        set { _isDeleteConfirmOpen = value; OnPropertyChanged(); }
+    }
+
+    private OptimizedResults? _pendingDeleteResult;
+
+    public void RequestDeleteResult(OptimizedResults result)
+    {
+        _pendingDeleteResult = result;
+        IsDeleteConfirmOpen = true;
+    }
+
+    public async void ConfirmDelete()
+    {
+        IsDeleteConfirmOpen = false;
+        if (_pendingDeleteResult == null) return;
+        await DeleteResult(_pendingDeleteResult);
+        _pendingDeleteResult = null;
+    }
+
+    public void CancelDelete()
+    {
+        _pendingDeleteResult = null;
+        IsDeleteConfirmOpen = false;
+    }
 
     public void NextPage()
     {
@@ -306,9 +363,10 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         });
     }
 
-    public void Export()
+    public async void Export()
     {
-        CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
+        bool success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
+        ShowNotification(success ? "Result exported successfully." : "Export failed: no results to export.");
     }
 
     public async Task DeleteResult(OptimizedResults result)
@@ -318,6 +376,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         if (SelectedOptimizedResult == result)
             SelectedOptimizedResult = null;
         OnPropertyChanged(nameof(HasNoOptimizedResults));
+        StatusMessage = "Result deleted successfully.";
+        IsNotificationOpen = true;
     }
 
     private void RebuildRows()
