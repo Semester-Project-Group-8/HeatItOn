@@ -148,7 +148,7 @@ public static class CsvHandler
             Console.WriteLine($"error | optimized result csv file export failed >> {e.Message}");
         }
     }
-    public static async Task ImportSource(string location, SourceClient sourceClient) 
+    public static async Task ImportSource(string location, IClient<Source> sourceClient) 
     { 
         List<Source> sources = new List<Source>();
         using (TextFieldParser parser = new TextFieldParser(location))
@@ -180,7 +180,8 @@ public static class CsvHandler
             Console.WriteLine("completed | csv file read");
         }
 
-        await sourceClient.PostList(sources);
+        var posts = sources.Select(s => sourceClient.Post(s));
+        await Task.WhenAll(posts);
     }
     private static bool IsDate(string value)
     {
