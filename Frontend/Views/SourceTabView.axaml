@@ -88,10 +88,8 @@
                                     Command="{Binding Import}"/>
                         </StackPanel>
                     </Border>
-                </Grid>
-            </DockPanel>
-        </Border>
-
+                </DockPanel>
+            </Border>
 
         <!-- MAIN CONTENT: charts + table (visible when data exists) -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -264,19 +262,6 @@
 
             </StackPanel>
         </ScrollViewer>
-
-                                            <Button Content="&#x203A;"
-                                                    Command="{Binding NextPage}"
-                                                    IsEnabled="{Binding CanGoNext}"
-                                                    Classes="page-btn"
-                                                    FontSize="16"/>
-
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-
-                            </Grid>
-                        </Border>
 
             <!-- EMPTY STATE -->
             <Border Background="#10AAAAAA"
