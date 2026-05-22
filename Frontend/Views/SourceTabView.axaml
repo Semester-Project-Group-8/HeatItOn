@@ -30,7 +30,6 @@
             <Setter Property="BorderBrush" Value="#F0F0F0"/>
         </Style>
 
-        <!-- Pagination button -->
         <Style Selector="Button.page-btn">
             <Setter Property="MinWidth" Value="32"/>
             <Setter Property="Height" Value="32"/>
@@ -51,17 +50,15 @@
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Styles>
-    <Grid>
+    
+    <Grid DragDrop.AllowDrop="True" Loaded="OnMainAreaLoaded" Background="Transparent">
         <DockPanel>
 
-            <!-- LEFT SIDEBAR -->
             <Border DockPanel.Dock="Left"
                     Width="220"
                     BorderBrush="Gray"
                     BorderThickness="0,0,1,0">
                 <DockPanel>
-
-                    <!-- Header label -->
                     <TextBlock DockPanel.Dock="Top"
                             Text="// UPLOADED FILES"
                             Margin="16,18,16,12"
@@ -70,7 +67,6 @@
                             Foreground="#AAAAAA"
                             LetterSpacing="1.5"/>
 
-                    <!-- Import/Export buttons pinned to bottom -->
                     <Border DockPanel.Dock="Bottom"
                             Padding="16,12"
                             BorderBrush="#E8E8E8"
@@ -85,203 +81,211 @@
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Center"
                                     Content="↑ Import Source"
-                                    Command="{Binding Import}"/>
+                                    Click="ImportSourceButton_Click"/>
                         </StackPanel>
                     </Border>
+                    
+                    <Grid Margin="8,0">
+                        <ListBox ItemsSource="{Binding Files}"
+                                 SelectedItem="{Binding SelectedFile}"
+                                 IsVisible="{Binding Files.Count}" />
+                        <Border IsVisible="{Binding !Files.Count}">
+                            <TextBlock Text="No file uploaded yet"
+                                       Opacity="0.6"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       TextAlignment="Center" />
+                        </Border>
+                    </Grid>
                 </DockPanel>
             </Border>
 
-        <!-- MAIN CONTENT: charts + table (visible when data exists) -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      IsVisible="{Binding HasSources}"
-                      Background="#F0F0F0">
-            <StackPanel Spacing="16" Margin="20">
+            <Panel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              IsVisible="{Binding HasSources}"
+                              Background="#F0F0F0">
+                    <StackPanel Spacing="16" Margin="20">
 
-                <!-- CHARTS SIDE BY SIDE -->
-                <Grid ColumnDefinitions="*,12,*">
-                    <!-- Winter chart -->
-                    <StackPanel Grid.Column="0" Spacing="4">
-                        <TextBlock Text="Winter"
-                                   HorizontalAlignment="Center"
-                                   FontWeight="Bold"
-                                   FontSize="16" />
-                        <Border Background="#F8FAFC"
-                                BorderBrush="#D6DCE5"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="10">
-                            <avalonia:CartesianChart
-                                Series="{Binding WinterSeries}"
-                                XAxes="{Binding TimeAxis}"
-                                YAxes="{Binding DualAxes}"
-                                Height="250" />
-                        </Border>
-                    </StackPanel>
-                    <!-- Summer chart -->
-                    <StackPanel Grid.Column="2" Spacing="4">
-                        <TextBlock Text="Summer"
-                                   HorizontalAlignment="Center"
-                                   FontWeight="Bold"
-                                   FontSize="16" />
-                        <Border Background="#F8FAFC"
-                                BorderBrush="#D6DCE5"
-                                BorderThickness="1"
-                                CornerRadius="8"
-                                Padding="10">
-                            <avalonia:CartesianChart
-                                Series="{Binding SummerSeries}"
-                                XAxes="{Binding TimeAxis}"
-                                YAxes="{Binding DualAxes}"
-                                Height="250" />
-                        </Border>
-                    </StackPanel>
-                </Grid>
+                        <Grid ColumnDefinitions="*,12,*">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Winter"
+                                           HorizontalAlignment="Center"
+                                           FontWeight="Bold"
+                                           FontSize="16" />
+                                <Border Background="#F8FAFC"
+                                        BorderBrush="#D6DCE5"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="10">
+                                    <avalonia:CartesianChart
+                                        Series="{Binding WinterSeries}"
+                                        XAxes="{Binding TimeAxis}"
+                                        YAxes="{Binding DualAxes}"
+                                        Height="250" />
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="4">
+                                <TextBlock Text="Summer"
+                                           HorizontalAlignment="Center"
+                                           FontWeight="Bold"
+                                           FontSize="16" />
+                                <Border Background="#F8FAFC"
+                                        BorderBrush="#D6DCE5"
+                                        BorderThickness="1"
+                                        CornerRadius="8"
+                                        Padding="10">
+                                    <avalonia:CartesianChart
+                                        Series="{Binding SummerSeries}"
+                                        XAxes="{Binding TimeAxis}"
+                                        YAxes="{Binding DualAxes}"
+                                        Height="250" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
 
-                <!-- TABLE SECTION -->
-                <Grid Margin="0,0,0,8">
-                    <TextBlock Text="// SOURCE DATA TABLE"
-                               FontSize="10"
-                               FontWeight="Bold"
-                               Foreground="#AAAAAA"
-                               LetterSpacing="1.5"
-                               VerticalAlignment="Center"/>
-                    <Button Content="Delete Selected"
-                            Command="{Binding DeleteSelected}"
-                            CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
-                            HorizontalAlignment="Right"
-                            Classes="export-btn"
-                            Background="#FFE06020"
-                            Foreground="White"/>
-                </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <TextBlock Text="// SOURCE DATA TABLE"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="#AAAAAA"
+                                       LetterSpacing="1.5"
+                                       VerticalAlignment="Center"/>
+                            <Button Content="Delete Selected"
+                                    Command="{Binding DeleteSelected}"
+                                    CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
+                                    HorizontalAlignment="Right"
+                                    Classes="export-btn"
+                                    Background="#FFE06020"
+                                    Foreground="White"/>
+                        </Grid>
 
-                <Border Background="White"
-                        CornerRadius="12"
-                        ClipToBounds="True">
-                    <Grid RowDefinitions="*,Auto">
+                        <Border Background="White"
+                                CornerRadius="12"
+                                ClipToBounds="True">
+                            <Grid RowDefinitions="*,Auto">
 
-                        <DataGrid x:Name="SourceDataGrid"
-                                  Grid.Row="0"
-                                  ItemsSource="{Binding PagedSources}"
-                                  HeadersVisibility="Column"
-                                  AutoGenerateColumns="False"
-                                  GridLinesVisibility="Horizontal"
-                                  BorderThickness="0"
-                                  RowBackground="White"
-                                  HorizontalAlignment="Stretch"
-                                  IsReadOnly="False"
-                                  SelectionMode="Extended"
-                                  CellEditEnded="SourceDataGrid_CellEditEnded"
-                                  CanUserReorderColumns="False"
-                                  CanUserResizeColumns="False"
-                                  CanUserSortColumns="True">
-                            <DataGrid.Columns>
-                                <DataGridTemplateColumn Header="ID"
-                                                       Width="*"
-                                                       IsReadOnly="True"
-                                                       SortMemberPath="Id">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Id}"
-                                                       Foreground="#E06020"
-                                                       Padding="12,0"
-                                                       VerticalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="FROM"
-                                                    Binding="{Binding TimeFrom}"
-                                                    Width="2*"/>
-                                <DataGridTextColumn Header="TO"
-                                                    Binding="{Binding TimeTo}"
-                                                    Width="2*"/>
-                                <DataGridTextColumn Header="HEAT DEMAND (MW)"
-                                                    Binding="{Binding HeatDemand}"
-                                                    Width="2*"/>
-                                <DataGridTextColumn Header="ELECTRICITY PRICE (DKK/MWH)"
-                                                    Binding="{Binding ElectricityPrice}"
-                                                    Width="2*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-
-                        <!-- Pagination footer -->
-                        <Border Grid.Row="1"
-                                Padding="16,10"
-                                BorderBrush="#F0F0F0"
-                                BorderThickness="0,1,0,0">
-                            <Grid ColumnDefinitions="*,Auto">
-
-                                <TextBlock Grid.Column="0"
-                                           Text="{Binding PageInfo}"
-                                           VerticalAlignment="Center"
-                                           Foreground="#AAAAAA"
-                                           FontSize="12"/>
-
-                                <StackPanel Grid.Column="1"
-                                            Orientation="Horizontal"
-                                            Spacing="4"
-                                            VerticalAlignment="Center">
-
-                                    <Button Content="&#x2039;"
-                                            Command="{Binding PrevPage}"
-                                            IsEnabled="{Binding CanGoPrev}"
-                                            Classes="page-btn"
-                                            FontSize="16"/>
-
-                                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                                  VerticalScrollBarVisibility="Disabled"
-                                                  MaxWidth="300">
-                                        <ItemsControl ItemsSource="{Binding PageNumbers}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal" Spacing="4"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
+                                <DataGrid x:Name="SourceDataGrid"
+                                          Grid.Row="0"
+                                          ItemsSource="{Binding PagedSources}"
+                                          HeadersVisibility="Column"
+                                          AutoGenerateColumns="False"
+                                          GridLinesVisibility="Horizontal"
+                                          BorderThickness="0"
+                                          RowBackground="White"
+                                          HorizontalAlignment="Stretch"
+                                          IsReadOnly="False"
+                                          SelectionMode="Extended"
+                                          CellEditEnded="SourceDataGrid_CellEditEnded"
+                                          CanUserReorderColumns="False"
+                                          CanUserResizeColumns="False"
+                                          CanUserSortColumns="True">
+                                    <DataGrid.Columns>
+                                        <DataGridTemplateColumn Header="ID"
+                                                               Width="*"
+                                                               IsReadOnly="True"
+                                                               SortMemberPath="Id">
+                                            <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="{Binding}"
-                                                            Command="{Binding ((vm:SourceTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
-                                                            CommandParameter="{Binding}"
-                                                            Classes="page-btn"/>
+                                                    <TextBlock Text="{Binding Id}"
+                                                               Foreground="#E06020"
+                                                               Padding="12,0"
+                                                               VerticalAlignment="Center"/>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </ScrollViewer>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="FROM"
+                                                            Binding="{Binding TimeFrom}"
+                                                            Width="2*"/>
+                                        <DataGridTextColumn Header="TO"
+                                                            Binding="{Binding TimeTo}"
+                                                            Width="2*"/>
+                                        <DataGridTextColumn Header="HEAT DEMAND (MW)"
+                                                            Binding="{Binding HeatDemand}"
+                                                            Width="2*"/>
+                                        <DataGridTextColumn Header="ELECTRICITY PRICE (DKK/MWH)"
+                                                            Binding="{Binding ElectricityPrice}"
+                                                            Width="2*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
 
-                                    <Button Content="&#x203A;"
-                                            Command="{Binding NextPage}"
-                                            IsEnabled="{Binding CanGoNext}"
-                                            Classes="page-btn"
-                                            FontSize="16"/>
+                                <Border Grid.Row="1"
+                                        Padding="16,10"
+                                        BorderBrush="#F0F0F0"
+                                        BorderThickness="0,1,0,0">
+                                    <Grid ColumnDefinitions="*,Auto">
 
-                                </StackPanel>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding PageInfo}"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="#AAAAAA"
+                                                   FontSize="12"/>
+
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    Spacing="4"
+                                                    VerticalAlignment="Center">
+
+                                            <Button Content="&#x2039;"
+                                                    Command="{Binding PrevPage}"
+                                                    IsEnabled="{Binding CanGoPrev}"
+                                                    Classes="page-btn"
+                                                    FontSize="16"/>
+
+                                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                          VerticalScrollBarVisibility="Disabled"
+                                                          MaxWidth="300">
+                                                <ItemsControl ItemsSource="{Binding PageNumbers}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Button Content="{Binding}"
+                                                                    Command="{Binding ((vm:SourceTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
+                                                                    CommandParameter="{Binding}"
+                                                                    Classes="page-btn"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+
+                                            <Button Content="&#x203A;"
+                                                    Command="{Binding NextPage}"
+                                                    IsEnabled="{Binding CanGoNext}"
+                                                    Classes="page-btn"
+                                                    FontSize="16"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
                             </Grid>
                         </Border>
+                    </StackPanel>
+                </ScrollViewer>
 
-                    </Grid>
+                <Border Background="#10AAAAAA"
+                        IsVisible="{Binding !HasSources}">
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Spacing="8">
+                        <Path Data="M10,4H4C2.89,4 2.01,4.89 2.01,6L2,18C2,19.1 2.89,20 4,20H20C21.1,20 22,19.1 22,18V8C22,6.9 21.1,6 20,6H12L10,4Z" 
+                              Fill="#E06020" Width="60" Height="60" Stretch="Uniform" Opacity="0.5" Margin="0,0,0,15"/>
+                        <TextBlock Text="Drag and drop your Source CSV here"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                Foreground="#999999"
+                                HorizontalAlignment="Center" />
+                        <TextBlock Text="or click 'Import Source' on the left"
+                                Opacity="0.7"
+                                Foreground="#AAAAAA"
+                                HorizontalAlignment="Center" />
+                    </StackPanel>
                 </Border>
-
-            </StackPanel>
-        </ScrollViewer>
-
-            <!-- EMPTY STATE -->
-            <Border Background="#10AAAAAA"
-                    IsVisible="{Binding !HasSources}">
-                <StackPanel HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Spacing="8">
-
-                    <TextBlock Text="No data to display"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                            HorizontalAlignment="Center" />
-
-                    <TextBlock Text="Select a file on the left to view its sources."
-                            Opacity="0.7"
-                            HorizontalAlignment="Center" />
-                </StackPanel>
-            </Border>
+            </Panel>
             
         </DockPanel>
+        
         <Border Grid.Row="0"
                 IsVisible="{Binding IsNotificationOpen}"
                 VerticalAlignment="Bottom"

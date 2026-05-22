@@ -173,24 +173,6 @@
                 <Grid RowDefinitions="Auto,*,Auto" Margin="5"
                       DragDrop.AllowDrop="True"
                       Loaded="OnMainAreaLoaded">
-<<<<<<< Updated upstream
-=======
-                    <Border Grid.Row="0"
-                        IsVisible="{Binding HasStatusMessage}"
-                        Background="#FFF3EC"
-                        BorderBrush="#E06020"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="15,8"
-                        Margin="0,0,0,15"
-                        HorizontalAlignment="Center">
-    
-                    <TextBlock Text="{Binding StatusMessage}"
-                               Foreground="#E06020"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center"/>
-                    </Border>
->>>>>>> Stashed changes
                     <StackPanel Grid.Row="1" 
                                 HorizontalAlignment="Center" 
                                 VerticalAlignment="Center"
@@ -381,5 +363,20 @@
                IsHitTestVisible="True">
             <v:ManagerButtonView DataContext="{Binding CurrentManagerDialog}" />
         </Panel>
+        <Border Grid.Row="0"
+                IsVisible="{Binding IsNotificationOpen}"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,24"
+                Background="White"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="24"
+                IsHitTestVisible="False">
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="14" FontWeight="Bold"
+                       Width="260" />
+        </Border>
     </Grid>
 </UserControl>

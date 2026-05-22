@@ -286,11 +286,36 @@ public partial class SourceTabViewModel : ViewModelBase
         ShowNotification(success ? "Source data was exported successfully." : "Export failed: no source data to export.");
     }
 
-    public async void Import()
+    public async Task Import(string filePath)
     {
-        await CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
-        await LoadAsync();
-        ShowNotification("Source data was imported successfully.");
+        try
+        {
+            if (string.IsNullOrWhiteSpace(filePath)) return;
+
+            await CsvHandler.ImportSource(filePath, _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
+
+            await LoadAsync();
+
+            string? recentlyImported = System.IO.Path.GetFileName(filePath);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                SelectedFile = null;
+                SelectedFile = recentlyImported;
+
+                OnPropertyChanged(nameof(Sources));
+                OnPropertyChanged(nameof(PagedSources));
+                OnPropertyChanged(nameof(HasSources));
+                NotifyPageChange();
+            });
+
+            ShowNotification("Sources imported successfully from: " + recentlyImported);
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Import failed: {ex.Message}");
+            Console.WriteLine($"Error importing sources: {ex}");
+        }
     }
 
     private static bool IsWinter(Source s)
