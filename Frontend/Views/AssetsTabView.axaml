@@ -378,5 +378,23 @@
                IsHitTestVisible="True">
             <v:ManagerButtonView DataContext="{Binding CurrentManagerDialog}" />
         </Panel>
+        <Border Grid.Row="0"
+                IsVisible="{Binding IsNotificationOpen}"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,24"
+                Background="White"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="24"
+                IsHitTestVisible="False">
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="14" FontWeight="Bold"
+                       Width="260" />
+        </Border>
     </Grid>
+
+
 </UserControl>
+

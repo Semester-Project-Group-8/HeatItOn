@@ -50,6 +50,8 @@
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Styles>
+    <Grid>
+        <DockPanel>
 
     <DockPanel DragDrop.AllowDrop="True" Loaded="OnMainAreaLoaded" Background="Transparent">
         
@@ -111,9 +113,8 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Center" />
                     </Border>
-                </Grid>
-            </DockPanel>
-        </Border>
+                </DockPanel>
+            </Border>
 
         <Panel>
             <DockPanel IsVisible="{Binding HasSources}" Margin="20">

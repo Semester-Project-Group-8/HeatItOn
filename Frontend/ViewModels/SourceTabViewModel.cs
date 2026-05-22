@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
@@ -39,6 +40,21 @@ public partial class SourceTabViewModel : ViewModelBase
         ? "No rows to display"
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, Sources.Count)} of {Sources.Count} rows";
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
+    private bool _isNotificationOpen;
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        set => SetProperty(ref _isNotificationOpen, value);
+    }
+
+    private string _statusMessage = string.Empty;
+    public string StatusMessage
+    {
+        get => _statusMessage;
+        private set => SetProperty(ref _statusMessage, value);
+    }
+
+    private readonly DispatcherTimer _dismissTimer;
 
     private string _statusMessage = string.Empty;
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
@@ -125,6 +141,8 @@ public partial class SourceTabViewModel : ViewModelBase
     public SourceTabViewModel(IClient<Source> client)
     {
         _client = client;
+        _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
         TimeAxis =
         [
             new Axis
@@ -230,12 +248,21 @@ public partial class SourceTabViewModel : ViewModelBase
         });
     }
 
+    private void ShowNotification(string message)
+    {
+        StatusMessage = message;
+        IsNotificationOpen = true;
+        _dismissTimer.Stop();
+        _dismissTimer.Start();
+    }
+
     public async void UpdateSource(Source source)
     {
         try
         {
             await _client.Put(source);
             RefreshSelectedFile();
+            ShowNotification("Source updated successfully.");
         }
         catch (Exception ex)
         {
@@ -258,16 +285,17 @@ public partial class SourceTabViewModel : ViewModelBase
             }
 
             RefreshSelectedFile();
+            ShowNotification("Source deleted successfully.");
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
     }
-
-    public void Export()
+    public async void Export()
     {
-        CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
+        bool success = await CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
+        ShowNotification(success ? "Source data was exported successfully." : "Export failed: no source data to export.");
     }
 
     public async Task Import(string filePath)
