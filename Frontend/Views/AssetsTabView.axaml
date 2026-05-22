@@ -170,8 +170,33 @@
                 </Border>
             </SplitView.Pane>
             <SplitView.Content>
-                <Grid RowDefinitions="*,Auto" Margin="5">
-                    <ScrollViewer Grid.Row="0"
+                <Grid RowDefinitions="Auto,*,Auto" Margin="5"
+                      DragDrop.AllowDrop="True"
+                      Loaded="OnMainAreaLoaded">
+                    <StackPanel Grid.Row="1" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding !HasAssets}">
+                        <Path Data="M10,4H4C2.89,4 2.01,4.89 2.01,6L2,18C2,19.1 2.89,20 4,20H20C21.1,20 22,19.1 22,18V8C22,6.9 21.1,6 20,6H12L10,4Z" 
+                                  Fill="#E06020" 
+                                  Width="60" 
+                                  Height="60" 
+                                  Stretch="Uniform" 
+                                  HorizontalAlignment="Center"
+                                  Margin="0,0,0,15"
+                                  Opacity="0.5"/>
+                        <TextBlock Text="Drag and drop your CSV file here" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Foreground="#999999" 
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="or import assets through the 'Manager'" 
+                                   FontSize="14" 
+                                   Foreground="#BBBBBB" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding AssetItems}">
@@ -354,7 +379,4 @@
                        Width="260" />
         </Border>
     </Grid>
-
-
 </UserControl>
-

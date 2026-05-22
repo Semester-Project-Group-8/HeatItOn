@@ -42,7 +42,7 @@ public static class CsvHandler
         }
     }
 
-    public static async void ImportAsset(string location, IClient<Asset> assetClient)
+    public static async Task ImportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
@@ -72,8 +72,14 @@ public static class CsvHandler
                         Console.WriteLine("error | read failed >> missing fields");
                     }
                 }
-                Console.WriteLine("completed | asset csv file read");
             }
+
+            if (assets.Count == 0)
+            {
+                throw new FormatException("Invalid file format. Please upload a valid Assets CSV.");
+            }
+
+            Console.WriteLine("completed | asset csv file read");
 
             List<Task> insertedAssets = [];
             insertedAssets.AddRange(assets.Select(assetClient.Post));
@@ -82,6 +88,7 @@ public static class CsvHandler
         catch (Exception e)
         {
             Console.WriteLine($"error | asset csv file import failed >> {e.Message}");
+            throw;
         }
     }
 
