@@ -152,6 +152,9 @@ public class AssetsTabViewModel : ViewModelBase
         managerVm.ImportRequested += async () =>
         {
             CurrentManagerDialog = null;
+            await ImportAssets();
+            await LoadFromBackendAsync();
+            ShowNotification("Assets were imported successfully.");
         };
         managerVm.ExportRequested += async () =>
         {
@@ -187,23 +190,9 @@ public class AssetsTabViewModel : ViewModelBase
         }
         ShowNotification("Data was optimized successfully.");
     }
-    public async Task ImportAssets(string filePath)
+    public async Task ImportAssets()
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(filePath)) 
-                return;
-
-            await CsvHandler.ImportAsset(filePath, _assetClient);
-
-            await LoadFromBackendAsync();
-            StatusMessage = "Assets imported successfully from: " + System.IO.Path.GetFileName(filePath);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Import failed: {ex.Message}";
-            Console.WriteLine($"Error importing assets: {ex}");
-        }
+        CsvHandler.ImportAsset(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
     }
 
     public async Task<bool> ExportAssets()
@@ -300,7 +289,7 @@ public class AssetsTabViewModel : ViewModelBase
 
                 if (assets.Count == 0)
                 {
-                    StatusMessage = string.Empty;
+                    StatusMessage = "No assets available from backend yet.";
                     return;
                 }
 

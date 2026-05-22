@@ -42,7 +42,7 @@ public static class CsvHandler
         }
     }
 
-    public static async Task ImportAsset(string location, IClient<Asset> assetClient)
+    public static async void ImportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
@@ -72,14 +72,8 @@ public static class CsvHandler
                         Console.WriteLine("error | read failed >> missing fields");
                     }
                 }
+                Console.WriteLine("completed | asset csv file read");
             }
-
-            if (assets.Count == 0)
-            {
-                throw new FormatException("Invalid file format. Please upload a valid Assets CSV.");
-            }
-
-            Console.WriteLine("completed | asset csv file read");
 
             List<Task> insertedAssets = [];
             insertedAssets.AddRange(assets.Select(assetClient.Post));
@@ -88,7 +82,6 @@ public static class CsvHandler
         catch (Exception e)
         {
             Console.WriteLine($"error | asset csv file import failed >> {e.Message}");
-            throw;
         }
     }
 
@@ -166,7 +159,7 @@ public static class CsvHandler
         List<Source> sources = new List<Source>();
         using (TextFieldParser parser = new TextFieldParser(location))
         {
-            parser.SetDelimiters(",", ";");
+            parser.SetDelimiters(",");
             parser.HasFieldsEnclosedInQuotes = true;
             while (!parser.EndOfData)
             {
@@ -193,17 +186,12 @@ public static class CsvHandler
             Console.WriteLine("completed | csv file read");
         }
 
-        if (sources.Count == 0)
-        {
-            throw new FormatException("Invalid file format. Please upload a valid Sources CSV.");
-        }
-
-        await sourceClient.PostList(sources);
+        var posts = sources.Select(s => sourceClient.Post(s));
+        await Task.WhenAll(posts);
     }
     private static bool IsDate(string value)
     {
-        return DateTime.TryParse(value, new CultureInfo("da-DK"), DateTimeStyles.None, out _) ||
-               DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
+        return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
     }
 
     public static async Task<bool> ExportSource(string location, List<Source>? sources)
