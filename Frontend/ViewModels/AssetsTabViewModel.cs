@@ -152,6 +152,9 @@ public class AssetsTabViewModel : ViewModelBase
         managerVm.ImportRequested += async () =>
         {
             CurrentManagerDialog = null;
+            await ImportAssets();
+            await LoadFromBackendAsync();
+            ShowNotification("Assets were imported successfully.");
         };
         managerVm.ExportRequested += async () =>
         {
@@ -187,23 +190,9 @@ public class AssetsTabViewModel : ViewModelBase
         }
         ShowNotification("Data was optimized successfully.");
     }
-    public async Task ImportAssets(string filePath)
+    public async Task ImportAssets()
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(filePath)) 
-                return;
-
-            await CsvHandler.ImportAsset(filePath, _assetClient);
-
-            await LoadFromBackendAsync();
-            StatusMessage = "Assets imported successfully from: " + System.IO.Path.GetFileName(filePath);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Import failed: {ex.Message}";
-            Console.WriteLine($"Error importing assets: {ex}");
-        }
+        CsvHandler.ImportAsset(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
     }
 
     public async Task<bool> ExportAssets()
@@ -293,14 +282,14 @@ public class AssetsTabViewModel : ViewModelBase
         {
             var assets = await _assetClient.GetAll() ?? new List<Asset>();
 
-            var populateUi = new Action(() =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 _allAssetItems.Clear();
                 AssetItems.Clear();
 
                 if (assets.Count == 0)
                 {
-                    StatusMessage = string.Empty;
+                    StatusMessage = "No assets available from backend yet.";
                     return;
                 }
 
@@ -316,26 +305,6 @@ public class AssetsTabViewModel : ViewModelBase
 
                 ApplyScenarioSelection();
             });
-
-            try
-            {
-                if (Avalonia.Threading.Dispatcher.UIThread is { } ui && ui.CheckAccess())
-                {
-                    populateUi();
-                }
-                else if (Avalonia.Threading.Dispatcher.UIThread is { })
-                {
-                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(populateUi);
-                }
-                else
-                {
-                    populateUi();
-                }
-            }
-            catch
-            {
-                populateUi();
-            }
         }
         catch (Exception ex)
         {
@@ -417,19 +386,7 @@ public class AssetsTabViewModel : ViewModelBase
     }
     private static Bitmap LoadFromResource(string resourceName)
     {
-        try
-        {
-            return new Bitmap(AssetLoader.Open(new Uri($"avares://Frontend/Assets/{resourceName}")));
-        }
-        catch
-        {
-            // Fallback for unit tests where Avalonia asset loader isn't available.
-            // Return a minimal 1x1 PNG from a known base64 blob.
-            var pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=";
-            var bytes = Convert.FromBase64String(pngBase64);
-            using var ms = new System.IO.MemoryStream(bytes);
-            return new Bitmap(ms);
-        }
+        return new Bitmap(AssetLoader.Open(new Uri($"avares://Frontend/Assets/{resourceName}")));
     }
 
     public void Refresh()

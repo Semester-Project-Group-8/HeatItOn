@@ -56,18 +56,6 @@ public partial class SourceTabViewModel : ViewModelBase
 
     private readonly DispatcherTimer _dismissTimer;
 
-    private string _statusMessage = string.Empty;
-    public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        private set
-        {
-            if (SetProperty(ref _statusMessage, value))
-                OnPropertyChanged(nameof(HasStatusMessage));
-        }
-    }
-
     public void NextPage()
     {
         if (!CanGoNext) return;
@@ -298,31 +286,11 @@ public partial class SourceTabViewModel : ViewModelBase
         ShowNotification(success ? "Source data was exported successfully." : "Export failed: no source data to export.");
     }
 
-    public async Task Import(string filePath)
+    public async void Import()
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(filePath)) return;
-
-            await CsvHandler.ImportSource(filePath, (SourceClient)_client);
-
-            await LoadAsync();
-            string? recentlyImported = System.IO.Path.GetFileName(filePath);
-            SelectedFile = null;
-            SelectedFile = recentlyImported;
-
-            OnPropertyChanged(nameof(Sources));
-            OnPropertyChanged(nameof(PagedSources));
-            OnPropertyChanged(nameof(HasSources));
-            NotifyPageChange();
-
-            StatusMessage = "Sources imported successfully from: " + System.IO.Path.GetFileName(filePath);
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = $"Import failed: {ex.Message}";
-            Console.WriteLine($"Error importing sources: {ex}");
-        }
+        await CsvHandler.ImportSource(Path.Combine(AppContext.BaseDirectory, "source.csv"), _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
+        await LoadAsync();
+        ShowNotification("Source data was imported successfully.");
     }
 
     private static bool IsWinter(Source s)
