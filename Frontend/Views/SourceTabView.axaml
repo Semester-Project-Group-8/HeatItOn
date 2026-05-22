@@ -51,45 +51,61 @@
             <Setter Property="FontWeight" Value="Bold"/>
         </Style>
     </UserControl.Styles>
-    <Grid>
-        <DockPanel>
 
-            <!-- LEFT SIDEBAR -->
-            <Border DockPanel.Dock="Left"
-                    Width="220"
-                    BorderBrush="Gray"
-                    BorderThickness="0,0,1,0">
-                <DockPanel>
+    <DockPanel>
 
-                    <!-- Header label -->
-                    <TextBlock DockPanel.Dock="Top"
-                            Text="// UPLOADED FILES"
-                            Margin="16,18,16,12"
-                            FontSize="10"
-                            FontWeight="Bold"
-                            Foreground="#AAAAAA"
-                            LetterSpacing="1.5"/>
+        <!-- LEFT SIDEBAR -->
+        <Border DockPanel.Dock="Left"
+                Width="220"
+                BorderBrush="Gray"
+                BorderThickness="0,0,1,0">
+            <DockPanel>
 
-                    <!-- Import/Export buttons pinned to bottom -->
-                    <Border DockPanel.Dock="Bottom"
-                            Padding="16,12"
-                            BorderBrush="#E8E8E8"
-                            BorderThickness="0,1,0,0">
-                        <StackPanel Spacing="8">
-                            <Button Classes="export-btn"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center"
-                                    Content="↓  Export Source"
-                                    Command="{Binding Export}"/>
-                            <Button Classes="export-btn"
-                                    HorizontalAlignment="Stretch"
-                                    HorizontalContentAlignment="Center"
-                                    Content="↑ Import Source"
-                                    Command="{Binding Import}"/>
-                        </StackPanel>
+                <!-- Header label -->
+                <TextBlock DockPanel.Dock="Top"
+                           Text="// UPLOADED FILES"
+                           Margin="16,18,16,12"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           Foreground="#AAAAAA"
+                           LetterSpacing="1.5"/>
+
+                <!-- Import/Export buttons pinned to bottom -->
+                <Border DockPanel.Dock="Bottom"
+                        Padding="16,12"
+                        BorderBrush="#E8E8E8"
+                        BorderThickness="0,1,0,0">
+                    <StackPanel Spacing="8">
+                        <Button Classes="export-btn"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Content="↓  Export Source"
+                                Command="{Binding Export}"/>
+                        <Button Classes="export-btn"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Content="↑ Import Source"
+                                Command="{Binding Import}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- File list / empty state -->
+                <Grid Margin="8,0">
+                    <ListBox
+                        ItemsSource="{Binding Files}"
+                        SelectedItem="{Binding SelectedFile}"
+                        IsVisible="{Binding Files.Count}" />
+                    <Border IsVisible="{Binding !Files.Count}">
+                        <TextBlock Text="No file uploaded yet"
+                                   Opacity="0.6"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Center" />
                     </Border>
-                </DockPanel>
-            </Border>
+                </Grid>
+            </DockPanel>
+        </Border>
+
 
         <!-- MAIN CONTENT: charts + table (visible when data exists) -->
         <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -263,40 +279,22 @@
             </StackPanel>
         </ScrollViewer>
 
-            <!-- EMPTY STATE -->
-            <Border Background="#10AAAAAA"
-                    IsVisible="{Binding !HasSources}">
-                <StackPanel HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Spacing="8">
+        <!-- EMPTY STATE -->
+        <Border Background="#10AAAAAA"
+                IsVisible="{Binding !HasSources}">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="8">
 
-                    <TextBlock Text="No data to display"
-                            FontSize="18"
-                            FontWeight="SemiBold"
-                            HorizontalAlignment="Center" />
+                <TextBlock Text="No data to display"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center" />
 
-                    <TextBlock Text="Select a file on the left to view its sources."
-                            Opacity="0.7"
-                            HorizontalAlignment="Center" />
-                </StackPanel>
-            </Border>
-            
-        </DockPanel>
-        <Border Grid.Row="0"
-                IsVisible="{Binding IsNotificationOpen}"
-                VerticalAlignment="Bottom"
-                HorizontalAlignment="Center"
-                Margin="0,0,0,24"
-                Background="White"
-                BorderBrush="#CCCCCC"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="24"
-                IsHitTestVisible="False">
-            <TextBlock Text="{Binding StatusMessage}"
-                       FontSize="14" FontWeight="Bold"
-                       Width="260" />
+                <TextBlock Text="Select a file on the left to view its sources."
+                           Opacity="0.7"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
         </Border>
-    </Grid>
-    
+    </DockPanel>
 </UserControl>
