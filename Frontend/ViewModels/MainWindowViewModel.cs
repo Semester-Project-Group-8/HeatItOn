@@ -11,6 +11,7 @@ namespace Frontend.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
+    private static readonly TimeSpan SignalRRetryDelay = TimeSpan.FromSeconds(5);
     private HubConnection? _connection;
     public SourceTabViewModel SourceTab {get; private set;}
     public AssetsTabViewModel AssetsTab  {get; private set;}
@@ -60,12 +61,51 @@ public class MainWindowViewModel : ViewModelBase
                 });
             });
 
-            await _connection.StartAsync();
-            Console.WriteLine("Connected to SignalR Hub!");
+            _connection.Reconnected += async _ =>
+            {
+                Debug.WriteLine("SignalR reconnected. Refreshing UI data...");
+                await RefreshAllTabsAsync();
+            };
+
+            while (true)
+            {
+                if (_connection.State is HubConnectionState.Connected or HubConnectionState.Connecting or HubConnectionState.Reconnecting)
+                {
+                    await Task.Delay(SignalRRetryDelay);
+                    continue;
+                }
+
+                try
+                {
+                    await _connection.StartAsync();
+                    Console.WriteLine("Connected to SignalR Hub!");
+                    await RefreshAllTabsAsync();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"SignalR connection attempt failed: {ex.Message}");
+                    await Task.Delay(SignalRRetryDelay);
+                }
+            }
         }
         catch (Exception ex)
         {
             throw new Exception("SignalR initialization failed", ex);
+        }
+    }
+
+    private async Task RefreshAllTabsAsync()
+    {
+        try
+        {
+            await Task.WhenAll(
+                AssetsTab.LoadFromBackendAsync(),
+                SourceTab.LoadAsync(),
+                ResultTab.LoadAsync());
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Refreshing UI data after SignalR connection failed: {ex.Message}");
         }
     }
 }

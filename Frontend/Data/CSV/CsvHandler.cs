@@ -237,8 +237,8 @@ public static class CsvHandler
             //ID = id,
             TimeFrom = DateTime.Parse(startDate,CsvCulture),
             TimeTo = DateTime.Parse(endDate,CsvCulture),
-            HeatDemand = float.Parse(heatDemand),
-            ElectricityPrice = float.Parse(electricityPrice)
+            HeatDemand = float.Parse(heatDemand, CsvCulture),
+            ElectricityPrice = float.Parse(electricityPrice, CsvCulture)
         };
         return source;
     }
