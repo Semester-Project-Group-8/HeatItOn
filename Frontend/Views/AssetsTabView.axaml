@@ -375,8 +375,7 @@
                 Padding="24"
                 IsHitTestVisible="False">
             <TextBlock Text="{Binding StatusMessage}"
-                       FontSize="14" FontWeight="Bold"
-                       Width="260" />
+                       FontSize="14" FontWeight="Bold" />
         </Border>
     </Grid>
 </UserControl>

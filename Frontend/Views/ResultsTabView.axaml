@@ -676,7 +676,7 @@
                 IsHitTestVisible="False">
             <TextBlock Text="{Binding StatusMessage}"
                        FontSize="14" FontWeight="Bold"
-                       Width="260" />
+                       />
         </Border>
         <Popup Grid.Row="0"
                IsOpen="{Binding IsDeleteConfirmOpen, Mode=TwoWay}"
