@@ -11,7 +11,7 @@ namespace Frontend.Data.CSV;
 public static class CsvHandler
 {
     // Asset
-    public static async void ExportAsset(string location, IClient<Asset> assetClient)
+    public static async Task<bool> ExportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
@@ -27,19 +27,22 @@ public static class CsvHandler
 
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | asset csv file export");
+                return true;
             }
             else
             {
                 Console.WriteLine("error | no assets found for export");
+                return false;
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"error | asset csv file export failed >> {e.Message}");
+            return false;
         }
     }
 
-    public static async void ImportAsset(string location, IClient<Asset> assetClient)
+    public static async Task ImportAsset(string location, IClient<Asset> assetClient)
     {
         try
         {
@@ -69,8 +72,14 @@ public static class CsvHandler
                         Console.WriteLine("error | read failed >> missing fields");
                     }
                 }
-                Console.WriteLine("completed | asset csv file read");
             }
+
+            if (assets.Count == 0)
+            {
+                throw new FormatException("Invalid file format. Please upload a valid Assets CSV.");
+            }
+
+            Console.WriteLine("completed | asset csv file read");
 
             List<Task> insertedAssets = [];
             insertedAssets.AddRange(assets.Select(assetClient.Post));
@@ -79,6 +88,7 @@ public static class CsvHandler
         catch (Exception e)
         {
             Console.WriteLine($"error | asset csv file import failed >> {e.Message}");
+            throw;
         }
     }
 
@@ -123,7 +133,7 @@ public static class CsvHandler
     }
     
     // Result
-    public static async void ExportResult(string location, List<ResultTableRow>? results)
+    public static async Task<bool> ExportResult(string location, List<ResultTableRow>? results)
     {
         try
         {
@@ -137,18 +147,21 @@ public static class CsvHandler
 
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | optimized result csv file export");
+                return true;
             }
             else
             {
                 Console.WriteLine("error | no results found for export");
+                return false;
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"error | optimized result csv file export failed >> {e.Message}");
+            return false;
         }
     }
-    public static async Task ImportSource(string location, IClient<Source> sourceClient) 
+    public static async Task ImportSource(string location, SourceClient sourceClient) 
     { 
         List<Source> sources = new List<Source>();
         using (TextFieldParser parser = new TextFieldParser(location))
@@ -180,20 +193,19 @@ public static class CsvHandler
             Console.WriteLine("completed | csv file read");
         }
 
-        var posts = sources.Select(s => sourceClient.Post(s));
-        await Task.WhenAll(posts);
+        await sourceClient.PostList(sources);
     }
     private static bool IsDate(string value)
     {
         return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
     }
 
-    public static async void ExportSource(string location, List<Source>? sources)
+    public static async Task<bool> ExportSource(string location, List<Source>? sources)
     {
         try
         {
-            if (sources != null)
-            {   
+            if (sources is { Count: > 0 })
+            {
                 List<string> lines =
                 [
                     "TimeFrom,TimeTo,HeatDemand,ElectricityPrice"
@@ -201,15 +213,18 @@ public static class CsvHandler
                 lines.AddRange(sources.Select(source => $"{source.TimeFrom.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.TimeTo.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.HeatDemand.ToString("00.00", CultureInfo.InvariantCulture)},{source.ElectricityPrice.ToString(CultureInfo.InvariantCulture)}"));
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | csv file export");
+                return true;
             }
             else
             {
                 Console.WriteLine("error | no sources found for export");
+                return false;
             }
         }
         catch (Exception e)
         {
             Console.WriteLine($"error | csv file export failed >> {e.Message}");
+            return false;
         }
     }
     private static readonly CultureInfo CsvCulture = new CultureInfo("da-DK");
@@ -225,8 +240,8 @@ public static class CsvHandler
             //ID = id,
             TimeFrom = DateTime.Parse(startDate,CsvCulture),
             TimeTo = DateTime.Parse(endDate,CsvCulture),
-            HeatDemand = float.Parse(heatDemand, CsvCulture),
-            ElectricityPrice = float.Parse(electricityPrice, CsvCulture),
+            HeatDemand = float.Parse(heatDemand),
+            ElectricityPrice = float.Parse(electricityPrice)
         };
         return source;
     }
