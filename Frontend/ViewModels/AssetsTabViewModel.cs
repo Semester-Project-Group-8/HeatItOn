@@ -1,21 +1,21 @@
-using Frontend.Data;
-using Frontend.Data.CSV;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Threading;
-using Frontend.Models;
-using System.IO;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
+using Frontend.Data;
+using Frontend.Data.CSV;
+using Frontend.Models;
 
 namespace Frontend.ViewModels;
 
@@ -36,7 +36,15 @@ public class AssetsTabViewModel : ViewModelBase
     public ICommand OpenAddAssetDialogCommand { get; }
     public ICommand OpenManagerButtonViewCommand { get; }
     public ICommand StartOptimizationCommand { get; }
-    
+
+    private bool _isNotificationOpen;
+    public bool IsNotificationOpen
+    {
+        get => _isNotificationOpen;
+        set => SetProperty(ref _isNotificationOpen, value);
+    }
+    private readonly DispatcherTimer _dismissTimer;
+
     public AddAssetDialogViewModel? CurrentDialog
     {
         get => _currentDialog;
@@ -80,31 +88,19 @@ public class AssetsTabViewModel : ViewModelBase
     public bool IsScenario1Selected
     {
         get => _isScenario1Selected;
-        set
-        {
-            if (SetProperty(ref _isScenario1Selected, value) && value)
-                ApplyScenarioSelection();
-        }
+        set { if (SetProperty(ref _isScenario1Selected, value) && value) ApplyScenarioSelection(); }
     }
 
     public bool IsScenario2Selected
     {
         get => _isScenario2Selected;
-        set
-        {
-            if (SetProperty(ref _isScenario2Selected, value) && value)
-                ApplyScenarioSelection();
-        }
+        set { if (SetProperty(ref _isScenario2Selected, value) && value) ApplyScenarioSelection(); }
     }
 
     public bool IsCustomScenarioSelected
     {
         get => _isCustomScenarioSelected;
-        set
-        {
-            if (SetProperty(ref _isCustomScenarioSelected, value) && value)
-                ApplyScenarioSelection();
-        }
+        set { if (SetProperty(ref _isCustomScenarioSelected, value) && value) ApplyScenarioSelection(); }
     }
 
     public AssetsTabViewModel(IClient<Asset> assetClient, OptimizerClient optimizerClient)
@@ -115,12 +111,23 @@ public class AssetsTabViewModel : ViewModelBase
         OpenAddAssetDialogCommand = new RelayCommand(OpenAddAssetDialog);
         OpenManagerButtonViewCommand = new RelayCommand(OpenManagerButtonView);
         StartOptimizationCommand = new RelayCommand(StartOptimization);
+        _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
         _ = LoadFromBackendAsync();
     }
 
     public AssetsTabViewModel(SourceClient _, AssetClient assetClient, OptimizerClient optimizerClient)
         : this(assetClient, optimizerClient)
     {
+    }
+
+    // --- NEW POP UP METHOD ---
+    private void ShowNotification(string message)
+    {
+        StatusMessage = message;
+        IsNotificationOpen = true;
+        _dismissTimer.Stop();
+        _dismissTimer.Start();
     }
 
     private void OpenManagerButtonView()
@@ -131,16 +138,37 @@ public class AssetsTabViewModel : ViewModelBase
             CurrentManagerDialog = null;
             OpenAddAssetDialog();
         };
-        managerVm.ImportRequested += () =>
+
+        managerVm.ImportRequested += async () =>
         {
             CurrentManagerDialog = null;
-            _ = ImportAssets();
+
+            // Safely open the File Browser (Fixes the CS8651/CS0119 crashes!)
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            {
+                var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
+                if (topLevel == null) return;
+
+                var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    Title = "Select Asset CSV",
+                    AllowMultiple = false,
+                    FileTypeFilter = new[] { new FilePickerFileType("CSV Files") { Patterns = new[] { "*.csv" } } }
+                });
+
+                if (files.Count >= 1)
+                {
+                    await ImportAssets(files[0].Path.LocalPath);
+                }
+            }
         };
+
         managerVm.ExportRequested += () =>
         {
             CurrentManagerDialog = null;
             ExportAssets();
         };
+
         managerVm.CancelRequested += () =>
         {
             CurrentManagerDialog = null;
@@ -153,29 +181,52 @@ public class AssetsTabViewModel : ViewModelBase
     {
         try
         {
-            List<Asset> scenarioAssets= new List<Asset>();
+            List<Asset> scenarioAssets = new List<Asset>();
             foreach (AssetCardItem item in _allAssetItems)
             {
-                if(item is { IsSelected: true, OriginalAsset: not null })
+                if (item is { IsSelected: true, OriginalAsset: not null })
                 {
                     scenarioAssets.Add(item.OriginalAsset);
                 }
             }
             await _optimizerClient.Optimize(scenarioAssets);
+            ShowNotification("Data was optimized successfully.");
         }
         catch (Exception e)
         {
-           Console.WriteLine(e); 
+            Console.WriteLine(e);
+            ShowNotification("Optimization failed.");
         }
     }
-    public async Task ImportAssets()
+
+    public async Task ImportAssets(string filePath)
     {
-        CsvHandler.ImportAsset(Path.Combine(AppContext.BaseDirectory,"assets.csv"),_assetClient);
+        try
+        {
+            if (string.IsNullOrWhiteSpace(filePath)) return;
+
+            await CsvHandler.ImportAsset(filePath, _assetClient);
+            await LoadFromBackendAsync();
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                OnPropertyChanged(nameof(AssetItems));
+                OnPropertyChanged(nameof(HasAssets));
+            });
+
+            ShowNotification("Assets imported successfully from: " + System.IO.Path.GetFileName(filePath));
+        }
+        catch (Exception ex)
+        {
+            ShowNotification($"Import failed: {ex.Message}");
+            Console.WriteLine($"Error importing assets: {ex}");
+        }
     }
 
     public void ExportAssets()
     {
         CsvHandler.ExportAsset(Path.Combine(AppContext.BaseDirectory, "assets_export.csv"), _assetClient);
+        ShowNotification("Assets exported successfully.");
     }
 
     private void OpenAddAssetDialog()
@@ -187,17 +238,18 @@ public class AssetsTabViewModel : ViewModelBase
             {
                 await _assetClient.Post(asset);
                 await LoadFromBackendAsync();
-                CurrentDialog = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    CurrentDialog = null;
+                    ShowNotification("Asset added successfully.");
+                });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error creating asset: {ex.Message}");
             }
         };
-        dialogVm.OnCanceled += () =>
-        {
-            CurrentDialog = null;
-        };
+        dialogVm.OnCanceled += () => CurrentDialog = null;
         CurrentDialog = dialogVm;
     }
 
@@ -205,40 +257,45 @@ public class AssetsTabViewModel : ViewModelBase
     {
         var dialogVm = new AddAssetDialogViewModel();
         dialogVm.InitializeForEdit(asset);
-        
+
         dialogVm.OnAssetAdded += async void (editedAsset) =>
         {
             try
             {
                 await _assetClient.Put(editedAsset);
                 await LoadFromBackendAsync();
-                CurrentDialog = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    CurrentDialog = null;
+                    ShowNotification("Asset updated successfully.");
+                });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating asset: {ex.Message}");
             }
         };
-        
-        dialogVm.OnCanceled += () =>
-        {
-            CurrentDialog = null;
-        };
-        
+
+        dialogVm.OnCanceled += () => CurrentDialog = null;
+
         dialogVm.OnAssetDeleted += async void () =>
         {
             try
             {
                 await _assetClient.Delete(asset.Id);
                 await LoadFromBackendAsync();
-                CurrentDialog = null;
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    CurrentDialog = null;
+                    ShowNotification("Asset deleted successfully.");
+                });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error deleting asset: {ex.Message}");
             }
         };
-        
+
         CurrentDialog = dialogVm;
     }
 
@@ -270,7 +327,6 @@ public class AssetsTabViewModel : ViewModelBase
                     AssetItems.Add(item);
 
                 ApplyScenarioSelection();
-                StatusMessage = string.Empty;
             });
         }
         catch (Exception ex)
@@ -289,13 +345,9 @@ public class AssetsTabViewModel : ViewModelBase
         var selectedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         if (IsScenario1Selected)
-        {
             selectedNames = new HashSet<string>(["Gas Boiler 1", "Gas Boiler 2", "Gas Boiler 3", "Oil Boiler 1"], StringComparer.OrdinalIgnoreCase);
-        }
         else if (IsScenario2Selected)
-        {
             selectedNames = new HashSet<string>(["Gas Motor 1", "Electric Boiler 1", "Gas Boiler 1", "Gas Boiler 3"], StringComparer.OrdinalIgnoreCase);
-        }
 
         foreach (var item in _allAssetItems)
             item.IsSelected = selectedNames.Contains(item.Name);
@@ -309,36 +361,25 @@ public class AssetsTabViewModel : ViewModelBase
             $"Production costs: {asset.ProductionCost} DKK/MWh(th)"
         };
 
-        if (asset.CO2Emission != 0)
-            details.Add($"CO2 emissions: {asset.CO2Emission} kg/MWh(th)");
-
-        if (asset.GasConsumption != 0)
-            details.Add($"Gas consumption: {FormatDecimal(asset.GasConsumption)} MWh(gas)/MWh(th)");
-
-        if (asset.OilConsumption != 0)
-            details.Add($"Oil consumption: {FormatDecimal(asset.OilConsumption)} MWh(oil)/MWh(th)");
-
-        if (asset.MaxElectricity != 0)
-            details.Add($"Max electricity: {FormatDecimal(asset.MaxElectricity)} MW");
+        if (asset.CO2Emission != 0) details.Add($"CO2 emissions: {asset.CO2Emission} kg/MWh(th)");
+        if (asset.GasConsumption != 0) details.Add($"Gas consumption: {FormatDecimal(asset.GasConsumption)} MWh(gas)/MWh(th)");
+        if (asset.OilConsumption != 0) details.Add($"Oil consumption: {FormatDecimal(asset.OilConsumption)} MWh(oil)/MWh(th)");
+        if (asset.MaxElectricity != 0) details.Add($"Max electricity: {FormatDecimal(asset.MaxElectricity)} MW");
 
         var assetType = DeriveAssetType(asset.Name);
-        var electricityDisplay = asset.MaxElectricity == 0 ? "—"
-            : $"{(asset.MaxElectricity > 0 ? "+" : "")}{FormatDecimal(asset.MaxElectricity)} MW";
+        var electricityDisplay = asset.MaxElectricity == 0 ? "—" : $"{(asset.MaxElectricity > 0 ? "+" : "")}{FormatDecimal(asset.MaxElectricity)} MW";
 
         return new AssetCardItem(
             string.IsNullOrWhiteSpace(asset.Name) ? $"Asset {asset.Id}" : asset.Name,
             LoadFromResource(string.IsNullOrWhiteSpace(asset.ImageName) ? "placeholder.png" : asset.ImageName),
-            details,
-            assetType,
-            $"{FormatDecimal(asset.MaxHeat)} MW",
-            $"{asset.ProductionCost} DKK",
-            $"{asset.CO2Emission} kg",
-            electricityDisplay,
-            asset);
+            details, assetType, $"{FormatDecimal(asset.MaxHeat)} MW", $"{asset.ProductionCost} DKK",
+            $"{asset.CO2Emission} kg", electricityDisplay, asset);
     }
 
-    private static string DeriveAssetType(string name)
+    // Fixed the Null Reference Error here!
+    private static string DeriveAssetType(string? name)
     {
+        if (string.IsNullOrWhiteSpace(name)) return "GAS";
         if (name.Contains("Motor", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
         if (name.Contains("Electric", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
         if (name.Contains("Oil", StringComparison.OrdinalIgnoreCase)) return "OIL";
@@ -347,10 +388,9 @@ public class AssetsTabViewModel : ViewModelBase
 
     private static string FormatDecimal(float value)
     {
-        return value
-            .ToString("0.##", CultureInfo.InvariantCulture)
-            .Replace('.', ',');
+        return value.ToString("0.##", CultureInfo.InvariantCulture).Replace('.', ',');
     }
+
     private static Bitmap LoadFromResource(string resourceName)
     {
         return new Bitmap(AssetLoader.Open(new Uri($"avares://Frontend/Assets/{resourceName}")));

@@ -17,11 +17,6 @@ namespace Backend.Services
 			return await _dbContext.Results.ToListAsync();
 		}
 
-		public async Task<int> Post(List<Result> result)
-		{
-			await _dbContext.Results.AddRangeAsync(result);
-			return await _dbContext.SaveChangesAsync();
-		}
 
 		// GetResultById
 		public async Task<Result> Get(int id)
@@ -31,19 +26,17 @@ namespace Backend.Services
 				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
 			return  result;
 		}
-
-		// GetResultByAssetId
-		public async Task<Result> GetResultByAssetId(int assetId)
-		{
-			var result = await _dbContext.Results.FirstOrDefaultAsync(r => r.AssetId == assetId);
-			if (result == null)
-				throw new KeyNotFoundException($"Error | Result with Asset id {assetId} not found.");
-			return result;
-		}
-
+		
 		public async Task Post(Result result)
 		{
 			await _dbContext.Results.AddAsync(result);
+			await _dbContext.SaveChangesAsync();
+		}
+		
+		public async Task PostList(List<Result> result)
+		{
+			await _dbContext.Results.AddRangeAsync(result);
+			await _dbContext.SaveChangesAsync();
 		}
 
 		public async Task Put(int id, Result value)

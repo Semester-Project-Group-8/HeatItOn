@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
+using Backend.ExceptionHandling;
 using Backend.Services;
 using Backend.Hubs;
 //using Backend.Data;
@@ -29,7 +30,7 @@ builder.Services.AddScoped<SourceService>();
 builder.Services.AddScoped<AssetsService>();
 builder.Services.AddScoped<OptimizerService>();
 builder.Services.AddScoped<ResultService>();
-builder.Services.AddScoped<ResultListService>();
+builder.Services.AddScoped<ResultByHourService>();
 builder.Services.AddScoped<OptimizedResultsService>();
 
 var app = builder.Build();
@@ -44,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.MapHub<BackendHub>("/datahub");
 
 app.UseAuthorization();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

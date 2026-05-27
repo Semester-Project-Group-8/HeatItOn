@@ -10,7 +10,7 @@ namespace BackendTest
         private readonly BackendDbContext _context;
         private readonly SourceService _sourceService;
         private readonly AssetsService _assetsService;
-        private readonly ResultListService _resultListService;
+        private readonly ResultByHourService _resultListService;
         private readonly ResultService _resultService;
         private readonly OptimizedResultsService _optimizerResultsService;
         private readonly OptimizerService _optimizerService;
@@ -26,7 +26,7 @@ namespace BackendTest
             _sourceService = new SourceService(_context);
             _assetsService = new AssetsService(_context);
             _resultService = new ResultService(_context);
-            _resultListService = new ResultListService(_context);
+            _resultListService = new ResultByHourService(_context);
             _optimizerResultsService = new OptimizedResultsService(_context);
             _optimizerService = new OptimizerService(_assetsService, _sourceService, _resultService,_resultListService,_optimizerResultsService);
         }

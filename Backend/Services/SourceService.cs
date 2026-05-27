@@ -13,32 +13,13 @@ namespace Backend.Services
 
         public async Task<List<Source>> List()
         {
-            try
-            {
-                return await _dbContext.Sources.ToListAsync();
-            }
-            catch (Exception)
-            {
-                throw new InvalidOperationException("Sources could not be loaded.");
-            }
+            return await _dbContext.Sources.ToListAsync();
         }
         
-        public async Task<int> PostList(List<Source> source)
+        public async Task PostList(List<Source> source)
         {
-            if (source == null || source.Count == 0)
-                throw new ArgumentException("No sources sent.");
-
-            try
-            {
-                await _dbContext.Sources.AddRangeAsync(source);
-                var result = await _dbContext.SaveChangesAsync();
-                Console.WriteLine($"{result} sources uploaded");
-                return result <= 0 ? throw new InvalidOperationException("Sources were not saved.") : result;
-            }
-            catch (DbUpdateException)
-            {
-                throw new InvalidOperationException("Sources could not be saved due to a database error.");
-            }
+            await _dbContext.Sources.AddRangeAsync(source);
+            var result = await _dbContext.SaveChangesAsync();
         }
 
         public async Task Post(Source source)
@@ -56,57 +37,25 @@ namespace Backend.Services
                 throw new InvalidOperationException("Source could not be saved.");
             }
         }
-
-        public async Task<IEnumerable<Source>> ListByMonth(int month)
-        {
-            if (month < 1 || month > 12)
-                throw new ArgumentException("Month must be between 1 and 12.");
-            try
-            {
-                return await _dbContext.Sources
-                    .Where(d => d.TimeFrom.Month == month)
-                    .ToListAsync();
-            }
-            catch (Exception)
-            {
-                throw new InvalidOperationException("Sources could not be loaded.");
-            }
-
-        }
+        
         public async Task<Source> Get(int id)
         {
             var source = await _dbContext.Sources.FindAsync(id);
-            if (source == null)
-            {
-                throw new KeyNotFoundException($"Source with ID {id} not found.");
-            }
-
-            return source;
+            return source ??  throw new KeyNotFoundException($"Source with ID {id} not found.");
         }
 
         public async Task Put(int id, Source value)
         {
             var source = await _dbContext.Sources.FindAsync(id);
-            if (source == null)
-                throw new KeyNotFoundException($"Source with ID {id} not found.");
+            if (source == null) throw new KeyNotFoundException($"Source with ID {id} not found.");
 
             source.TimeFrom = value.TimeFrom;
             source.TimeTo = value.TimeTo;
             source.HeatDemand = value.HeatDemand;
             source.ElectricityPrice = value.ElectricityPrice;
 
-            try
-            {
-                _dbContext.Sources.Update(source);
-                var result = await _dbContext.SaveChangesAsync();
-                if (result <= 0)
-                    throw new InvalidOperationException("Source was not updated.");
-
-            }
-            catch (DbUpdateException)
-            {
-                throw new InvalidOperationException($"Source with ID {id} could not be updated due to a database error.");
-            }
+            _dbContext.Sources.Update(source);
+            await _dbContext.SaveChangesAsync();
         }
         
         public async Task Delete(int id)
@@ -115,18 +64,8 @@ namespace Backend.Services
             if (source == null)
                 throw new KeyNotFoundException($"Source with ID {id} not found.");
 
-            try
-            {
-                _dbContext.Sources.Remove(source);
-                var result = await _dbContext.SaveChangesAsync();
-                if (result <= 0)
-                    throw new InvalidOperationException("Source was not deleted.");
-
-            }
-            catch (DbUpdateException)
-            {
-                throw new InvalidOperationException($"Source with ID {id} cannot be deleted due to existing dependencies.");
-            }
+            _dbContext.Sources.Remove(source);
+            await _dbContext.SaveChangesAsync();
         }
 
     }

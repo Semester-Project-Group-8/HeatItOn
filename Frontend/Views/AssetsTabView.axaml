@@ -170,12 +170,32 @@
                 </Border>
             </SplitView.Pane>
             <SplitView.Content>
-                <Grid RowDefinitions="Auto,*,Auto" Margin="5">
-                    <TextBlock Grid.Row="0"
-                               IsVisible="{Binding HasStatusMessage}"
-                               Text="{Binding StatusMessage}"
-                               Margin="0,0,0,8"
-                               Opacity="0.8" />
+                <Grid RowDefinitions="Auto,*,Auto" Margin="5"
+                      DragDrop.AllowDrop="True"
+                      Loaded="OnMainAreaLoaded">
+                    <StackPanel Grid.Row="1" 
+                                HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"
+                                IsVisible="{Binding !HasAssets}">
+                        <Path Data="M10,4H4C2.89,4 2.01,4.89 2.01,6L2,18C2,19.1 2.89,20 4,20H20C21.1,20 22,19.1 22,18V8C22,6.9 21.1,6 20,6H12L10,4Z" 
+                                  Fill="#E06020" 
+                                  Width="60" 
+                                  Height="60" 
+                                  Stretch="Uniform" 
+                                  HorizontalAlignment="Center"
+                                  Margin="0,0,0,15"
+                                  Opacity="0.5"/>
+                        <TextBlock Text="Drag and drop your CSV file here" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Foreground="#999999" 
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="or import assets through the 'Manager'" 
+                                   FontSize="14" 
+                                   Foreground="#BBBBBB" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,5,0,0"/>
+                    </StackPanel>
                     <ScrollViewer Grid.Row="1"
                                   HorizontalScrollBarVisibility="Disabled"
                                   VerticalScrollBarVisibility="Auto">
@@ -343,5 +363,19 @@
                IsHitTestVisible="True">
             <v:ManagerButtonView DataContext="{Binding CurrentManagerDialog}" />
         </Panel>
+        <Border Grid.Row="0"
+                IsVisible="{Binding IsNotificationOpen}"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,24"
+                Background="White"
+                BorderBrush="#CCCCCC"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="24"
+                IsHitTestVisible="False">
+            <TextBlock Text="{Binding StatusMessage}"
+                       FontSize="14" FontWeight="Bold" />
+        </Border>
     </Grid>
 </UserControl>

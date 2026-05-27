@@ -8,7 +8,7 @@ namespace BackendTest;
 public class ResultListServiceTests : IDisposable
 {
     private readonly BackendDbContext _context;
-    private readonly ResultListService _resultListService;
+    private readonly ResultByHourService _resultListService;
 
     public ResultListServiceTests()
     {
@@ -17,7 +17,7 @@ public class ResultListServiceTests : IDisposable
             .Options;
 
         _context = new BackendDbContext(options);
-        _resultListService = new ResultListService(_context);
+        _resultListService = new ResultByHourService(_context);
     }
 
     public void Dispose()
