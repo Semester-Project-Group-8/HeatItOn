@@ -379,10 +379,11 @@ public class AssetsTabViewModel : ViewModelBase
     // Fixed the Null Reference Error here!
     private static string DeriveAssetType(string? name)
     {
-        if (string.IsNullOrWhiteSpace(name)) return "GAS";
-        if (name.Contains("Motor", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
-        if (name.Contains("Electric", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
-        if (name.Contains("Oil", StringComparison.OrdinalIgnoreCase)) return "OIL";
+        //added whitespaces here cause we were finding in bOILer word OIL
+        if (string.IsNullOrWhiteSpace(name)) return "OTHER";
+        if (name.Contains("Motor ", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
+        if (name.Contains("Electric ", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
+        if (name.Contains("Oil ", StringComparison.OrdinalIgnoreCase)) return "OIL";
         return "GAS";
     }
 

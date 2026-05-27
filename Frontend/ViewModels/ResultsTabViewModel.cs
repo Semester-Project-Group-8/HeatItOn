@@ -365,7 +365,13 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
     public async void Export()
     {
-        bool success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, "result.csv"), Rows.ToList());
+        string resultName = "result";
+        if (_selectedOptimizedResult!=null)
+        {
+            resultName = _selectedOptimizedResult.Name;
+        }
+        resultName += ".csv";
+        bool success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, resultName), _allRows);
         ShowNotification(success ? "Result exported successfully." : "Export failed: no results to export.");
     }
 
