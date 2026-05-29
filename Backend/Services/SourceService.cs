@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
 namespace Backend.Services
@@ -18,8 +18,19 @@ namespace Backend.Services
         
         public async Task PostList(List<Source> source)
         {
+            if (source == null || source.Count == 0)
+                throw new ArgumentException("Source list cannot be empty");
+
             await _dbContext.Sources.AddRangeAsync(source);
-            var result = await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<Source>> ListByMonth(int month)
+        {
+            if (month < 1 || month > 12) throw new ArgumentException("Invalid month");
+            return await _dbContext.Sources
+                .Where(s => s.TimeFrom.Month == month)
+                .ToListAsync();
         }
 
         public async Task Post(Source source)

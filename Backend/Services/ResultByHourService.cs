@@ -72,5 +72,51 @@ namespace Backend.Services
             _dbContext.ResultByHours.Remove(resultList);
             await _dbContext.SaveChangesAsync();
         }
+        public async Task<int> Post(List<ResultByHour> results)
+        {
+            if (results == null || results.Count == 0) return 0;
+            await PostList(results);
+            return results.Count;
+        }
+
+        public async Task<List<ResultByHour>> ListResultLists()
+        {
+            return await List();
+        }
+
+        public async Task<int> Put(DateTime timeFrom, DateTime timeTo, List<Result> results)
+        {
+            if (results == null || results.Count == 0)
+                throw new ArgumentException("Results cannot be empty");
+
+            var duplicateAsset = results.GroupBy(r => r.AssetId).Any(g => g.Count() > 1);
+            if (duplicateAsset)
+                throw new ArgumentException("Same asset appears more than once in results");
+
+            foreach (var r in results)
+            {
+                var exists = await _dbContext.Assets.FindAsync(r.AssetId);
+                if (exists == null)
+                    throw new ArgumentException($"Asset with id {r.AssetId} does not exist");
+            }
+
+            var rbh = new ResultByHour
+            {
+                TimeFrom = timeFrom,
+                TimeTo = timeTo,
+                Results = results
+            };
+
+            await _dbContext.ResultByHours.AddAsync(rbh);
+            await _dbContext.SaveChangesAsync();
+
+            return rbh.Id;
+        }
+
+        public async Task<int> DeleteResultList(int id)
+        {
+            await Delete(id);
+            return 1;
+        }
     }
 }

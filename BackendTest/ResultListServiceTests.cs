@@ -25,9 +25,9 @@ public class ResultListServiceTests : IDisposable
         _context.Dispose();
     }
 
-    List<ResultList> resultLists = new List<ResultList>
+    List<ResultByHour> resultLists = new List<ResultByHour>
         {
-            new ResultList
+            new ResultByHour
             {
                 TimeFrom = new DateTime(2026, 4, 10, 8, 0, 0),
                 TimeTo = new DateTime(2026, 4, 10, 9, 0, 0),
@@ -53,7 +53,7 @@ public class ResultListServiceTests : IDisposable
                     }
                 }
             },
-            new ResultList
+            new ResultByHour
             {
                 TimeFrom = new DateTime(2026, 4, 10, 10, 0, 0),
                 TimeTo = new DateTime(2026, 4, 10, 11, 0, 0),
