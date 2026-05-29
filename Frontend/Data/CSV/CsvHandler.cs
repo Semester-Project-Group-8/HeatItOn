@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Rendering;
 using Frontend.Interfaces;
 using Frontend.Models;
 using Microsoft.VisualBasic.FileIO;
@@ -99,6 +100,8 @@ public static class CsvHandler
             return "eb1.png";
         else if (name.Contains("Gas Motor", StringComparison.CurrentCultureIgnoreCase))
             return "gm1.png";
+        else if (name.Contains("tes", StringComparison.CurrentCultureIgnoreCase))
+            return "tes.png";
         else
             return null;
     }
