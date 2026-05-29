@@ -379,11 +379,13 @@ public class AssetsTabViewModel : ViewModelBase
     // Fixed the Null Reference Error here!
     private static string DeriveAssetType(string? name)
     {
-        if (name.Contains("Motor", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
-        if (name.Contains("Electric", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
-        if (name.Contains("Oil", StringComparison.OrdinalIgnoreCase)) return "OIL";
-        if (name.Contains("PTES", StringComparison.OrdinalIgnoreCase)) return "STORAGE";
-        return "GAS";
+        //name = $"{name} ";
+        if (name.Contains("Motor ", StringComparison.OrdinalIgnoreCase)) return "MOTOR";
+        if (name.Contains("Electric ", StringComparison.OrdinalIgnoreCase)) return "ELECTRIC";
+        if (name.Contains("Gas ", StringComparison.OrdinalIgnoreCase)) return "GAS";
+        if (name.Contains("Oil ", StringComparison.OrdinalIgnoreCase)) return "OIL";
+        if (name.Contains("TES", StringComparison.OrdinalIgnoreCase)) return "STORAGE";
+        return "OTHER";
     }
 
     private static string FormatDecimal(float value)
