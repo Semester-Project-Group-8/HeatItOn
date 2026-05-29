@@ -18,7 +18,9 @@ namespace Backend.Data
             modelBuilder.Entity<Source>()
                 .HasIndex(s => new {s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice})
                 .IsUnique();
+            modelBuilder.Entity<Asset>()
+                .HasIndex(a => a.Name)
+                .IsUnique();
         }
     }
-    
 }
