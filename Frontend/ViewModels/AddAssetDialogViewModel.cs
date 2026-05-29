@@ -152,9 +152,4 @@ public class RelayCommand : ICommand
     {
         _execute();
     }
-
-    public void RaiseCanExecuteChanged()
-    {
-        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-    }
 }

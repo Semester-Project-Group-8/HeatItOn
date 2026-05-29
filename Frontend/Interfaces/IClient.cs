@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Frontend.Data;
+namespace Frontend.Interfaces;
 
 public interface IClient<T>
 {

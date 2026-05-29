@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Frontend.Interfaces;
 using Frontend.Models;
 
 namespace Frontend.Data;
