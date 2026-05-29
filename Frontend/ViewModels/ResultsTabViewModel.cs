@@ -33,7 +33,11 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         _client = client;
         CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
         _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
+        _dismissTimer.Tick += (_, _) =>
+        {
+            IsNotificationOpen = false;
+            _dismissTimer.Stop();
+        };
         _ = LoadAsync();
     }
 
@@ -58,30 +62,48 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     public int TotalPages => Math.Max(1, (int)Math.Ceiling(_filteredRows.Count / (double)PageSize));
     public bool CanGoPrev => _currentPage > 1;
     public bool CanGoNext => _currentPage < TotalPages;
+
     public string PageInfo => _filteredRows.Count == 0
         ? "No rows to display"
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, _filteredRows.Count)} of {_filteredRows.Count} rows";
+
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
     private bool _isNotificationOpen;
+
     public bool IsNotificationOpen
     {
         get => _isNotificationOpen;
-        set { _isNotificationOpen = value; OnPropertyChanged(); }
+        set
+        {
+            _isNotificationOpen = value;
+            OnPropertyChanged();
+        }
     }
 
     private string _statusMessage = string.Empty;
+
     public string StatusMessage
     {
         get => _statusMessage;
-        private set { _statusMessage = value; OnPropertyChanged(); }
+        private set
+        {
+            _statusMessage = value;
+            OnPropertyChanged();
+        }
     }
+
     public ICommand CloseNotificationCommand { get; }
 
     private bool _isDeleteConfirmOpen;
+
     public bool IsDeleteConfirmOpen
     {
         get => _isDeleteConfirmOpen;
-        set { _isDeleteConfirmOpen = value; OnPropertyChanged(); }
+        set
+        {
+            _isDeleteConfirmOpen = value;
+            OnPropertyChanged();
+        }
     }
 
     private OptimizedResults? _pendingDeleteResult;
@@ -210,6 +232,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     private ObservableCollection<ISeries> CostGeneratorStackedChartData { get; } = [];
     private ObservableCollection<ISeries> GeneratorUsageChartData { get; } = [];
     public ObservableCollection<GeneratorLegendItem> GeneratorUsageLegend { get; } = new();
+
     private static readonly string[] GeneratorPalette =
     [
         "#FF6B6B",
@@ -342,10 +365,10 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         }
     ];
 
-    public Axis[] HeatAxis => CreateValueAxis("Heat (MWh)", minLimit: 0);
-    public Axis[] ElectricityAxis => CreateValueAxis("Electricity (MWh)", minLimit: null);
-    public Axis[] Co2Axis => CreateValueAxis("CO₂ (kg)", minLimit: 0);
-    public Axis[] CostAxis => CreateValueAxis("Production cost (DKK)", minLimit: 0);
+    public Axis[] HeatAxis => CreateValueAxis("Heat (MWh)", 0);
+    public Axis[] ElectricityAxis => CreateValueAxis("Electricity (MWh)", null);
+    public Axis[] Co2Axis => CreateValueAxis("CO₂ (kg)", 0);
+    public Axis[] CostAxis => CreateValueAxis("Production cost (DKK)", 0);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -365,13 +388,10 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
     public async void Export()
     {
-        string resultName = "result";
-        if (_selectedOptimizedResult!=null)
-        {
-            resultName = _selectedOptimizedResult.Name;
-        }
+        var resultName = "result";
+        if (_selectedOptimizedResult != null) resultName = _selectedOptimizedResult.Name;
         resultName += ".csv";
-        bool success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, resultName), _allRows);
+        var success = await CsvHandler.ExportResult(Path.Combine(AppContext.BaseDirectory, resultName), _allRows);
         ShowNotification(success ? "Result exported successfully." : "Export failed: no results to export.");
     }
 
@@ -382,10 +402,10 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         if (SelectedOptimizedResult == result)
         {
             SelectedOptimizedResult = null;
-            OnPropertyChanged(nameof(SelectedOptimizedResult));//added this so it auto updates removal from side list
+            OnPropertyChanged(nameof(SelectedOptimizedResult)); //added this so it auto updates removal from side list
             OnPropertyChanged(nameof(IsResultSelected));
         }
-            
+
         OnPropertyChanged(nameof(HasNoOptimizedResults));
         StatusMessage = "Result deleted successfully.";
         IsNotificationOpen = true;
@@ -423,11 +443,10 @@ public class ResultsTabViewModel : INotifyPropertyChanged
                             .Where(n => !string.IsNullOrWhiteSpace(n))
                             .Distinct()
                     ),
-                    HeatProduced = MathF.Round(heat,2),
-                    Electricity = MathF.Round(electricity,2),
+                    HeatProduced = MathF.Round(heat, 2),
+                    Electricity = MathF.Round(electricity, 2),
                     Co2Produced = co2,
-                    ProductionCost = MathF.Round(cost,2)
-                    
+                    ProductionCost = MathF.Round(cost, 2)
                 };
             })
             .ToList();
@@ -444,11 +463,11 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         Co2ChartData.Clear();
         CostChartData.Clear();
         DateTime start = orderedHours.First().TimeFrom, end = orderedHours.Last().TimeFrom;
-        List<ResultList> filledHours = new List<ResultList>();
-        for (DateTime thisHour=start;thisHour<=end;thisHour=thisHour.AddHours(1))
+        var filledHours = new List<ResultList>();
+        for (var thisHour = start; thisHour <= end; thisHour = thisHour.AddHours(1))
         {
-            ResultList? hour = orderedHours.FirstOrDefault(h => h.TimeFrom == thisHour);
-            if(hour!=null)
+            var hour = orderedHours.FirstOrDefault(h => h.TimeFrom == thisHour);
+            if (hour != null)
             {
                 var heat = hour.Results.Sum(r => r.HeatProduction);
                 var electricity = hour.Results.Sum(r => r.Electricity);
@@ -469,11 +488,12 @@ public class ResultsTabViewModel : INotifyPropertyChanged
                 CostChartData.Add(new DateTimePoint(thisHour, 0));
                 filledHours.Add(new ResultList
                 {
-                    TimeFrom= thisHour,
-                    Results=new List<Result>()
+                    TimeFrom = thisHour,
+                    Results = new List<Result>()
                 });
             }
         }
+
         //RebuildHeatStackedByGenerator(filledHours);
         RebuildStackedByGenerator(
             filledHours,
@@ -506,7 +526,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ElectricityChartSeries));
             OnPropertyChanged(nameof(Co2ChartSeries));
             OnPropertyChanged(nameof(CostChartSeries));
-        });//CHARTS FINALLY AUTO UPDATE
+        }); //CHARTS FINALLY AUTO UPDATE
     }
 
     private void RebuildHeatStackedByGenerator(IReadOnlyList<ResultList> hours)
@@ -730,7 +750,6 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         }
 
         if (generatorOrder.Count > 0)
-        {
             targetSeries.Add(new LineSeries<DateTimePoint>
             {
                 Name = $"{chartLabel} total",
@@ -744,7 +763,6 @@ public class ResultsTabViewModel : INotifyPropertyChanged
                     StrokeThickness = 1f
                 }
             });
-        }
     }
 
     private void RebuildGeneratorUsagePie(IEnumerable<ResultList> hours)
@@ -876,7 +894,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
     {
         return
         [
-            new()
+            new Axis
             {
                 Name = name,
                 NameTextSize = 12,

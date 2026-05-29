@@ -18,14 +18,14 @@ public class SourceClient : IClient<Source>
 
     public async Task<Source?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
+        var response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Source>();
     }
 
     public async Task<List<Source>> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/");
+        var response = await _client.GetAsync($"{UrlExtension}/");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<Source>>();
         return result ?? [];
@@ -33,21 +33,21 @@ public class SourceClient : IClient<Source>
 
     public async Task Post(Source source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
+        var response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
     }
 
     public async Task PostList(List<Source> source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
+        var response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
     }
 
     public async Task Put(Source source)
     {
-        HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/Update/{source.Id}", JsonContent.Create(source));
+        var response = await _client.PutAsync($"{UrlExtension}/Update/{source.Id}", JsonContent.Create(source));
     }
 
     public async Task Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}" );
+        var response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}");
     }
 }

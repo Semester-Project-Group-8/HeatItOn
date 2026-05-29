@@ -18,20 +18,13 @@ public partial class SourceTabView : UserControl
     private void SourceDataGrid_CellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
     {
         if (e.EditAction == DataGridEditAction.Commit)
-        {
             if (e.Row.DataContext is Source source && DataContext is SourceTabViewModel vm)
-            {
                 vm.UpdateSource(source);
-            }
-        }
     }
 
     private void OnMainAreaLoaded(object? sender, RoutedEventArgs e)
     {
-        if (sender is Control mainArea)
-        {
-            mainArea.AddHandler(DragDrop.DropEvent, MainArea_Drop);
-        }
+        if (sender is Control mainArea) mainArea.AddHandler(DragDrop.DropEvent, MainArea_Drop);
     }
 
     private async void MainArea_Drop(object? sender, DragEventArgs e)
@@ -43,11 +36,8 @@ public partial class SourceTabView : UserControl
 
             if (firstFile != null && firstFile.Name.EndsWith(".csv", System.StringComparison.OrdinalIgnoreCase))
             {
-                string filePath = firstFile.Path.LocalPath;
-                if (this.DataContext is SourceTabViewModel vm)
-                {
-                    await vm.Import(filePath);
-                }
+                var filePath = firstFile.Path.LocalPath;
+                if (DataContext is SourceTabViewModel vm) await vm.Import(filePath);
             }
         }
     }
@@ -66,11 +56,8 @@ public partial class SourceTabView : UserControl
 
         if (files.Count >= 1)
         {
-            string filePath = files[0].Path.LocalPath;
-            if (this.DataContext is SourceTabViewModel vm)
-            {
-                await vm.Import(filePath);
-            }
+            var filePath = files[0].Path.LocalPath;
+            if (DataContext is SourceTabViewModel vm) await vm.Import(filePath);
         }
     }
 }

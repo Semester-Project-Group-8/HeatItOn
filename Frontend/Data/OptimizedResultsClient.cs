@@ -18,14 +18,14 @@ public class OptimizedResultsClient : IClient<OptimizedResults>
 
     public async Task<OptimizedResults?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync($"{urlExtension}/{id.ToString()}");
+        var response = await _client.GetAsync($"{urlExtension}/{id.ToString()}");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<OptimizedResults>();
     }
 
     public async Task<List<OptimizedResults>?> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync($"{urlExtension}");
+        var response = await _client.GetAsync($"{urlExtension}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<List<OptimizedResults>>();
         return result;
@@ -33,16 +33,16 @@ public class OptimizedResultsClient : IClient<OptimizedResults>
 
     public async Task Post(OptimizedResults item)
     {
-        HttpResponseMessage response = await _client.PostAsJsonAsync($"{urlExtension}", item);
+        var response = await _client.PostAsJsonAsync($"{urlExtension}", item);
     }
 
     public async Task Put(OptimizedResults item)
     {
-        HttpResponseMessage response = await _client.PutAsJsonAsync($"{urlExtension}", item);
+        var response = await _client.PutAsJsonAsync($"{urlExtension}", item);
     }
 
     public async Task Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
+        var response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
     }
 }

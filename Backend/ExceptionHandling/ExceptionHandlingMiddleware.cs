@@ -21,8 +21,9 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            await  _next(context);
-        } catch (Exception ex)
+            await _next(context);
+        }
+        catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
             await HandleExceptionAsync(context, ex);
@@ -33,52 +34,38 @@ public class ExceptionHandlingMiddleware
     {
         HttpStatusCode status;
 
-        Type? exceptionType = exception.GetType();
+        var exceptionType = exception.GetType();
 
-        string message = exception.Message;
+        var message = exception.Message;
         if (exceptionType == typeof(DirectoryNotFoundException) ||
             exceptionType == typeof(DllNotFoundException) ||
             exceptionType == typeof(EntryPointNotFoundException) ||
             exceptionType == typeof(FileNotFoundException) ||
             exceptionType == typeof(KeyNotFoundException))
-        {
             status = HttpStatusCode.NotFound;
-        }
         else if (exceptionType == typeof(NotImplementedException))
-        {
             status = HttpStatusCode.NotImplemented;
-        }
         else if (exceptionType == typeof(UnauthorizedAccessException) ||
                  exceptionType == typeof(AuthenticationException))
-        {
             status = HttpStatusCode.Unauthorized;
-        }
         else if (exceptionType == typeof(ValidationException) ||
                  exceptionType == typeof(NotSupportedException))
-        {
-            status =  HttpStatusCode.BadRequest;
-        }
+            status = HttpStatusCode.BadRequest;
         else if (exceptionType == typeof(AlreadyExistsException) ||
                  exceptionType == typeof(ConflictException) ||
                  exceptionType == typeof(DbUpdateException))
-        {
             status = HttpStatusCode.Conflict;
-        }
         else if (exceptionType == typeof(NotFoundException))
-        {
             status = HttpStatusCode.NotFound;
-        }
         else
-        {
             status = HttpStatusCode.InternalServerError;
-        }
 
-        string? stackTrace = exception.StackTrace;
+        var stackTrace = exception.StackTrace;
 
-        string exceptionResult = System.Text.Json.JsonSerializer.Serialize(new { error = message, stackTrace });
+        var exceptionResult = System.Text.Json.JsonSerializer.Serialize(new { error = message, stackTrace });
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)status;
-        
+
         return context.Response.WriteAsync(exceptionResult);
     }
 }

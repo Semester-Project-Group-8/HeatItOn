@@ -38,7 +38,7 @@ public class SourceController : ControllerBase, IController<Source, Source>
     public async Task<IActionResult> Post([FromBody] Source source)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
+
         await _sourceService.Post(source);
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
         return Created();
@@ -48,7 +48,7 @@ public class SourceController : ControllerBase, IController<Source, Source>
     public async Task<IActionResult> AddSources([FromBody] List<Source> sources)
     {
         if (sources.Any(source => !ModelState.IsValid)) return BadRequest(ModelState);
-        
+
         await _sourceService.PostList(sources);
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
         return Created();
@@ -58,7 +58,7 @@ public class SourceController : ControllerBase, IController<Source, Source>
     public async Task<IActionResult> Put(int id, [FromBody] Source source)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
+
         await _sourceService.Put(id, source);
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Source");
         return Ok(new { Message = "Source updated successfully." });

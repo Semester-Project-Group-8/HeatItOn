@@ -44,7 +44,7 @@ public class OptimizedResultsController : ControllerBase, IController<OptimizedR
     [HttpPut("Update/{id:int}")]
     public Task<IActionResult> Put(int id, [FromBody] OptimizedResults optimizedResults)
     {
-        throw new  UnauthorizedAccessException("You are not authorized to modify it.");
+        throw new UnauthorizedAccessException("You are not authorized to modify it.");
     }
 
     [HttpDelete("Delete/{id:int}")]

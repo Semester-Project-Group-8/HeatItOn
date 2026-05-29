@@ -9,7 +9,7 @@ namespace Frontend.Data;
 public class OptimizerClient
 {
     private readonly HttpClient _client;
-    
+
     public OptimizerClient(HttpClient httpClient)
     {
         _client = httpClient;
@@ -20,7 +20,8 @@ public class OptimizerClient
         var result = await _client.PostAsync("Optimize", JsonContent.Create(scenarioAssets));
         return result;
     }
-    public async Task<HttpResponseMessage> Optimize()//remove before flight
+
+    public async Task<HttpResponseMessage> Optimize() //remove before flight
     {
         var result = await _client.PostAsync("Optimize", null);
         return result;

@@ -10,7 +10,7 @@ public class ResultListClient : IClient<ResultList>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "ResultList";
-    
+
     public ResultListClient(HttpClient httpClient)
     {
         _client = httpClient;
@@ -33,16 +33,16 @@ public class ResultListClient : IClient<ResultList>
 
     public async Task Post(ResultList resultList)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
+        var response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
     }
 
     public async Task Put(ResultList resultList)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
+        var response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
     }
 
     public async Task Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}" );
+        var response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}");
     }
 }

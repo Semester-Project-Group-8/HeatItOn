@@ -15,10 +15,7 @@ public partial class AssetsTabView : UserControl
 
     private void OnMainAreaLoaded(object? sender, RoutedEventArgs e)
     {
-        if (sender is Control mainArea)
-        {
-            mainArea.AddHandler(DragDrop.DropEvent, MainArea_Drop);
-        }
+        if (sender is Control mainArea) mainArea.AddHandler(DragDrop.DropEvent, MainArea_Drop);
     }
 
     private async void MainArea_Drop(object? sender, DragEventArgs e)
@@ -30,11 +27,8 @@ public partial class AssetsTabView : UserControl
 
             if (firstFile != null && firstFile.Name.EndsWith(".csv", System.StringComparison.OrdinalIgnoreCase))
             {
-                string filePath = firstFile.Path.LocalPath;
-                if (this.DataContext is AssetsTabViewModel vm)
-                {
-                    await vm.ImportAssets(filePath);
-                }
+                var filePath = firstFile.Path.LocalPath;
+                if (DataContext is AssetsTabViewModel vm) await vm.ImportAssets(filePath);
             }
         }
     }

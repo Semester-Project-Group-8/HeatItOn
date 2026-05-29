@@ -15,7 +15,7 @@ public static class CsvHandler
     {
         try
         {
-            List<Asset>? assets = await assetClient.GetAll();
+            var assets = await assetClient.GetAll();
 
             if (assets is { Count: > 0 })
             {
@@ -23,7 +23,8 @@ public static class CsvHandler
                 [
                     "Name,MaxHeat MW,Production Cost DKK/MWh(th),CO2 Emissions kg/MWh(th),Gas Consumption MW(th),Oil Consumption MW(th),Max Electricity MW(e)"
                 ];
-                lines.AddRange(assets.Select(asset => $"{asset.Name},{asset.MaxHeat.ToString(CultureInfo.InvariantCulture)},{asset.ProductionCost},{asset.CO2Emission},{asset.GasConsumption.ToString(CultureInfo.InvariantCulture)},{asset.OilConsumption.ToString(CultureInfo.InvariantCulture)},{asset.MaxElectricity.ToString(CultureInfo.InvariantCulture)}"));
+                lines.AddRange(assets.Select(asset =>
+                    $"{asset.Name},{asset.MaxHeat.ToString(CultureInfo.InvariantCulture)},{asset.ProductionCost},{asset.CO2Emission},{asset.GasConsumption.ToString(CultureInfo.InvariantCulture)},{asset.OilConsumption.ToString(CultureInfo.InvariantCulture)},{asset.MaxElectricity.ToString(CultureInfo.InvariantCulture)}"));
 
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | asset csv file export");
@@ -46,25 +47,23 @@ public static class CsvHandler
     {
         try
         {
-            List<Asset> assets = new List<Asset>();
+            var assets = new List<Asset>();
 
-            using (TextFieldParser parser = new TextFieldParser(location))
+            using (var parser = new TextFieldParser(location))
             {
                 parser.SetDelimiters(",");
                 parser.HasFieldsEnclosedInQuotes = true;
 
-                if (!parser.EndOfData)
-                {
-                    parser.ReadFields();
-                }
+                if (!parser.EndOfData) parser.ReadFields();
 
                 while (!parser.EndOfData)
                 {
-                    string[]? fields = parser.ReadFields();
+                    var fields = parser.ReadFields();
 
                     if (fields is { Length: >= 7 })
                     {
-                        Asset asset = AssetConverter(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5], fields[6]);
+                        var asset = AssetConverter(fields[0], fields[1], fields[2], fields[3], fields[4], fields[5],
+                            fields[6]);
                         assets.Add(asset);
                     }
                     else
@@ -74,10 +73,7 @@ public static class CsvHandler
                 }
             }
 
-            if (assets.Count == 0)
-            {
-                throw new FormatException("Invalid file format. Please upload a valid Assets CSV.");
-            }
+            if (assets.Count == 0) throw new FormatException("Invalid file format. Please upload a valid Assets CSV.");
 
             Console.WriteLine("completed | asset csv file read");
 
@@ -95,30 +91,21 @@ public static class CsvHandler
     private static string? ImageParser(string name)
     {
         if (name.Contains("Gas Boiler", StringComparison.CurrentCultureIgnoreCase))
-        {
             return "gb1.png";
-        }
         else if (name.Contains("Oil Boiler", StringComparison.CurrentCultureIgnoreCase))
-        {
             return "ob1.png";
-        }
         else if (name.Contains("Electric Boiler", StringComparison.CurrentCultureIgnoreCase))
-        {
             return "eb1.png";
-        } 
-        else if (name.Contains("Gas Motor",  StringComparison.CurrentCultureIgnoreCase))
-        {
+        else if (name.Contains("Gas Motor", StringComparison.CurrentCultureIgnoreCase))
             return "gm1.png";
-        }
         else
-        {
             return null;
-        }
     }
 
-    private static Asset AssetConverter(string name, string maxHeat, string prodCost, string co2, string gas, string oil, string maxElec)
+    private static Asset AssetConverter(string name, string maxHeat, string prodCost, string co2, string gas,
+        string oil, string maxElec)
     {
-        var asd = new Asset()
+        var asd = new Asset
         {
             Name = name,
             MaxHeat = float.Parse(maxHeat, CultureInfo.InvariantCulture),
@@ -131,7 +118,7 @@ public static class CsvHandler
         };
         return asd;
     }
-    
+
     // Result
     public static async Task<bool> ExportResult(string location, List<ResultTableRow>? results)
     {
@@ -143,7 +130,8 @@ public static class CsvHandler
                 [
                     "Hour,ActiveAssets,HeatProduced MW,Electricity MW,Co2Produced kg"
                 ];
-                lines.AddRange(results.Select(row => $"{row.Hour},{row.ActiveAssets},{row.HeatProduced.ToString(CultureInfo.InvariantCulture)},{row.Electricity.ToString(CultureInfo.InvariantCulture)},{row.Co2Produced}"));
+                lines.AddRange(results.Select(row =>
+                    $"{row.Hour},{row.ActiveAssets},{row.HeatProduced.ToString(CultureInfo.InvariantCulture)},{row.Electricity.ToString(CultureInfo.InvariantCulture)},{row.Co2Produced}"));
 
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | optimized result csv file export");
@@ -161,27 +149,29 @@ public static class CsvHandler
             return false;
         }
     }
-    public static async Task ImportSource(string location, SourceClient sourceClient) 
-    { 
-        List<Source> sources = new List<Source>();
-        using (TextFieldParser parser = new TextFieldParser(location))
+
+    public static async Task ImportSource(string location, SourceClient sourceClient)
+    {
+        var sources = new List<Source>();
+        using (var parser = new TextFieldParser(location))
         {
             parser.SetDelimiters(",");
             parser.HasFieldsEnclosedInQuotes = true;
             while (!parser.EndOfData)
             {
-                string[]? fields = parser.ReadFields();
+                var fields = parser.ReadFields();
                 if (fields != null)
                 {
-                    int i = 0;
+                    var i = 0;
                     while (i < fields.Length)
                     {
                         if (IsDate(fields[i]))
                         {
-                            Source source = SourceConverter(fields[i], fields[i + 1], fields[i + 2], fields[i + 3]);
+                            var source = SourceConverter(fields[i], fields[i + 1], fields[i + 2], fields[i + 3]);
                             sources.Add(source);
                             i = i + 3;
                         }
+
                         i++;
                     }
                 }
@@ -190,14 +180,16 @@ public static class CsvHandler
                     Console.WriteLine("error | read failed >> no fields found");
                 }
             }
+
             Console.WriteLine("completed | csv file read");
         }
 
         await sourceClient.PostList(sources);
     }
+
     private static bool IsDate(string value)
     {
-        return DateTime.TryParse(value,new CultureInfo("da-DK"),DateTimeStyles.None, out _);
+        return DateTime.TryParse(value, new CultureInfo("da-DK"), DateTimeStyles.None, out _);
     }
 
     public static async Task<bool> ExportSource(string location, List<Source>? sources)
@@ -210,7 +202,8 @@ public static class CsvHandler
                 [
                     "TimeFrom,TimeTo,HeatDemand,ElectricityPrice"
                 ];
-                lines.AddRange(sources.Select(source => $"{source.TimeFrom.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.TimeTo.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.HeatDemand.ToString("00.00", CultureInfo.InvariantCulture)},{source.ElectricityPrice.ToString(CultureInfo.InvariantCulture)}"));
+                lines.AddRange(sources.Select(source =>
+                    $"{source.TimeFrom.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.TimeTo.ToString("yyyy.MM.dd HH:mm", CsvCulture)},{source.HeatDemand.ToString("00.00", CultureInfo.InvariantCulture)},{source.ElectricityPrice.ToString(CultureInfo.InvariantCulture)}"));
                 await System.IO.File.WriteAllLinesAsync(location, lines);
                 Console.WriteLine("completed | csv file export");
                 return true;
@@ -227,19 +220,22 @@ public static class CsvHandler
             return false;
         }
     }
-    private static readonly CultureInfo CsvCulture = new CultureInfo("da-DK");
-    private static Source SourceConverter(string? startDate, string? endDate, string? heatDemand, string? electricityPrice)
+
+    private static readonly CultureInfo CsvCulture = new("da-DK");
+
+    private static Source SourceConverter(string? startDate, string? endDate, string? heatDemand,
+        string? electricityPrice)
     {
         startDate ??= "2000.01.01 00:00";
         endDate ??= "2000.01.01 01:00";
         heatDemand ??= "0";
         electricityPrice ??= "0";
 
-        Source source = new Source()
+        var source = new Source
         {
             //ID = id,
-            TimeFrom = DateTime.Parse(startDate,CsvCulture),
-            TimeTo = DateTime.Parse(endDate,CsvCulture),
+            TimeFrom = DateTime.Parse(startDate, CsvCulture),
+            TimeTo = DateTime.Parse(endDate, CsvCulture),
             HeatDemand = float.Parse(heatDemand),
             ElectricityPrice = float.Parse(electricityPrice)
         };

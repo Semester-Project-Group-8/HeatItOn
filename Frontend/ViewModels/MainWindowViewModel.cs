@@ -13,9 +13,9 @@ public class MainWindowViewModel : ViewModelBase
 {
     private static readonly TimeSpan SignalRRetryDelay = TimeSpan.FromSeconds(5);
     private HubConnection? _connection;
-    public SourceTabViewModel SourceTab {get; private set;}
-    public AssetsTabViewModel AssetsTab  {get; private set;}
-    public ResultsTabViewModel ResultTab   {get; private set;}
+    public SourceTabViewModel SourceTab { get; private set; }
+    public AssetsTabViewModel AssetsTab { get; private set; }
+    public ResultsTabViewModel ResultTab { get; private set; }
     public RelayCommand Refresh { get; }
 
     public MainWindowViewModel(
@@ -69,7 +69,8 @@ public class MainWindowViewModel : ViewModelBase
 
             while (true)
             {
-                if (_connection.State is HubConnectionState.Connected or HubConnectionState.Connecting or HubConnectionState.Reconnecting)
+                if (_connection.State is HubConnectionState.Connected or HubConnectionState.Connecting
+                    or HubConnectionState.Reconnecting)
                 {
                     await Task.Delay(SignalRRetryDelay);
                     continue;

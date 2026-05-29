@@ -39,7 +39,7 @@ public class AssetsController : ControllerBase, IController<Asset, Asset>
     {
         // Checking received data validity
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
+
         await _assetsService.Post(asset);
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
         return Created();
@@ -57,7 +57,7 @@ public class AssetsController : ControllerBase, IController<Asset, Asset>
     public async Task<IActionResult> Put(int id, [FromBody] Asset asset)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
+
         await _assetsService.Put(id, asset);
         await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Asset");
         return Ok();

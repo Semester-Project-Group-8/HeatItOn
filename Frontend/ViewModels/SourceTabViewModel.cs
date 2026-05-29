@@ -36,11 +36,14 @@ public partial class SourceTabViewModel : ViewModelBase
     public int TotalPages => Math.Max(1, (int)Math.Ceiling(Sources.Count / (double)PageSize));
     public bool CanGoPrev => _currentPage > 1;
     public bool CanGoNext => _currentPage < TotalPages;
+
     public string PageInfo => Sources.Count == 0
         ? "No rows to display"
         : $"Showing {(_currentPage - 1) * PageSize + 1}-{Math.Min(_currentPage * PageSize, Sources.Count)} of {Sources.Count} rows";
+
     public List<int> PageNumbers => Enumerable.Range(1, TotalPages).ToList();
     private bool _isNotificationOpen;
+
     public bool IsNotificationOpen
     {
         get => _isNotificationOpen;
@@ -48,6 +51,7 @@ public partial class SourceTabViewModel : ViewModelBase
     }
 
     private string _statusMessage = string.Empty;
+
     public string StatusMessage
     {
         get => _statusMessage;
@@ -130,7 +134,11 @@ public partial class SourceTabViewModel : ViewModelBase
     {
         _client = client;
         _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
+        _dismissTimer.Tick += (_, _) =>
+        {
+            IsNotificationOpen = false;
+            _dismissTimer.Stop();
+        };
         TimeAxis =
         [
             new Axis
@@ -157,7 +165,7 @@ public partial class SourceTabViewModel : ViewModelBase
                 TextSize = 11,
                 NameTextSize = 10,
                 SeparatorsPaint = new SolidColorPaint(SKColors.LightGray),
-                ShowSeparatorLines = true,
+                ShowSeparatorLines = true
             }
         ];
         DualAxes =
@@ -280,10 +288,13 @@ public partial class SourceTabViewModel : ViewModelBase
             Console.WriteLine(ex);
         }
     }
+
     public async void Export()
     {
-        bool success = await CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"), Sources.ToList());
-        ShowNotification(success ? "Source data was exported successfully." : "Export failed: no source data to export.");
+        var success = await CsvHandler.ExportSource(Path.Combine(AppContext.BaseDirectory, "exported_source.csv"),
+            Sources.ToList());
+        ShowNotification(
+            success ? "Source data was exported successfully." : "Export failed: no source data to export.");
     }
 
     public async Task Import(string filePath)
@@ -292,11 +303,12 @@ public partial class SourceTabViewModel : ViewModelBase
         {
             if (string.IsNullOrWhiteSpace(filePath)) return;
 
-            await CsvHandler.ImportSource(filePath, _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
+            await CsvHandler.ImportSource(filePath,
+                _client as SourceClient ?? throw new Exception("Failed to convert to SourceClient"));
 
             await LoadAsync();
 
-            string? recentlyImported = System.IO.Path.GetFileName(filePath);
+            var recentlyImported = Path.GetFileName(filePath);
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -365,8 +377,6 @@ public partial class SourceTabViewModel : ViewModelBase
             Stroke = new SolidColorPaint(SKColor.Parse("#0084FF")) { StrokeThickness = 1 },
             Fill = new SolidColorPaint(SKColor.Parse("#300084FF"))
         });
-
-        
     }
 
     private void BuildSummerSeries()
@@ -404,7 +414,5 @@ public partial class SourceTabViewModel : ViewModelBase
             Stroke = new SolidColorPaint(SKColor.Parse("#0084FF")) { StrokeThickness = 1 },
             Fill = new SolidColorPaint(SKColor.Parse("#300084FF"))
         });
-
-        
     }
 }
