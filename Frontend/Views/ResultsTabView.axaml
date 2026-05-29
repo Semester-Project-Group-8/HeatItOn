@@ -380,135 +380,7 @@
                             </Grid>
                         </Border>
 
-                        <StackPanel Spacing="16" Margin="20,20,20,0">
-                        <!-- Results Table -->
-                        <Border Background="White"
-                                CornerRadius="12"
-                                ClipToBounds="True"
-                                Margin="20,0">
-                            <Grid RowDefinitions="*,Auto">
-
-                                <DataGrid Grid.Row="0"
-                                        ItemsSource="{Binding Rows}"
-                                        AutoGenerateColumns="False"
-                                        GridLinesVisibility="Horizontal"
-                                        BorderThickness="0"
-                                        RowBackground="White"
-                                        HorizontalAlignment="Stretch"
-                                        IsReadOnly="True"
-                                        CanUserReorderColumns="False"
-                                        CanUserResizeColumns="False"
-                                        CanUserSortColumns="True">
-                                    <DataGrid.Columns>
-
-                                        <!-- TIME - orange -->
-                                        <DataGridTemplateColumn Header="TIME" Width="*">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="models:ResultTableRow">
-                                                    <TextBlock Text="{Binding Hour}"
-                                                            Foreground="#E06020"
-                                                            FontWeight="SemiBold"
-                                                            FontSize="13"
-                                                            VerticalAlignment="Center"
-                                                            Margin="12,0"/>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-
-                                        <!-- ACTIVE ASSETS -->
-                                        <DataGridTextColumn Header="ACTIVE ASSETS"
-                                                            Binding="{Binding ActiveAssets}"
-                                                            Width="2*"/>
-
-                                        <!-- HEAT -->
-                                        <DataGridTextColumn Header="HEAT (MW)"
-                                                            Binding="{Binding HeatProduced}"
-                                                            Width="*"/>
-
-                                        <!-- ELECTRICITY - green -->
-                                        <DataGridTemplateColumn Header="ELECTRICITY (MW)" Width="*">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate x:DataType="models:ResultTableRow">
-                                                    <TextBlock Text="{Binding Electricity}"
-                                                            Foreground="#2E9E5E"
-                                                            FontWeight="SemiBold"
-                                                            FontSize="13"
-                                                            VerticalAlignment="Center"
-                                                            Margin="12,0"/>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-
-                                        <!-- CO2 -->
-                                        <DataGridTextColumn Header="CO&#x2082; (KG)"
-                                                            Binding="{Binding Co2Produced}"
-                                                            Width="*"/>
-
-                                        <!-- COST -->
-                                        <DataGridTextColumn Header="COST (DKK)"
-                                                            Binding="{Binding ProductionCost}"
-                                                            Width="*"/>
-
-                                    </DataGrid.Columns>
-                                </DataGrid>
-
-                                <!-- Pagination footer -->
-                                <Border Grid.Row="1"
-                                        Padding="16,10"
-                                        BorderBrush="#F0F0F0"
-                                        BorderThickness="0,1,0,0">
-                                    <Grid ColumnDefinitions="*,Auto">
-
-                                        <TextBlock Grid.Column="0"
-                                                Text="{Binding PageInfo}"
-                                                VerticalAlignment="Center"
-                                                Foreground="#AAAAAA"
-                                                FontSize="12"/>
-
-                                        <StackPanel Grid.Column="1"
-                                                    Orientation="Horizontal"
-                                                    Spacing="4"
-                                                    VerticalAlignment="Center">
-
-                                            <Button Content="&#x2039;"
-                                                    Command="{Binding PrevPage}"
-                                                    IsEnabled="{Binding CanGoPrev}"
-                                                    Classes="page-btn"
-                                                    FontSize="16"/>
-
-                                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                                        VerticalScrollBarVisibility="Disabled"
-                                                        MaxWidth="300">
-                                                <ItemsControl ItemsSource="{Binding PageNumbers}">
-                                                    <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
-                                                        </ItemsPanelTemplate>
-                                                    </ItemsControl.ItemsPanel>
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Button Content="{Binding}"
-                                                                    Command="{Binding ((vm:ResultsTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
-                                                                    CommandParameter="{Binding}"
-                                                                    Classes="page-btn"/>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </ScrollViewer>
-
-                                            <Button Content="&#x203A;"
-                                                    Command="{Binding NextPage}"
-                                                    IsEnabled="{Binding CanGoNext}"
-                                                    Classes="page-btn"
-                                                    FontSize="16"/>
-
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-
-                            </Grid>
-                        </Border>
-                        </StackPanel>
+                        
 
                         <TextBlock Text="// PERFORMANCE CHARTS"
                                 FontSize="10" FontWeight="Bold"
@@ -643,6 +515,135 @@
                                     TooltipBackgroundPaint="#F8FAFC"
                                     TooltipTextPaint="#111827" />
                             </Border>
+                        </StackPanel>
+                        <StackPanel Spacing="16" Margin="20,20,20,0">
+                        <!-- Results Table -->
+                        <Border Background="White"
+                                CornerRadius="12"
+                                ClipToBounds="True"
+                                Margin="20,0">
+                            <Grid RowDefinitions="*,Auto">
+
+                                <DataGrid Grid.Row="0"
+                                        ItemsSource="{Binding Rows}"
+                                        AutoGenerateColumns="False"
+                                        GridLinesVisibility="Horizontal"
+                                        BorderThickness="0"
+                                        RowBackground="White"
+                                        HorizontalAlignment="Stretch"
+                                        IsReadOnly="True"
+                                        CanUserReorderColumns="False"
+                                        CanUserResizeColumns="False"
+                                        CanUserSortColumns="True">
+                                    <DataGrid.Columns>
+
+                                        <!-- TIME - orange -->
+                                        <DataGridTemplateColumn Header="TIME" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate x:DataType="models:ResultTableRow">
+                                                    <TextBlock Text="{Binding Hour}"
+                                                            Foreground="#E06020"
+                                                            FontWeight="SemiBold"
+                                                            FontSize="13"
+                                                            VerticalAlignment="Center"
+                                                            Margin="12,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <!-- ACTIVE ASSETS -->
+                                        <DataGridTextColumn Header="ACTIVE ASSETS"
+                                                            Binding="{Binding ActiveAssets}"
+                                                            Width="2*"/>
+
+                                        <!-- HEAT -->
+                                        <DataGridTextColumn Header="HEAT (MW)"
+                                                            Binding="{Binding HeatProduced}"
+                                                            Width="*"/>
+
+                                        <!-- ELECTRICITY - green -->
+                                        <DataGridTemplateColumn Header="ELECTRICITY (MW)" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate x:DataType="models:ResultTableRow">
+                                                    <TextBlock Text="{Binding Electricity}"
+                                                            Foreground="{Binding ElectricityColor}"
+                                                            FontWeight="SemiBold"
+                                                            FontSize="13"
+                                                            VerticalAlignment="Center"
+                                                            Margin="12,0"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <!-- CO2 -->
+                                        <DataGridTextColumn Header="CO&#x2082; (KG)"
+                                                            Binding="{Binding Co2Produced}"
+                                                            Width="*"/>
+
+                                        <!-- COST -->
+                                        <DataGridTextColumn Header="COST (DKK)"
+                                                            Binding="{Binding ProductionCost}"
+                                                            Width="*"/>
+
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <!-- Pagination footer -->
+                                <Border Grid.Row="1"
+                                        Padding="16,10"
+                                        BorderBrush="#F0F0F0"
+                                        BorderThickness="0,1,0,0">
+                                    <Grid ColumnDefinitions="*,Auto">
+
+                                        <TextBlock Grid.Column="0"
+                                                Text="{Binding PageInfo}"
+                                                VerticalAlignment="Center"
+                                                Foreground="#AAAAAA"
+                                                FontSize="12"/>
+
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    Spacing="4"
+                                                    VerticalAlignment="Center">
+
+                                            <Button Content="&#x2039;"
+                                                    Command="{Binding PrevPage}"
+                                                    IsEnabled="{Binding CanGoPrev}"
+                                                    Classes="page-btn"
+                                                    FontSize="16"/>
+
+                                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                                        VerticalScrollBarVisibility="Disabled"
+                                                        MaxWidth="300">
+                                                <ItemsControl ItemsSource="{Binding PageNumbers}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Button Content="{Binding}"
+                                                                    Command="{Binding ((vm:ResultsTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
+                                                                    CommandParameter="{Binding}"
+                                                                    Classes="page-btn"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+
+                                            <Button Content="&#x203A;"
+                                                    Command="{Binding NextPage}"
+                                                    IsEnabled="{Binding CanGoNext}"
+                                                    Classes="page-btn"
+                                                    FontSize="16"/>
+
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                        </Border>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

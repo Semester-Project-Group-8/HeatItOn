@@ -380,7 +380,12 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         await _client.Delete(result.Id);
         OptimizedResults.Remove(result);
         if (SelectedOptimizedResult == result)
+        {
             SelectedOptimizedResult = null;
+            OnPropertyChanged(nameof(SelectedOptimizedResult));//added this so it auto updates removal from side list
+            OnPropertyChanged(nameof(IsResultSelected));
+        }
+            
         OnPropertyChanged(nameof(HasNoOptimizedResults));
         StatusMessage = "Result deleted successfully.";
         IsNotificationOpen = true;
@@ -438,33 +443,70 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         ElectricityChartData.Clear();
         Co2ChartData.Clear();
         CostChartData.Clear();
-        foreach (var hour in orderedHours)
+        DateTime start = orderedHours.First().TimeFrom, end = orderedHours.Last().TimeFrom;
+        List<ResultList> filledHours = new List<ResultList>();
+        for (DateTime thisHour=start;thisHour<=end;thisHour=thisHour.AddHours(1))
         {
-            var heat = hour.Results.Sum(r => r.HeatProduction);
-            var electricity = hour.Results.Sum(r => r.Electricity);
-            var co2 = hour.Results.Sum(r => r.CO2Produced);
-            var cost = hour.Results.Sum(r => r.ProductionCost);
+            ResultList? hour = orderedHours.FirstOrDefault(h => h.TimeFrom == thisHour);
+            if(hour!=null)
+            {
+                var heat = hour.Results.Sum(r => r.HeatProduction);
+                var electricity = hour.Results.Sum(r => r.Electricity);
+                var co2 = hour.Results.Sum(r => r.CO2Produced);
+                var cost = hour.Results.Sum(r => r.ProductionCost);
 
-            HeatChartData.Add(new DateTimePoint(hour.TimeFrom, heat));
-            ElectricityChartData.Add(new DateTimePoint(hour.TimeFrom, electricity));
-            Co2ChartData.Add(new DateTimePoint(hour.TimeFrom, co2));
-            CostChartData.Add(new DateTimePoint(hour.TimeFrom, cost));
+                HeatChartData.Add(new DateTimePoint(hour.TimeFrom, heat));
+                ElectricityChartData.Add(new DateTimePoint(hour.TimeFrom, electricity));
+                Co2ChartData.Add(new DateTimePoint(hour.TimeFrom, co2));
+                CostChartData.Add(new DateTimePoint(hour.TimeFrom, cost));
+                filledHours.Add(hour);
+            }
+            else
+            {
+                HeatChartData.Add(new DateTimePoint(thisHour, 0));
+                ElectricityChartData.Add(new DateTimePoint(thisHour, 0));
+                Co2ChartData.Add(new DateTimePoint(thisHour, 0));
+                CostChartData.Add(new DateTimePoint(thisHour, 0));
+                filledHours.Add(new ResultList
+                {
+                    TimeFrom= thisHour,
+                    Results=new List<Result>()
+                });
+            }
         }
-
-        RebuildHeatStackedByGenerator(orderedHours);
+        //RebuildHeatStackedByGenerator(filledHours);
         RebuildStackedByGenerator(
-            orderedHours,
+            filledHours,
             Co2GeneratorStackedChartData,
             hour => hour.Results.Sum(r => (double)r.CO2Produced),
             result => result.CO2Produced,
             "kg",
             "CO₂");
-        RebuildCostStackedByGenerator(orderedHours);
 
-        OnPropertyChanged(nameof(HeatChartSeries));
-        OnPropertyChanged(nameof(ElectricityChartSeries));
-        OnPropertyChanged(nameof(Co2ChartSeries));
-        OnPropertyChanged(nameof(CostChartSeries));
+        RebuildStackedByGenerator(
+            filledHours,
+            CostGeneratorStackedChartData,
+            hour => hour.Results.Sum(r => (double)r.ProductionCost),
+            result => result.ProductionCost,
+            "DKK",
+            "Cost");
+
+        RebuildStackedByGenerator(
+            filledHours,
+            HeatGeneratorStackedChartData,
+            hour => hour.Results.Sum(r => (double)r.HeatProduction),
+            result => result.HeatProduction,
+            "MWh",
+            "Heat");
+
+        //RebuildCostStackedByGenerator(filledHours);
+        Dispatcher.UIThread.Post(() =>
+        {
+            OnPropertyChanged(nameof(HeatChartSeries));
+            OnPropertyChanged(nameof(ElectricityChartSeries));
+            OnPropertyChanged(nameof(Co2ChartSeries));
+            OnPropertyChanged(nameof(CostChartSeries));
+        });//CHARTS FINALLY AUTO UPDATE
     }
 
     private void RebuildHeatStackedByGenerator(IReadOnlyList<ResultList> hours)
@@ -507,7 +549,6 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         Func<double, DispatchGenerator, double> metricFromHeat)
     {
         targetSeries.Clear();
-
         var grouped = hours
             .SelectMany(hour => hour.Results)
             .GroupBy(result => new
@@ -784,9 +825,13 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
         return normalized switch
         {
+            "GASMOTOR1" => "#E63946",
             "GASBOILER1" or "GB1" => "#FF6B6B",
             "GASBOILER2" or "GB2" => "#4D96FF",
             "GASBOILER3" or "GB3" => "#6BCB77",
+            "ELECTRICBOILER1" => "#2563EB",
+            "OILBOILER1" => "#8B5CF6",
+
             _ => GeneratorPalette[index % GeneratorPalette.Length]
         };
     }
