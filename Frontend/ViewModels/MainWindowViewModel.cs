@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Frontend.Data;
+using Frontend.Interfaces;
 using Frontend.Models;
 using Microsoft.AspNetCore.SignalR.Client;
-using Tmds.DBus.Protocol;
 
 namespace Frontend.ViewModels;
 

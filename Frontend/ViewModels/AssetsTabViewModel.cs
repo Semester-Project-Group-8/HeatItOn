@@ -15,6 +15,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
+using Frontend.Interfaces;
 using Frontend.Models;
 
 namespace Frontend.ViewModels;

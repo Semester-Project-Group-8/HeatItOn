@@ -8,6 +8,7 @@ using System.Windows.Input;
 using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
+using Frontend.Interfaces;
 using Frontend.Models;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;

@@ -17,6 +17,7 @@ using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
 using Avalonia.Media;
+using Frontend.Interfaces;
 
 namespace Frontend.ViewModels;
 
