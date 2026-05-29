@@ -29,8 +29,9 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
     private readonly DispatcherTimer _dismissTimer;
 
-    public ResultsTabViewModel(IClient<OptimizedResults> client)
+    public ResultsTabViewModel(IClient<OptimizedResults> client, PopupHub popupHub)
     {
+        popupHub.MessageReceived += ShowNotification;
         _client = client;
         CloseNotificationCommand = new RelayCommand(() => IsNotificationOpen = false);
         _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -398,7 +399,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
     public async Task DeleteResult(OptimizedResults result)
     {
-        await _client.Delete(result.Id);
+        var httpResult = await _client.Delete(result.Id);
+        if (!httpResult) return;
         OptimizedResults.Remove(result);
         if (SelectedOptimizedResult == result)
         {
@@ -408,6 +410,7 @@ public class ResultsTabViewModel : INotifyPropertyChanged
         }
 
         OnPropertyChanged(nameof(HasNoOptimizedResults));
+        
         StatusMessage = "Result deleted successfully.";
         IsNotificationOpen = true;
     }

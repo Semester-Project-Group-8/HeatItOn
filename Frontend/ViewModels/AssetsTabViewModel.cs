@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
@@ -116,8 +117,9 @@ public class AssetsTabViewModel : ViewModelBase
         }
     }
 
-    public AssetsTabViewModel(IClient<Asset> assetClient, OptimizerClient optimizerClient)
+    public AssetsTabViewModel(IClient<Asset> assetClient, OptimizerClient optimizerClient, PopupHub popupHub)
     {
+        popupHub.MessageReceived += ShowNotification;
         _assetClient = assetClient;
         _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAssets));
@@ -131,11 +133,6 @@ public class AssetsTabViewModel : ViewModelBase
             _dismissTimer.Stop();
         };
         _ = LoadFromBackendAsync();
-    }
-
-    public AssetsTabViewModel(SourceClient _, AssetClient assetClient, OptimizerClient optimizerClient)
-        : this(assetClient, optimizerClient)
-    {
     }
 
     // --- NEW POP UP METHOD ---
@@ -245,7 +242,8 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Post(asset);
+                var result = await _assetClient.Post(asset);
+                if (!result) return;
                 await LoadFromBackendAsync();
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -271,7 +269,8 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Put(editedAsset);
+                var result = await _assetClient.Put(editedAsset);
+                if (!result) return;
                 await LoadFromBackendAsync();
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -291,7 +290,8 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Delete(asset.Id);
+                var result = await _assetClient.Delete(asset.Id);
+                if (!result) return;
                 await LoadFromBackendAsync();
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -299,9 +299,9 @@ public class AssetsTabViewModel : ViewModelBase
                     ShowNotification("Asset deleted successfully.");
                 });
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error deleting asset: {ex.Message}");
+                Debug.Write(e);
             }
         };
 

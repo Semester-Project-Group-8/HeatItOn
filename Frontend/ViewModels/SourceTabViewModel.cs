@@ -131,8 +131,9 @@ public partial class SourceTabViewModel : ViewModelBase
         set => SetProperty(ref _selectedSource, value);
     }
 
-    public SourceTabViewModel(IClient<Source> client)
+    public SourceTabViewModel(IClient<Source> client, PopupHub popupHub)
     {
+        popupHub.MessageReceived += ShowNotification;
         _client = client;
         _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _dismissTimer.Tick += (_, _) =>
@@ -257,7 +258,8 @@ public partial class SourceTabViewModel : ViewModelBase
     {
         try
         {
-            await _client.Put(source);
+            var result = await _client.Put(source);
+            if (!result) return;
             RefreshSelectedFile();
             ShowNotification("Source updated successfully.");
         }
@@ -277,7 +279,8 @@ public partial class SourceTabViewModel : ViewModelBase
         {
             foreach (var item in itemsToDelete)
             {
-                await _client.Delete(item.Id);
+                var result = await _client.Delete(item.Id);
+                if (!result) return;
                 _allSources.Remove(item);
             }
 

@@ -22,11 +22,12 @@ public class MainWindowViewModel : ViewModelBase
         IClient<Source> sourceClient,
         IClient<Asset> assetClient,
         OptimizerClient optimizerClient,
-        IClient<OptimizedResults> optimizedResultsClient)
+        IClient<OptimizedResults> optimizedResultsClient,
+        PopupHub popupHub)
     {
-        SourceTab = new SourceTabViewModel(sourceClient);
-        AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient);
-        ResultTab = new ResultsTabViewModel(optimizedResultsClient);
+        SourceTab = new SourceTabViewModel(sourceClient, popupHub);
+        AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient,  popupHub);
+        ResultTab = new ResultsTabViewModel(optimizedResultsClient, popupHub);
         Refresh = new RelayCommand(() =>
         {
             _ = AssetsTab.LoadFromBackendAsync();

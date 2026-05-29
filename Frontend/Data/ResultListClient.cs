@@ -7,12 +7,12 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class ResultListClient : IClient<ResultList>
+public class ResultListClient : BaseClient, IClient<ResultList>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "ResultList";
 
-    public ResultListClient(HttpClient httpClient)
+    public ResultListClient(HttpClient httpClient, PopupHub popupHub) : base(httpClient, popupHub)
     {
         _client = httpClient;
     }
@@ -20,30 +20,41 @@ public class ResultListClient : IClient<ResultList>
     public async Task<ResultList?> Get(int id)
     {
         var response = await _client.GetAsync($"{UrlExtension}/{id}");
-        response.EnsureSuccessStatusCode();
+        if (await HandleError(response))
+            return null;
         return await response.Content.ReadFromJsonAsync<ResultList>();
     }
 
     public async Task<List<ResultList>> GetAll()
     {
         var response = await _client.GetAsync(UrlExtension);
-        response.EnsureSuccessStatusCode();
+        if (await HandleError(response))
+            return [];
         var results = await response.Content.ReadFromJsonAsync<List<ResultList>>();
         return results ?? [];
     }
 
-    public async Task Post(ResultList resultList)
+    public async Task<bool> Post(ResultList resultList)
     {
         var response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Put(ResultList resultList)
+    public async Task<bool> Put(ResultList resultList)
     {
         var response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(resultList));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Delete(int id)
+    public async Task<bool> Delete(int id)
     {
         var response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}");
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 }

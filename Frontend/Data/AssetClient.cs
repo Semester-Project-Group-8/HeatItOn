@@ -7,12 +7,12 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class AssetClient : IClient<Asset>
+public class AssetClient : BaseClient, IClient<Asset>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Asset";
 
-    public AssetClient(HttpClient httpClient)
+    public AssetClient(HttpClient httpClient, PopupHub popupHub) : base(httpClient,  popupHub)
     {
         _client = httpClient;
     }
@@ -20,33 +20,46 @@ public class AssetClient : IClient<Asset>
     public async Task<Asset?> Get(int id)
     {
         var response = await _client.GetAsync($"{UrlExtension}/{id}");
-        response.EnsureSuccessStatusCode();
+
+        if (await HandleError(response))
+            return null;
+        
         return await response.Content.ReadFromJsonAsync<Asset>();
     }
 
     public async Task<List<Asset>> GetAll()
     {
         var response = await _client.GetAsync($"{UrlExtension}");
-        response.EnsureSuccessStatusCode();
+        
+        if (await HandleError(response))
+            return [];
+
         var result = await response.Content.ReadFromJsonAsync<List<Asset>>();
         return result ?? [];
     }
 
-    public async Task Post(Asset asset)
+    public async Task<bool> Post(Asset asset)
     {
         var response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(asset));
-        response.EnsureSuccessStatusCode();
+        await HandleError(response);
+        
+        if (await HandleError(response)) return false;
+        return true;
     }
 
-    public async Task Put(Asset asset)
+    public async Task<bool> Put(Asset asset)
     {
         var response = await _client.PutAsync($"{UrlExtension}/{asset.Id}", JsonContent.Create(asset));
-        response.EnsureSuccessStatusCode();
+        
+        if (await HandleError(response)) return false;
+        return true;
     }
 
-    public async Task Delete(int id)
+    public async Task<bool> Delete(int id)
     {
         var response = await _client.DeleteAsync($"{UrlExtension}/{id}");
-        response.EnsureSuccessStatusCode();
+        
+        if (await HandleError(response)) return false;
+        return true;
     }
 }

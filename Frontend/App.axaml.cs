@@ -22,12 +22,13 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            var popupHub = new PopupHub();
             var httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri("http://localhost:8080/");
-            var sourceClient = new SourceClient(httpClient);
-            var assetClient = new AssetClient(httpClient);
-            var optimizerClient = new OptimizerClient(httpClient);
-            var optimizedResultsClient = new OptimizedResultsClient(httpClient);
+            var sourceClient = new SourceClient(httpClient, popupHub);
+            var assetClient = new AssetClient(httpClient, popupHub);
+            var optimizerClient = new OptimizerClient(httpClient, popupHub);
+            var optimizedResultsClient = new OptimizedResultsClient(httpClient, popupHub);
 
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
@@ -36,7 +37,7 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow
             {
                 DataContext =
-                    new MainWindowViewModel(sourceClient, assetClient, optimizerClient, optimizedResultsClient)
+                    new MainWindowViewModel(sourceClient, assetClient, optimizerClient, optimizedResultsClient, popupHub)
             };
         }
 

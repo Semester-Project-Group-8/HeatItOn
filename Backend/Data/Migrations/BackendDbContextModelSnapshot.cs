@@ -58,6 +58,9 @@ namespace Backend.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Assets");
                 });
 

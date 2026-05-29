@@ -6,11 +6,11 @@ using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class OptimizerClient
+public class OptimizerClient: BaseClient
 {
     private readonly HttpClient _client;
 
-    public OptimizerClient(HttpClient httpClient)
+    public OptimizerClient(HttpClient httpClient, PopupHub popupHub):base(httpClient, popupHub)
     {
         _client = httpClient;
     }
@@ -18,12 +18,9 @@ public class OptimizerClient
     public async Task<HttpResponseMessage> Optimize(List<Asset> scenarioAssets)
     {
         var result = await _client.PostAsync("Optimize", JsonContent.Create(scenarioAssets));
-        return result;
-    }
 
-    public async Task<HttpResponseMessage> Optimize() //remove before flight
-    {
-        var result = await _client.PostAsync("Optimize", null);
+        await HandleError(result);
+        
         return result;
     }
 }
