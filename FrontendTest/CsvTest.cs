@@ -6,12 +6,8 @@ namespace FrontendTest
 {
     public class CsvTests
     {
-        private static readonly HttpClient client = new HttpClient()
-        {
-            BaseAddress =  new Uri("https://localhost:8080/")
-        };
-        private readonly AssetClient _assetClient = new AssetClient(client);
-        private readonly SourceClient _sourceClient = new SourceClient(client);
+        private readonly IClient<Asset> _assetClient = new InMemoryAssetClient();
+        private readonly IClient<Source> _sourceClient = new InMemorySourceClient();
 
         // -------------------------
         // Helper
@@ -40,9 +36,10 @@ namespace FrontendTest
         {
             var path = Path.GetTempFileName();
 
+            await _assetClient.Post(new Asset { Id = 1, Name = "Gas Boiler", MaxHeat = 12.5f, ProductionCost = 500, CO2Emission = 200, GasConsumption = 6.2f, OilConsumption = 0, MaxElectricity = 0 });
             CsvHandler.ExportAsset(path, _assetClient);
 
-            await WaitUntilAsync(() => Task.FromResult(File.Exists(path)));
+            await WaitUntilAsync(() => Task.FromResult(File.Exists(path)&& new FileInfo(path).Length > 0));
 
             var lines = await File.ReadAllLinesAsync(path);
 
@@ -55,10 +52,11 @@ namespace FrontendTest
         {
             var path = Path.GetTempFileName();
 
-            await File.WriteAllLinesAsync(path, [
+            await File.WriteAllLinesAsync(path, new[]
+            {
                 "Name,MaxHeat MW,Production Cost DKK/MWh(th),CO2 Emissions kg/MWh(th),Gas Consumption MW(th),Oil Consumption MW(th),Max Electricity MW(e)",
                 "Gas Boiler Test,12.5,500,200,6.2,0,0"
-            ]);
+            });
 
             CsvHandler.ImportAsset(path, _assetClient);
 
@@ -97,7 +95,7 @@ namespace FrontendTest
 
             CsvHandler.ExportResult(path, results);
 
-            await WaitUntilAsync(() => Task.FromResult(File.Exists(path)));
+            await WaitUntilAsync(() => Task.FromResult(File.Exists(path) && new FileInfo(path).Length > 0));
 
             var lines = await File.ReadAllLinesAsync(path);
 
@@ -159,8 +157,90 @@ namespace FrontendTest
             var lines = await File.ReadAllLinesAsync(path);
 
             Assert.Equal(2, lines.Length);
-            Assert.Contains("2024.01.01 00:00", lines[1]);
+            var cols = lines[1].Split(',');
+            var csvCulture = new System.Globalization.CultureInfo("da-DK");
+            var from = DateTime.Parse(cols[0], csvCulture);
+            var to = DateTime.Parse(cols[1], csvCulture);
+            Assert.Equal(new DateTime(2024,1,1,0,0,0), from);
+            Assert.Equal(new DateTime(2024,1,1,1,0,0), to);
             Assert.Contains("10.25", lines[1], StringComparison.InvariantCulture);
+        }
+    }
+    class InMemoryAssetClient : IClient<Asset>
+    {
+        private readonly List<Asset> _items = new List<Asset>();
+        public Task Delete(int id)
+        {
+            _items.RemoveAll(a => a.Id == id);
+            return Task.CompletedTask;
+        }
+
+        public Task<Asset?> Get(int id)
+        {
+            return Task.FromResult(_items.FirstOrDefault(a => a.Id == id));
+        }
+
+        public Task<List<Asset>> GetAll()
+        {
+            return Task.FromResult(_items.ToList());
+        }
+
+        public Task Post(Asset item)
+        {
+            if (item.Id == 0)
+                item.Id = _items.Count + 1;
+            _items.Add(item);
+            return Task.CompletedTask;
+        }
+
+        public Task Put(Asset item)
+        {
+            var existing = _items.FirstOrDefault(a => a.Id == item.Id);
+            if (existing != null)
+            {
+                _items.Remove(existing);
+                _items.Add(item);
+            }
+            return Task.CompletedTask;
+        }
+    }
+
+    class InMemorySourceClient : IClient<Source>
+    {
+        private readonly List<Source> _items = new List<Source>();
+        public Task Delete(int id)
+        {
+            _items.RemoveAll(s => s.Id == id);
+            return Task.CompletedTask;
+        }
+
+        public Task<Source?> Get(int id)
+        {
+            return Task.FromResult(_items.FirstOrDefault(s => s.Id == id));
+        }
+
+        public Task<List<Source>> GetAll()
+        {
+            return Task.FromResult(_items.ToList());
+        }
+
+        public Task Post(Source item)
+        {
+            if (item.Id == 0)
+                item.Id = _items.Count + 1;
+            _items.Add(item);
+            return Task.CompletedTask;
+        }
+
+        public Task Put(Source item)
+        {
+            var existing = _items.FirstOrDefault(s => s.Id == item.Id);
+            if (existing != null)
+            {
+                _items.Remove(existing);
+                _items.Add(item);
+            }
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Backend.Data;
+using Backend.Models;
 using Backend.Services;
 
 namespace BackendTest;
@@ -24,10 +25,19 @@ public class SourceServiceTests : IDisposable
         _context.Dispose();
     }
 
-    [Fact]
-    public async Task AddSource_ShouldAddItem()
+    Source test_source = new Source
     {
-        await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
+        Id = 1, 
+        TimeFrom = DateTime.Now, 
+        TimeTo = DateTime.Now, 
+        HeatDemand = 10, 
+        ElectricityPrice = 5
+    };
+
+    [Fact]
+    public async Task AddSource_PositiveCase()
+    {
+        await _sourceService.Post(test_source);
 
         var result = await _sourceService.List();
 
@@ -35,34 +45,101 @@ public class SourceServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task AddSource_ShouldThrow_WhenDuplicateId()
+    public async Task AddSource_NegativeCase()
     {
-        await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
+       await _sourceService.Post(test_source);
+
+        var result = await _sourceService.List();
+
+        Assert.NotEqual(2, result.Count());
+    }
+
+     [Fact]
+    public async Task AddSource_EdgeCase()
+    {
+        await _sourceService.Post(test_source);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 20, 10)
+            _sourceService.Post(new Source {Id = 1, TimeFrom = DateTime.Now,  TimeTo = DateTime.Now, HeatDemand = 100, ElectricityPrice = 25})
         );
     }
 
     [Fact]
-    public async Task AddSource_ShouldThrow_WhenHeatNegative()
+    public async Task GetSource_PositiveCase()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _sourceService.AddSource(1, DateTime.Now, DateTime.Now, -10, 5)
-        );
+        await _sourceService.Post(test_source);
+
+        var result = await _sourceService.Get(1);
+
+        Assert.Equal(1, result.Id);
     }
 
     [Fact]
-    public async Task AddSource_ShouldThrow_WhenFromAfterTo()
+    public async Task GetSource_NegativeCase()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _sourceService.AddSource(1, DateTime.Now, DateTime.Now.AddDays(-1), 10, 5)
-        );
+        await _sourceService.Post(test_source);
+
+        var result = await _sourceService.Get(1);
+
+        Assert.NotEqual(1000, result.HeatDemand);
     }
 
+    [Fact]
+    public async Task GetSource_EdgeCase()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>( async () =>
+        await _sourceService.Get(1));
+    }
 
     [Fact]
-    public async Task ListSources_ShouldReturnEmpty_WhenNoItems()
+    public async Task AddListOfSources_PositiveCase()
+    {
+        var sources = new List<Source>
+        {
+            new Source {Id = 1, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 10, ElectricityPrice = 3},
+            new Source {Id = 2, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 100, ElectricityPrice = 30}
+        };
+        await _sourceService.PostList(sources);
+        var result = await _sourceService.List();
+
+        Assert.Equal(2, result.Count());
+    }
+
+    [Fact]
+    public async Task AddListOfSources_NegativeCase()
+    {
+        var sources = new List<Source>
+        {
+            new Source {Id = 1, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 10, ElectricityPrice = 3},
+            new Source {Id = 2, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 100, ElectricityPrice = 30}
+        };
+        await _sourceService.PostList(sources);
+        var result = await _sourceService.List();
+
+        Assert.NotEqual(5, result.Count());
+
+    }
+
+    [Fact]
+    public async Task AddListOfSources_EdgeCase()
+    {
+        var sources = new List<Source>{};
+        await Assert.ThrowsAsync<ArgumentException>(async () =>
+            await _sourceService.PostList(sources));
+
+    }
+
+    [Fact]
+    public async Task ListSources_PositiveCase()
+    {
+        await _sourceService.Post(test_source);
+        var result = await _sourceService.List();
+
+        Assert.Single(result);
+    }
+
+    [Fact]
+    public async Task ListSources_NegativeCase()
     {
         var result = await _sourceService.List();
 
@@ -70,20 +147,29 @@ public class SourceServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task ListByMonth_ShouldReturnCorrectItems()
+    public async Task ListByMonth_PositiveCase()
     {
-        var date = new DateTime(2025, 5, 1);
+        await _sourceService.Post(test_source);
+        await _sourceService.Post(new Source {Id = 2, TimeFrom = new DateTime(2025, 6, 1), TimeTo = new DateTime(2025, 6, 1), HeatDemand = 20, ElectricityPrice = 10});
 
-        await _sourceService.AddSource(1, date, date, 10, 5);
-        await _sourceService.AddSource(2, new DateTime(2025, 6, 1), new DateTime(2025, 6, 1), 20, 10);
-
-        var result = await _sourceService.ListByMonth(5);
+        var result = await _sourceService.ListByMonth(6);
 
         Assert.Single(result);
     }
 
     [Fact]
-    public async Task ListByMonth_ShouldThrow_WhenInvalidMonth()
+    public async Task ListByMonth_NegativeCase()
+    {
+        await _sourceService.Post(test_source);
+        await _sourceService.Post(new Source {Id = 2, TimeFrom = new DateTime(2025, 6, 1), TimeTo = new DateTime(2025, 6, 1), HeatDemand = 20, ElectricityPrice = 10});
+
+        var result = await _sourceService.ListByMonth(9);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task ListByMonth_EdgeCase()
     {
         await Assert.ThrowsAsync<ArgumentException>(() =>
             _sourceService.ListByMonth(13)
@@ -91,30 +177,41 @@ public class SourceServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task UpdateSource_ShouldUpdateCorrectly()
+    public async Task UpdateSource_PositiveCase()
     {
-        await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
-
-        await _sourceService.Put(1, DateTime.Now, DateTime.Now, 50, 20);
+        await _sourceService.Post(test_source);
+        await _sourceService.Put(1, new Source {Id = 1, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 500, ElectricityPrice = 200});
 
         var result = await _sourceService.List();
 
-        Assert.Equal(50, result.First().HeatDemand);
-        Assert.Equal(20, result.First().ElectricityPrice);
+        Assert.Equal(500, result.First().HeatDemand);
+        Assert.Equal(200, result.First().ElectricityPrice);
     }
 
     [Fact]
-    public async Task UpdateSource_ShouldThrow_WhenNotFound()
+    public async Task UpdateSource_NrgativeCase()
+    {
+        await _sourceService.Post(test_source);
+        await _sourceService.Put(1, new Source {Id = 1, TimeFrom = DateTime.Now, TimeTo = DateTime.Now, HeatDemand = 500, ElectricityPrice = 200});
+
+        var result = await _sourceService.List();
+
+        Assert.NotEqual(10, result.First().HeatDemand);
+        Assert.NotEqual(5, result.First().ElectricityPrice);
+    }
+
+    [Fact]
+    public async Task UpdateSource_EdgeCase()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _sourceService.Put(999, DateTime.Now, DateTime.Now, 10, 5)
+            _sourceService.Put(999, test_source)
         );
     }
 
     [Fact]
-    public async Task DeleteSource_ShouldRemoveItem()
+    public async Task DeleteSource_PositiveCase()
     {
-        await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
+        await _sourceService.Post(test_source);
 
         await _sourceService.Delete(1);
 
@@ -124,7 +221,7 @@ public class SourceServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task DeleteSource_ShouldThrow_WhenNotFound()
+    public async Task DeleteSource_EdgeCase()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _sourceService.Delete(999)
@@ -132,9 +229,9 @@ public class SourceServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task DeleteSource_ShouldThrow_WhenDeletedTwice()
+    public async Task DeleteSource_EdgeCase2_DeletingTwice()
     {
-        await _sourceService.AddSource(1, DateTime.Now, DateTime.Now, 10, 5);
+        await _sourceService.Post(test_source);
 
         await _sourceService.Delete(1);
 

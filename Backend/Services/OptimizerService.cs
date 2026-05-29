@@ -64,9 +64,19 @@ namespace Backend.Services
                 .ToList();
             OptimizedResults finalResults = new OptimizedResults
             {
-                Name = $"results_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}",
+                Name = $"result_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}",
                 ResultsForHours = new List<ResultByHour>()
             };
+            List<string> scenarioNames = new List<string>{ "Gas boiler 1", "Gas boiler 2", "Gas boiler 3", "Oil boiler 1" };//check if this is one of the scenarios
+            if (scenarioAssets != null && scenarioAssets.Count==4 &&scenarioNames.All(name=>scenarioAssets.Any(a=>a.Name==name)))
+            {
+                finalResults.Name = $"PeakLoad_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
+            }
+            scenarioNames = new List<string> { "Gas boiler 1", "Gas boiler 3", "Gas motor 1", "Electric boiler 1" };
+            if (scenarioAssets != null && scenarioAssets.Count == 4 && scenarioNames.All(name => scenarioAssets.Any(a => a.Name == name)))//check if this os the other scenario
+            {
+                finalResults.Name = $"EcoLoad_{DateTime.Now:yyyy_MM_dd_HH_mm_ss}";
+            }
             foreach (Source source in allSources)
             {
                 scenarioAssets=SortAssets(scenarioAssets,source.ElectricityPrice);

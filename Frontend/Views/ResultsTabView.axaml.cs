@@ -14,15 +14,27 @@ public partial class ResultsTabView : UserControl
         AddHandler(Button.ClickEvent, OnAnyButtonClick, RoutingStrategies.Bubble);
     }
 
-    private async void OnAnyButtonClick(object? sender, RoutedEventArgs e)
+    private void OnAnyButtonClick(object? sender, RoutedEventArgs e)
     {
         if (e.Source is Button { Name: "DeleteBtn", Tag: OptimizedResults result } &&
             DataContext is ResultsTabViewModel viewModel)
         {
-            await viewModel.DeleteResult(result);
+            viewModel.RequestDeleteResult(result);
             e.Handled = true;
         }
     }
+    private void OnConfirmDeleteClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ResultsTabViewModel viewModel)
+            viewModel.ConfirmDelete();
+    }
+
+    private void OnCancelDeleteClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ResultsTabViewModel viewModel)
+            viewModel.CancelDelete();
+    }
+
 
     private void OnSearchClick(object? sender, RoutedEventArgs e)
     {
