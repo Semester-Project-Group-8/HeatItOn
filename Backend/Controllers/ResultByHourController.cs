@@ -41,13 +41,13 @@ public class ResultByHourController : ControllerBase, IController<ResultByHour, 
     }
 
     [HttpPost("AddList")]
-    public Task<IActionResult> AddResultLists([FromBody] List<Models.ResultByHour> results)
+    public Task<IActionResult> AddResultLists([FromBody] List<ResultByHour> results)
     {
         throw new UnauthorizedAccessException("You are not authorized to create it.");
     }
 
     [HttpPut("{id:int}")]
-    public Task<IActionResult> Put(int id, [FromBody] Models.ResultByHour resultList)
+    public Task<IActionResult> Put(int id, [FromBody] ResultByHour resultList)
     {
         throw new UnauthorizedAccessException("You are not authorized to modify it.");
     }

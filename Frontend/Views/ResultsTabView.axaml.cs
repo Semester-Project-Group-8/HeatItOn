@@ -23,6 +23,7 @@ public partial class ResultsTabView : UserControl
             e.Handled = true;
         }
     }
+
     private void OnConfirmDeleteClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is ResultsTabViewModel viewModel)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Frontend.Data;
 using Frontend.Data.CSV;
+using Frontend.Interfaces;
 using Frontend.Models;
 
 namespace Frontend.ViewModels;
@@ -38,11 +40,13 @@ public class AssetsTabViewModel : ViewModelBase
     public ICommand StartOptimizationCommand { get; }
 
     private bool _isNotificationOpen;
+
     public bool IsNotificationOpen
     {
         get => _isNotificationOpen;
         set => SetProperty(ref _isNotificationOpen, value);
     }
+
     private readonly DispatcherTimer _dismissTimer;
 
     public AddAssetDialogViewModel? CurrentDialog
@@ -75,6 +79,7 @@ public class AssetsTabViewModel : ViewModelBase
     public bool IsUiEnabled => !HasOpenDialog;
 
     public bool HasStatusMessage => !string.IsNullOrWhiteSpace(StatusMessage);
+
     public string StatusMessage
     {
         get => _statusMessage;
@@ -88,23 +93,33 @@ public class AssetsTabViewModel : ViewModelBase
     public bool IsScenario1Selected
     {
         get => _isScenario1Selected;
-        set { if (SetProperty(ref _isScenario1Selected, value) && value) ApplyScenarioSelection(); }
+        set
+        {
+            if (SetProperty(ref _isScenario1Selected, value) && value) ApplyScenarioSelection();
+        }
     }
 
     public bool IsScenario2Selected
     {
         get => _isScenario2Selected;
-        set { if (SetProperty(ref _isScenario2Selected, value) && value) ApplyScenarioSelection(); }
+        set
+        {
+            if (SetProperty(ref _isScenario2Selected, value) && value) ApplyScenarioSelection();
+        }
     }
 
     public bool IsCustomScenarioSelected
     {
         get => _isCustomScenarioSelected;
-        set { if (SetProperty(ref _isCustomScenarioSelected, value) && value) ApplyScenarioSelection(); }
+        set
+        {
+            if (SetProperty(ref _isCustomScenarioSelected, value) && value) ApplyScenarioSelection();
+        }
     }
 
-    public AssetsTabViewModel(IClient<Asset> assetClient, OptimizerClient optimizerClient)
+    public AssetsTabViewModel(IClient<Asset> assetClient, OptimizerClient optimizerClient, PopupHub popupHub)
     {
+        popupHub.MessageReceived += ShowNotification;
         _assetClient = assetClient;
         _optimizerClient = optimizerClient;
         AssetItems.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasAssets));
@@ -112,13 +127,12 @@ public class AssetsTabViewModel : ViewModelBase
         OpenManagerButtonViewCommand = new RelayCommand(OpenManagerButtonView);
         StartOptimizationCommand = new RelayCommand(StartOptimization);
         _dismissTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-        _dismissTimer.Tick += (_, _) => { IsNotificationOpen = false; _dismissTimer.Stop(); };
+        _dismissTimer.Tick += (_, _) =>
+        {
+            IsNotificationOpen = false;
+            _dismissTimer.Stop();
+        };
         _ = LoadFromBackendAsync();
-    }
-
-    public AssetsTabViewModel(SourceClient _, AssetClient assetClient, OptimizerClient optimizerClient)
-        : this(assetClient, optimizerClient)
-    {
     }
 
     // --- NEW POP UP METHOD ---
@@ -144,7 +158,8 @@ public class AssetsTabViewModel : ViewModelBase
             CurrentManagerDialog = null;
 
             // Safely open the File Browser (Fixes the CS8651/CS0119 crashes!)
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop &&
+                desktop.MainWindow != null)
             {
                 var topLevel = TopLevel.GetTopLevel(desktop.MainWindow);
                 if (topLevel == null) return;
@@ -156,10 +171,7 @@ public class AssetsTabViewModel : ViewModelBase
                     FileTypeFilter = new[] { new FilePickerFileType("CSV Files") { Patterns = new[] { "*.csv" } } }
                 });
 
-                if (files.Count >= 1)
-                {
-                    await ImportAssets(files[0].Path.LocalPath);
-                }
+                if (files.Count >= 1) await ImportAssets(files[0].Path.LocalPath);
             }
         };
 
@@ -169,10 +181,7 @@ public class AssetsTabViewModel : ViewModelBase
             ExportAssets();
         };
 
-        managerVm.CancelRequested += () =>
-        {
-            CurrentManagerDialog = null;
-        };
+        managerVm.CancelRequested += () => { CurrentManagerDialog = null; };
 
         CurrentManagerDialog = managerVm;
     }
@@ -181,14 +190,11 @@ public class AssetsTabViewModel : ViewModelBase
     {
         try
         {
-            List<Asset> scenarioAssets = new List<Asset>();
-            foreach (AssetCardItem item in _allAssetItems)
-            {
+            var scenarioAssets = new List<Asset>();
+            foreach (var item in _allAssetItems)
                 if (item is { IsSelected: true, OriginalAsset: not null })
-                {
                     scenarioAssets.Add(item.OriginalAsset);
-                }
-            }
+
             await _optimizerClient.Optimize(scenarioAssets);
             ShowNotification("Data was optimized successfully.");
         }
@@ -214,7 +220,7 @@ public class AssetsTabViewModel : ViewModelBase
                 OnPropertyChanged(nameof(HasAssets));
             });
 
-            ShowNotification("Assets imported successfully from: " + System.IO.Path.GetFileName(filePath));
+            ShowNotification("Assets imported successfully from: " + Path.GetFileName(filePath));
         }
         catch (Exception ex)
         {
@@ -236,7 +242,8 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Post(asset);
+                var result = await _assetClient.Post(asset);
+                if (!result) return;
                 await LoadFromBackendAsync();
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -262,7 +269,8 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Put(editedAsset);
+                var result = await _assetClient.Put(editedAsset);
+                if (!result) return;
                 await LoadFromBackendAsync();
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -282,7 +290,8 @@ public class AssetsTabViewModel : ViewModelBase
         {
             try
             {
-                await _assetClient.Delete(asset.Id);
+                var result = await _assetClient.Delete(asset.Id);
+                if (!result) return;
                 await LoadFromBackendAsync();
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -290,9 +299,9 @@ public class AssetsTabViewModel : ViewModelBase
                     ShowNotification("Asset deleted successfully.");
                 });
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine($"Error deleting asset: {ex.Message}");
+                Debug.Write(e);
             }
         };
 
@@ -345,9 +354,11 @@ public class AssetsTabViewModel : ViewModelBase
         var selectedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         if (IsScenario1Selected)
-            selectedNames = new HashSet<string>(["Gas Boiler 1", "Gas Boiler 2", "Gas Boiler 3", "Oil Boiler 1"], StringComparer.OrdinalIgnoreCase);
+            selectedNames = new HashSet<string>(["Gas Boiler 1", "Gas Boiler 2", "Gas Boiler 3", "Oil Boiler 1"],
+                StringComparer.OrdinalIgnoreCase);
         else if (IsScenario2Selected)
-            selectedNames = new HashSet<string>(["Gas Motor 1", "Electric Boiler 1", "Gas Boiler 1", "Gas Boiler 3"], StringComparer.OrdinalIgnoreCase);
+            selectedNames = new HashSet<string>(["Gas Motor 1", "Electric Boiler 1", "Gas Boiler 1", "Gas Boiler 3"],
+                StringComparer.OrdinalIgnoreCase);
 
         foreach (var item in _allAssetItems)
             item.IsSelected = selectedNames.Contains(item.Name);
@@ -362,12 +373,16 @@ public class AssetsTabViewModel : ViewModelBase
         };
 
         if (asset.CO2Emission != 0) details.Add($"CO2 emissions: {asset.CO2Emission} kg/MWh(th)");
-        if (asset.GasConsumption != 0) details.Add($"Gas consumption: {FormatDecimal(asset.GasConsumption)} MWh(gas)/MWh(th)");
-        if (asset.OilConsumption != 0) details.Add($"Oil consumption: {FormatDecimal(asset.OilConsumption)} MWh(oil)/MWh(th)");
+        if (asset.GasConsumption != 0)
+            details.Add($"Gas consumption: {FormatDecimal(asset.GasConsumption)} MWh(gas)/MWh(th)");
+        if (asset.OilConsumption != 0)
+            details.Add($"Oil consumption: {FormatDecimal(asset.OilConsumption)} MWh(oil)/MWh(th)");
         if (asset.MaxElectricity != 0) details.Add($"Max electricity: {FormatDecimal(asset.MaxElectricity)} MW");
 
         var assetType = DeriveAssetType(asset.Name);
-        var electricityDisplay = asset.MaxElectricity == 0 ? "—" : $"{(asset.MaxElectricity > 0 ? "+" : "")}{FormatDecimal(asset.MaxElectricity)} MW";
+        var electricityDisplay = asset.MaxElectricity == 0
+            ? "—"
+            : $"{(asset.MaxElectricity > 0 ? "+" : "")}{FormatDecimal(asset.MaxElectricity)} MW";
 
         return new AssetCardItem(
             string.IsNullOrWhiteSpace(asset.Name) ? $"Asset {asset.Id}" : asset.Name,
@@ -422,7 +437,7 @@ public class AssetCardItem : ViewModelBase
     public IBrush BannerBrush { get; }
     public string MaxHeatDisplay { get; }
     public string CostDisplay { get; }
-    public string CO2Display { get; }
+    public string Co2Display { get; }
     public string ElectricityDisplay { get; }
 
     public IBrush CardBorderBrush => _isSelected ? SelectedBorderBrush : UnselectedBorderBrush;
@@ -448,44 +463,51 @@ public class AssetCardItem : ViewModelBase
         (TypeAccentBrush, BannerBrush) = GetTypeBrushes(assetType);
         MaxHeatDisplay = maxHeatDisplay;
         CostDisplay = costDisplay;
-        CO2Display = co2Display;
+        Co2Display = co2Display;
         ElectricityDisplay = electricityDisplay;
         OriginalAsset = originalAsset;
     }
 
-    private static (IBrush accent, IBrush banner) GetTypeBrushes(string type) => type switch
+    private static (IBrush accent, IBrush banner) GetTypeBrushes(string type)
     {
-        "OIL" => (
-            new SolidColorBrush(Color.Parse("#8B6040")),
-            new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
-                GradientStops = new GradientStops { new GradientStop(Color.Parse("#D0C8BC"), 0), new GradientStop(Color.Parse("#EDE8E2"), 1) }
-            }),
-        "MOTOR" => (
-            new SolidColorBrush(Color.Parse("#6040A0")),
-            new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
-                GradientStops = new GradientStops { new GradientStop(Color.Parse("#C8C0E0"), 0), new GradientStop(Color.Parse("#E8E4F5"), 1) }
-            }),
-        "ELECTRIC" => (
-            new SolidColorBrush(Color.Parse("#208040")),
-            new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
-                GradientStops = new GradientStops { new GradientStop(Color.Parse("#B8D4C0"), 0), new GradientStop(Color.Parse("#DCF0E3"), 1) }
-            }),
-        _ => (
-            new SolidColorBrush(Color.Parse("#E06020")),
-            new LinearGradientBrush
-            {
-                StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
-                EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
-                GradientStops = new GradientStops { new GradientStop(Color.Parse("#BFD9EE"), 0), new GradientStop(Color.Parse("#E5F0F8"), 1) }
-            })
-    };
+        return type switch
+        {
+            "OIL" => (
+                new SolidColorBrush(Color.Parse("#8B6040")),
+                new LinearGradientBrush
+                {
+                    StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                    EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                    GradientStops =
+                        [new GradientStop(Color.Parse("#D0C8BC"), 0), new GradientStop(Color.Parse("#EDE8E2"), 1)]
+                }),
+            "MOTOR" => (
+                new SolidColorBrush(Color.Parse("#6040A0")),
+                new LinearGradientBrush
+                {
+                    StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                    EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                    GradientStops =
+                        [new GradientStop(Color.Parse("#C8C0E0"), 0), new GradientStop(Color.Parse("#E8E4F5"), 1)]
+                }),
+            "ELECTRIC" => (
+                new SolidColorBrush(Color.Parse("#208040")),
+                new LinearGradientBrush
+                {
+                    StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                    EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                    GradientStops =
+                        [new GradientStop(Color.Parse("#B8D4C0"), 0), new GradientStop(Color.Parse("#DCF0E3"), 1)]
+                }),
+            _ => (
+                new SolidColorBrush(Color.Parse("#E06020")),
+                new LinearGradientBrush
+                {
+                    StartPoint = new RelativePoint(0.5, 0, RelativeUnit.Relative),
+                    EndPoint = new RelativePoint(0.5, 1, RelativeUnit.Relative),
+                    GradientStops =
+                        [new GradientStop(Color.Parse("#BFD9EE"), 0), new GradientStop(Color.Parse("#E5F0F8"), 1)]
+                })
+        };
+    }
 }

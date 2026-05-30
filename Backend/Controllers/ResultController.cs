@@ -55,7 +55,7 @@ public class ResultController : ControllerBase, IController<Result, Result>
     [HttpPost("AddList")]
     public Task<IActionResult> AddResultList([FromBody] List<Result> results)
     {
-        throw new  UnauthorizedAccessException("You are not authorized to create it.");
+        throw new UnauthorizedAccessException("You are not authorized to create it.");
     }
 
     // Put

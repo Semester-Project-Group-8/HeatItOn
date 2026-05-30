@@ -2,47 +2,62 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Frontend.Interfaces;
 using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class OptimizedResultsClient : IClient<OptimizedResults>
+public class OptimizedResultsClient : BaseClient,
+    IClient<OptimizedResults>
 {
     private readonly HttpClient _client;
     private const string urlExtension = "OptimizedResults";
 
-    public OptimizedResultsClient(HttpClient httpClient)
+    public OptimizedResultsClient(HttpClient httpClient, PopupHub popupHub) : base(httpClient, popupHub)
     {
         _client = httpClient;
     }
 
     public async Task<OptimizedResults?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync($"{urlExtension}/{id.ToString()}");
-        response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"{urlExtension}/{id.ToString()}");
+        
+        if (await HandleError(response))
+            return null;
+        
         return await response.Content.ReadFromJsonAsync<OptimizedResults>();
     }
 
     public async Task<List<OptimizedResults>?> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync($"{urlExtension}");
-        response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"{urlExtension}");
+        if (await HandleError(response))
+            return [];
         var result = await response.Content.ReadFromJsonAsync<List<OptimizedResults>>();
         return result;
     }
 
-    public async Task Post(OptimizedResults item)
+    public async Task<bool> Post(OptimizedResults item)
     {
-        HttpResponseMessage response = await _client.PostAsJsonAsync($"{urlExtension}", item);
+        var response = await _client.PostAsJsonAsync($"{urlExtension}", item);
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Put(OptimizedResults item)
+    public async Task<bool> Put(OptimizedResults item)
     {
-        HttpResponseMessage response = await _client.PutAsJsonAsync($"{urlExtension}", item);
+        var response = await _client.PutAsJsonAsync($"{urlExtension}", item);
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
+        var response = await _client.DeleteAsync($"{urlExtension}/Delete/{id.ToString()}");
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 }

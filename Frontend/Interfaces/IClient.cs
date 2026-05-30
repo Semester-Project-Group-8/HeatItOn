@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Frontend.Data;
+namespace Frontend.Interfaces;
 
 public interface IClient<T>
 {
     Task<T?> Get(int id);
     Task<List<T>> GetAll();
-    Task Post(T item);
-    Task Put(T item);
-    Task Delete(int id);
+    Task<bool> Post(T item);
+    Task<bool> Put(T item);
+    Task<bool> Delete(int id);
 }

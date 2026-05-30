@@ -2,52 +2,67 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Frontend.Interfaces;
 using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class SourceClient : IClient<Source>
+public class SourceClient : BaseClient, IClient<Source>
 {
     private readonly HttpClient _client;
     private const string UrlExtension = "Source";
 
-    public SourceClient(HttpClient httpClient)
+    public SourceClient(HttpClient httpClient, PopupHub popupHub): base(httpClient, popupHub)
     {
         _client = httpClient;
     }
 
     public async Task<Source?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
-        response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
+        if (await HandleError(response))
+            return null;
         return await response.Content.ReadFromJsonAsync<Source>();
     }
 
     public async Task<List<Source>> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/");
-        response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"{UrlExtension}/");
+        if (await HandleError(response))
+            return [];
         var result = await response.Content.ReadFromJsonAsync<List<Source>>();
         return result ?? [];
     }
 
-    public async Task Post(Source source)
+    public async Task<bool> Post(Source source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
+        var response = await _client.PostAsync($"{UrlExtension}/Add", JsonContent.Create(source));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task PostList(List<Source> source)
+    public async Task<bool> PostList(List<Source> source)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
+        var response = await _client.PostAsync($"{UrlExtension}/AddList", JsonContent.Create(source));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Put(Source source)
+    public async Task<bool> Put(Source source)
     {
-        HttpResponseMessage response = await _client.PutAsync($"{UrlExtension}/Update/{source.Id}", JsonContent.Create(source));
+        var response = await _client.PutAsync($"{UrlExtension}/Update/{source.Id}", JsonContent.Create(source));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}" );
+        var response = await _client.DeleteAsync($"{UrlExtension}/Delete/{id.ToString()}");
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 }

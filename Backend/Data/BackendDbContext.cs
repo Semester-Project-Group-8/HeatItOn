@@ -1,24 +1,28 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Backend.Models;
-namespace Backend.Data
+
+namespace Backend.Data;
+
+public class BackendDbContext : DbContext
 {
-    public class BackendDbContext:DbContext
+    public BackendDbContext(DbContextOptions options) : base(options)
     {
-        public BackendDbContext(DbContextOptions options) : base(options) { }
-        
-        public DbSet<Source> Sources { get; set; }
-        public DbSet<Asset> Assets{ get; set; }
-        public DbSet<Result> Results{ get; set; }
-        public DbSet<ResultByHour> ResultByHours { get; set; }
-        public DbSet<OptimizedResults> OptimizedResults { get; set; }
-        
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Source>()
-                .HasIndex(s => new {s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice})
-                .IsUnique();
-        }
     }
-    
+
+    public DbSet<Source> Sources { get; set; }
+    public DbSet<Asset> Assets { get; set; }
+    public DbSet<Result> Results { get; set; }
+    public DbSet<ResultByHour> ResultByHours { get; set; }
+    public DbSet<OptimizedResults> OptimizedResults { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Source>()
+            .HasIndex(s => new { s.TimeFrom, s.TimeTo, s.HeatDemand, s.ElectricityPrice })
+            .IsUnique();
+        modelBuilder.Entity<Asset>()
+            .HasIndex(a => a.Name)
+            .IsUnique();
+    }
 }

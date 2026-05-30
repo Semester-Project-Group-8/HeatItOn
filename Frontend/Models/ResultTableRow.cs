@@ -1,4 +1,5 @@
 namespace Frontend.Models;
+
 public class ResultTableRow
 {
     public string Hour { get; set; } = string.Empty;

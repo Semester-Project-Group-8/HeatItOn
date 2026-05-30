@@ -1,67 +1,67 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
 using Backend.Models;
-namespace Backend.Services
+
+namespace Backend.Services;
+
+public class ResultService : IService<Result>
 {
-	public class ResultService:IService<Result>
-	{
-		private readonly BackendDbContext _dbContext;
+    private readonly BackendDbContext _dbContext;
 
-		public ResultService(BackendDbContext dbContext)
-		{
-			_dbContext = dbContext;
-		}
+    public ResultService(BackendDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-		public async Task<List<Result>> List()
-		{
-			return await _dbContext.Results.ToListAsync();
-		}
+    public async Task<List<Result>> List()
+    {
+        return await _dbContext.Results.ToListAsync();
+    }
 
 
-		// GetResultById
-		public async Task<Result> Get(int id)
-		{
-			var result = await _dbContext.Results.FindAsync(id);
-			if (result == null)
-				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
-			return  result;
-		}
-		
-		public async Task Post(Result result)
-		{
-			await _dbContext.Results.AddAsync(result);
-			await _dbContext.SaveChangesAsync();
-		}
-		
-		public async Task PostList(List<Result> result)
-		{
-			await _dbContext.Results.AddRangeAsync(result);
-			await _dbContext.SaveChangesAsync();
-		}
+    // GetResultById
+    public async Task<Result> Get(int id)
+    {
+        var result = await _dbContext.Results.FindAsync(id);
+        if (result == null)
+            throw new KeyNotFoundException($"Error | Result with id {id} not found.");
+        return result;
+    }
 
-		public async Task Put(int id, Result value)
-		{
-			var result = await _dbContext.Results.FindAsync(id);
-			if (result == null)
-				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
+    public async Task Post(Result result)
+    {
+        await _dbContext.Results.AddAsync(result);
+        await _dbContext.SaveChangesAsync();
+    }
 
-			result.HeatProduction = value.HeatProduction;
-			result.Electricity = value.Electricity;
-			result.ProductionCost = value.ProductionCost;
-			result.PrimaryEnergyConsumed = value.PrimaryEnergyConsumed;
-			result.CO2Produced = value.CO2Produced;
-			result.AssetId = value.AssetId;
+    public async Task PostList(List<Result> result)
+    {
+        await _dbContext.Results.AddRangeAsync(result);
+        await _dbContext.SaveChangesAsync();
+    }
 
-			await _dbContext.SaveChangesAsync();
-		}
+    public async Task Put(int id, Result value)
+    {
+        var result = await _dbContext.Results.FindAsync(id);
+        if (result == null)
+            throw new KeyNotFoundException($"Error | Result with id {id} not found.");
 
-		public async Task Delete(int id)
-		{
-			var result = await _dbContext.Results.FindAsync(id);
-			if (result == null)
-				throw new KeyNotFoundException($"Error | Result with id {id} not found.");
-			_dbContext.Results.Remove(result);
-			await _dbContext.SaveChangesAsync();
-		}
-	}
+        result.HeatProduction = value.HeatProduction;
+        result.Electricity = value.Electricity;
+        result.ProductionCost = value.ProductionCost;
+        result.PrimaryEnergyConsumed = value.PrimaryEnergyConsumed;
+        result.CO2Produced = value.CO2Produced;
+        result.AssetId = value.AssetId;
+
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task Delete(int id)
+    {
+        var result = await _dbContext.Results.FindAsync(id);
+        if (result == null)
+            throw new KeyNotFoundException($"Error | Result with id {id} not found.");
+        _dbContext.Results.Remove(result);
+        await _dbContext.SaveChangesAsync();
+    }
 }

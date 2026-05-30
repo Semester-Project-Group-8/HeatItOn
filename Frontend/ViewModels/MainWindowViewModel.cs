@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Frontend.Data;
+using Frontend.Interfaces;
 using Frontend.Models;
 using Microsoft.AspNetCore.SignalR.Client;
-using Tmds.DBus.Protocol;
 
 namespace Frontend.ViewModels;
 
@@ -13,20 +13,21 @@ public class MainWindowViewModel : ViewModelBase
 {
     private static readonly TimeSpan SignalRRetryDelay = TimeSpan.FromSeconds(5);
     private HubConnection? _connection;
-    public SourceTabViewModel SourceTab {get; private set;}
-    public AssetsTabViewModel AssetsTab  {get; private set;}
-    public ResultsTabViewModel ResultTab   {get; private set;}
+    public SourceTabViewModel SourceTab { get; private set; }
+    public AssetsTabViewModel AssetsTab { get; private set; }
+    public ResultsTabViewModel ResultTab { get; private set; }
     public RelayCommand Refresh { get; }
 
     public MainWindowViewModel(
         IClient<Source> sourceClient,
         IClient<Asset> assetClient,
         OptimizerClient optimizerClient,
-        IClient<OptimizedResults> optimizedResultsClient)
+        IClient<OptimizedResults> optimizedResultsClient,
+        PopupHub popupHub)
     {
-        SourceTab = new SourceTabViewModel(sourceClient);
-        AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient);
-        ResultTab = new ResultsTabViewModel(optimizedResultsClient);
+        SourceTab = new SourceTabViewModel(sourceClient, popupHub);
+        AssetsTab = new AssetsTabViewModel(assetClient, optimizerClient,  popupHub);
+        ResultTab = new ResultsTabViewModel(optimizedResultsClient, popupHub);
         Refresh = new RelayCommand(() =>
         {
             _ = AssetsTab.LoadFromBackendAsync();
@@ -69,7 +70,8 @@ public class MainWindowViewModel : ViewModelBase
 
             while (true)
             {
-                if (_connection.State is HubConnectionState.Connected or HubConnectionState.Connecting or HubConnectionState.Reconnecting)
+                if (_connection.State is HubConnectionState.Connected or HubConnectionState.Connecting
+                    or HubConnectionState.Reconnecting)
                 {
                     await Task.Delay(SignalRRetryDelay);
                     continue;

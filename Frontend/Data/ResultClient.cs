@@ -2,46 +2,58 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+using Frontend.Interfaces;
 using Frontend.Models;
 
 namespace Frontend.Data;
 
-public class ResultClient : IClient<Result>
+public class ResultClient : BaseClient, IClient<Result>
 {
     private readonly HttpClient _client;
-    private const  string UrlExtension = "Result";
+    private const string UrlExtension = "Result";
 
-    public ResultClient(HttpClient httpClient)
+    public ResultClient(HttpClient httpClient, PopupHub popupHub) : base(httpClient, popupHub)
     {
         _client = httpClient;
     }
 
     public async Task<Result?> Get(int id)
     {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
-        response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"{UrlExtension}/{id.ToString()}");
+        if (await HandleError(response))
+            return null;
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
     public async Task<List<Result>> GetAll()
     {
-        HttpResponseMessage response = await _client.GetAsync($"{UrlExtension}");
-        response.EnsureSuccessStatusCode();
+        var response = await _client.GetAsync($"{UrlExtension}");
+        if (await HandleError(response))
+            return [];
         return await response.Content.ReadFromJsonAsync<List<Result>>() ?? [];
     }
 
-    public async Task Post(Result result)
+    public async Task<bool> Post(Result result)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(result));
+        var response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(result));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Put(Result result)
+    public async Task<bool> Put(Result result)
     {
-        HttpResponseMessage response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(result));
+        var response = await _client.PostAsync($"{UrlExtension}/", JsonContent.Create(result));
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 
-    public async Task Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        HttpResponseMessage response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}" );
+        var response = await _client.DeleteAsync($"{UrlExtension}/{id.ToString()}");
+        if (await HandleError(response))
+            return false;
+        return true;
     }
 }

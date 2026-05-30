@@ -11,46 +11,46 @@
 
     <UserControl.Styles>
         <Style Selector="DataGridColumnHeader">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#AAAAAA"/>
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Padding" Value="12,12"/>
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="#AAAAAA" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Padding" Value="12,12" />
         </Style>
         <Style Selector="DataGridColumnHeader:pointerover /template/ Grid">
-            <Setter Property="Background" Value="#F8F8F8"/>
+            <Setter Property="Background" Value="#F8F8F8" />
         </Style>
         <Style Selector="DataGridRow">
-            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="MinHeight" Value="44" />
         </Style>
         <Style Selector="DataGridCell">
-            <Setter Property="Padding" Value="12,0"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-            <Setter Property="BorderBrush" Value="#F0F0F0"/>
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="#F0F0F0" />
         </Style>
 
         <Style Selector="Button.page-btn">
-            <Setter Property="MinWidth" Value="32"/>
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Background" Value="#F0F0F0"/>
-            <Setter Property="Foreground" Value="#444444"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Padding" Value="6,0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="MinWidth" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="#F0F0F0" />
+            <Setter Property="Foreground" Value="#444444" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
         <Style Selector="Button.page-btn:pointerover /template/ ContentPresenter">
-            <Setter Property="Background" Value="#E0E0E0"/>
+            <Setter Property="Background" Value="#E0E0E0" />
         </Style>
         <Style Selector="Button.page-btn.active">
-            <Setter Property="Background" Value="#E06020"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Background" Value="#E06020" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="Bold" />
         </Style>
     </UserControl.Styles>
-    
+
     <Grid DragDrop.AllowDrop="True" Loaded="OnMainAreaLoaded" Background="Transparent">
         <DockPanel>
 
@@ -60,12 +60,12 @@
                     BorderThickness="0,0,1,0">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top"
-                            Text="// UPLOADED FILES"
-                            Margin="16,18,16,12"
-                            FontSize="10"
-                            FontWeight="Bold"
-                            Foreground="#AAAAAA"
-                            LetterSpacing="1.5"/>
+                               Text="// UPLOADED FILES"
+                               Margin="16,18,16,12"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="#AAAAAA"
+                               LetterSpacing="1.5" />
 
                     <Border DockPanel.Dock="Bottom"
                             Padding="16,12"
@@ -76,15 +76,15 @@
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Center"
                                     Content="↓  Export Source"
-                                    Command="{Binding Export}"/>
+                                    Command="{Binding Export}" />
                             <Button Classes="export-btn"
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Center"
                                     Content="↑ Import Source"
-                                    Click="ImportSourceButton_Click"/>
+                                    Click="ImportSourceButton_Click" />
                         </StackPanel>
                     </Border>
-                    
+
                     <Grid Margin="8,0">
                         <ListBox ItemsSource="{Binding Files}"
                                  SelectedItem="{Binding SelectedFile}"
@@ -149,14 +149,14 @@
                                        FontWeight="Bold"
                                        Foreground="#AAAAAA"
                                        LetterSpacing="1.5"
-                                       VerticalAlignment="Center"/>
+                                       VerticalAlignment="Center" />
                             <Button Content="Delete Selected"
                                     Command="{Binding DeleteSelected}"
                                     CommandParameter="{Binding #SourceDataGrid.SelectedItems}"
                                     HorizontalAlignment="Right"
                                     Classes="export-btn"
                                     Background="#FFE06020"
-                                    Foreground="White"/>
+                                    Foreground="White" />
                         </Grid>
 
                         <Border Background="White"
@@ -181,30 +181,30 @@
                                           CanUserSortColumns="True">
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Header="ID"
-                                                               Width="*"
-                                                               IsReadOnly="True"
-                                                               SortMemberPath="Id">
+                                                                Width="*"
+                                                                IsReadOnly="True"
+                                                                SortMemberPath="Id">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding Id}"
                                                                Foreground="#E06020"
                                                                Padding="12,0"
-                                                               VerticalAlignment="Center"/>
+                                                               VerticalAlignment="Center" />
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
                                         <DataGridTextColumn Header="FROM"
                                                             Binding="{Binding TimeFrom}"
-                                                            Width="2*"/>
+                                                            Width="2*" />
                                         <DataGridTextColumn Header="TO"
                                                             Binding="{Binding TimeTo}"
-                                                            Width="2*"/>
+                                                            Width="2*" />
                                         <DataGridTextColumn Header="HEAT DEMAND (MW)"
                                                             Binding="{Binding HeatDemand}"
-                                                            Width="2*"/>
+                                                            Width="2*" />
                                         <DataGridTextColumn Header="ELECTRICITY PRICE (DKK/MWH)"
                                                             Binding="{Binding ElectricityPrice}"
-                                                            Width="2*"/>
+                                                            Width="2*" />
                                     </DataGrid.Columns>
                                 </DataGrid>
 
@@ -218,7 +218,7 @@
                                                    Text="{Binding PageInfo}"
                                                    VerticalAlignment="Center"
                                                    Foreground="#AAAAAA"
-                                                   FontSize="12"/>
+                                                   FontSize="12" />
 
                                         <StackPanel Grid.Column="1"
                                                     Orientation="Horizontal"
@@ -229,7 +229,7 @@
                                                     Command="{Binding PrevPage}"
                                                     IsEnabled="{Binding CanGoPrev}"
                                                     Classes="page-btn"
-                                                    FontSize="16"/>
+                                                    FontSize="16" />
 
                                             <ScrollViewer HorizontalScrollBarVisibility="Auto"
                                                           VerticalScrollBarVisibility="Disabled"
@@ -237,7 +237,7 @@
                                                 <ItemsControl ItemsSource="{Binding PageNumbers}">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>
-                                                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                                                            <StackPanel Orientation="Horizontal" Spacing="4" />
                                                         </ItemsPanelTemplate>
                                                     </ItemsControl.ItemsPanel>
                                                     <ItemsControl.ItemTemplate>
@@ -245,7 +245,7 @@
                                                             <Button Content="{Binding}"
                                                                     Command="{Binding ((vm:SourceTabViewModel)DataContext).GoToPage, ElementName=RootControl}"
                                                                     CommandParameter="{Binding}"
-                                                                    Classes="page-btn"/>
+                                                                    Classes="page-btn" />
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
@@ -255,7 +255,7 @@
                                                     Command="{Binding NextPage}"
                                                     IsEnabled="{Binding CanGoNext}"
                                                     Classes="page-btn"
-                                                    FontSize="16"/>
+                                                    FontSize="16" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -269,23 +269,24 @@
                     <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Spacing="8">
-                        <Path Data="M10,4H4C2.89,4 2.01,4.89 2.01,6L2,18C2,19.1 2.89,20 4,20H20C21.1,20 22,19.1 22,18V8C22,6.9 21.1,6 20,6H12L10,4Z" 
-                              Fill="#E06020" Width="60" Height="60" Stretch="Uniform" Opacity="0.5" Margin="0,0,0,15"/>
+                        <Path
+                            Data="M10,4H4C2.89,4 2.01,4.89 2.01,6L2,18C2,19.1 2.89,20 4,20H20C21.1,20 22,19.1 22,18V8C22,6.9 21.1,6 20,6H12L10,4Z"
+                            Fill="#E06020" Width="60" Height="60" Stretch="Uniform" Opacity="0.5" Margin="0,0,0,15" />
                         <TextBlock Text="Drag and drop your Source CSV here"
-                                FontSize="20"
-                                FontWeight="SemiBold"
-                                Foreground="#999999"
-                                HorizontalAlignment="Center" />
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="#999999"
+                                   HorizontalAlignment="Center" />
                         <TextBlock Text="or click 'Import Source' on the left"
-                                Opacity="0.7"
-                                Foreground="#AAAAAA"
-                                HorizontalAlignment="Center" />
+                                   Opacity="0.7"
+                                   Foreground="#AAAAAA"
+                                   HorizontalAlignment="Center" />
                     </StackPanel>
                 </Border>
             </Panel>
-            
+
         </DockPanel>
-        
+
         <Border Grid.Row="0"
                 IsVisible="{Binding IsNotificationOpen}"
                 VerticalAlignment="Bottom"
@@ -301,5 +302,5 @@
                        FontSize="14" FontWeight="Bold" />
         </Border>
     </Grid>
-    
+
 </UserControl>
