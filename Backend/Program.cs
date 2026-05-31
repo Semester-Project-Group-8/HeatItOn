@@ -3,6 +3,10 @@ using Backend.Data;
 using Backend.ExceptionHandling;
 using Backend.Services;
 using Backend.Hubs;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 //using Backend.Data;
 
