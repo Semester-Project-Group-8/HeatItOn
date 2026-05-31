@@ -61,10 +61,6 @@ public class OptimizerService
     {
         Asset? PTES; //Pit Thermal Energy Storage
         PTES = scenarioAssets.FirstOrDefault(asset => asset.ProductionCost == 0);
-        if (PTES != null)
-        {
-            //scenarioAssets.Remove(PTES);
-        }
 
         var allSources = (await _sourceService.List())
             .OrderBy(s => s.TimeFrom)
@@ -89,7 +85,7 @@ public class OptimizerService
             float heatOfTheHour = 0;
             var usedGenerators = 0;
             var allowOverproduction = true;
-            var maintenanceFrom = DateTime.Parse("2025-09-09T20:00:00");
+            var maintenanceFrom = DateTime.Parse("2025-09-15T15:00:00");
             var maintenanceTil = maintenanceFrom.AddHours(45);
             var resultOfHour = new ResultByHour
             {
@@ -100,7 +96,7 @@ public class OptimizerService
             while (usedGenerators < scenarioAssets.Count() &&
                    (heatOfTheHour < source.HeatDemand || allowOverproduction))
             {
-                if (scenarioAssets[usedGenerators].Name == "Gas boiler 1" && maintenanceFrom <= source.TimeFrom &&
+                if ((scenarioAssets[usedGenerators].Name == "Gas boiler 1" || scenarioAssets[usedGenerators].Name == "Electric boiler 1") && maintenanceFrom <= source.TimeFrom &&
                     source.TimeFrom < maintenanceTil) //maintenance
                 {
                     usedGenerators++;
