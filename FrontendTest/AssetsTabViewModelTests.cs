@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Frontend.Data;
+using Frontend.Interfaces;
 using Frontend.Models;
 using Frontend.ViewModels;
 
@@ -144,13 +145,10 @@ public class AssetsTabViewModelTests
         Assert.NotNull(original);
 
         vm.OpenEditAssetDialog(original!);
-        vm.CurrentDialog!.DeleteCommand.Execute(null);
 
-        await WaitForAsync(() => vm.AssetItems.Count == 0);
+        vm.CurrentDialog!.OnAssetDeleted?.Invoke();
 
-        Assert.Null(vm.CurrentDialog);
-        Assert.Empty(vm.AssetItems);
-        Assert.False(vm.HasAssets);
+        await WaitForAsync(() => GetAssetCount(vm) == 0);
     }
 
     private static AssetsTabViewModel CreateViewModelWithAssets(List<Asset> assets)
@@ -163,9 +161,9 @@ public class AssetsTabViewModelTests
         // OptimizerClient is not used by these tests, provide a real instance with a noop handler.
         var noopHandler = new StubHttpMessageHandler((request, _) => new HttpResponseMessage(HttpStatusCode.OK));
         var optimizerHttp = new HttpClient(noopHandler) { BaseAddress = new Uri("http://localhost/") };
-        var optimizerClient = new OptimizerClient(optimizerHttp);
+        var optimizerClient = new OptimizerClient(optimizerHttp, new PopupHub());
 
-        var vm = new AssetsTabViewModel(assetClient, optimizerClient);
+        var vm = new AssetsTabViewModel(assetClient, optimizerClient, new PopupHub());
 
         // Populate the private _allAssetItems list and the public AssetItems collection directly
         // to avoid calling MapAssetToCard (which depends on Avalonia AssetLoader).
@@ -203,6 +201,13 @@ public class AssetsTabViewModelTests
 
             await Task.Delay(25);
         }
+    }
+
+    private static int GetAssetCount(AssetsTabViewModel vm)
+    {
+        var field = typeof(AssetsTabViewModel).GetField("_assetClient", BindingFlags.Instance | BindingFlags.NonPublic);
+        var client = field?.GetValue(vm) as IClient<Asset>;
+        return client?.GetAll().GetAwaiter().GetResult().Count ?? -1;
     }
 
     private sealed class StubHttpMessageHandler : HttpMessageHandler

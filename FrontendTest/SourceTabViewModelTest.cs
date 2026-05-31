@@ -80,7 +80,7 @@ public class SourceTabViewModelTests
             BaseAddress = new Uri("http://localhost")
         };
 
-        return new SourceTabViewModel(new SourceClient(httpClient));
+        return new SourceTabViewModel(new SourceClient(httpClient, new PopupHub()), new PopupHub());
     }
 
     private static List<Source> CreateSources()
