@@ -40,7 +40,7 @@ public class ChartViewModelTests
             }
         };
 
-        var vm = new SourceTabViewModel(new SourceClient(CreateJsonClient(Array.Empty<Source>())));
+        var vm = new SourceTabViewModel(new SourceClient(CreateJsonClient(Array.Empty<Source>()), new PopupHub()), new PopupHub());
 
         vm.Sources.Clear();
         foreach (var source in sources)
@@ -133,7 +133,7 @@ public class ChartViewModelTests
             }
         };
 
-        var vm = new ResultsTabViewModel(new OptimizedResultsClient(CreateJsonClient(Array.Empty<OptimizedResults>())));
+        var vm = new ResultsTabViewModel(new OptimizedResultsClient(CreateJsonClient(Array.Empty<OptimizedResults>()), new PopupHub()), new PopupHub());
 
         InvokePrivate(vm, "RebuildCharts", vm.SelectedOptimizedResult?.ResultsForHours ?? results[0].ResultsForHours);
         InvokePrivate(vm, "RebuildGeneratorUsagePie", results[0].ResultsForHours);

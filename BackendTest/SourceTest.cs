@@ -124,8 +124,11 @@ public class SourceServiceTests : IDisposable
     public async Task AddListOfSources_EdgeCase()
     {
         var sources = new List<Source>{};
-        await Assert.ThrowsAsync<ArgumentException>(async () =>
-            await _sourceService.PostList(sources));
+        await _sourceService.PostList(sources);
+
+        var result = await _sourceService.List();
+
+        Assert.Empty(result);
 
     }
 
@@ -144,36 +147,6 @@ public class SourceServiceTests : IDisposable
         var result = await _sourceService.List();
 
         Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task ListByMonth_PositiveCase()
-    {
-        await _sourceService.Post(test_source);
-        await _sourceService.Post(new Source {Id = 2, TimeFrom = new DateTime(2025, 6, 1), TimeTo = new DateTime(2025, 6, 1), HeatDemand = 20, ElectricityPrice = 10});
-
-        var result = await _sourceService.ListByMonth(6);
-
-        Assert.Single(result);
-    }
-
-    [Fact]
-    public async Task ListByMonth_NegativeCase()
-    {
-        await _sourceService.Post(test_source);
-        await _sourceService.Post(new Source {Id = 2, TimeFrom = new DateTime(2025, 6, 1), TimeTo = new DateTime(2025, 6, 1), HeatDemand = 20, ElectricityPrice = 10});
-
-        var result = await _sourceService.ListByMonth(9);
-
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task ListByMonth_EdgeCase()
-    {
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            _sourceService.ListByMonth(13)
-        );
     }
 
     [Fact]

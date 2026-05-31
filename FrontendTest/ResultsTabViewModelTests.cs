@@ -19,7 +19,7 @@ public class ResultsTabViewModelTests
             });
 
         var httpClient = new HttpClient(handler) { BaseAddress = new Uri("http://localhost/") };
-        return new ResultsTabViewModel(new OptimizedResultsClient(httpClient));
+        return new ResultsTabViewModel(new OptimizedResultsClient(httpClient, new PopupHub()), new PopupHub());
     }
 
     private static OptimizedResults MakeResult(params (DateTime time, float heat, float elec, int co2, float cost)[] hours)

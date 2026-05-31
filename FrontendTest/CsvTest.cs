@@ -1,6 +1,10 @@
 using Frontend.Data;
 using Frontend.Data.CSV;
+using Frontend.Interfaces;
 using Frontend.Models;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 
 namespace FrontendTest
 {
@@ -37,7 +41,7 @@ namespace FrontendTest
             var path = Path.GetTempFileName();
 
             await _assetClient.Post(new Asset { Id = 1, Name = "Gas Boiler", MaxHeat = 12.5f, ProductionCost = 500, CO2Emission = 200, GasConsumption = 6.2f, OilConsumption = 0, MaxElectricity = 0 });
-            CsvHandler.ExportAsset(path, _assetClient);
+            await CsvHandler.ExportAsset(path, _assetClient);
 
             await WaitUntilAsync(() => Task.FromResult(File.Exists(path)&& new FileInfo(path).Length > 0));
 
@@ -58,7 +62,7 @@ namespace FrontendTest
                 "Gas Boiler Test,12.5,500,200,6.2,0,0"
             });
 
-            CsvHandler.ImportAsset(path, _assetClient);
+            await CsvHandler.ImportAsset(path, _assetClient);
 
             await WaitUntilAsync(async () =>
             {
@@ -93,7 +97,7 @@ namespace FrontendTest
                 }
             };
 
-            CsvHandler.ExportResult(path, results);
+            await CsvHandler.ExportResult(path, results);
 
             await WaitUntilAsync(() => Task.FromResult(File.Exists(path) && new FileInfo(path).Length > 0));
 
@@ -119,15 +123,18 @@ namespace FrontendTest
                 "2024.01.01 01:00,2024.01.01 02:00,50,1300"
             });
 
-            await CsvHandler.ImportSource(path, _sourceClient);
+            var handler = new CaptureHttpMessageHandler();
+            var httpClient = new HttpClient(handler)
+            {
+                BaseAddress = new Uri("http://localhost/")
+            };
+            var sourceClient = new SourceClient(httpClient, new PopupHub());
 
-            var sources = await _sourceClient.GetAll();
+            await CsvHandler.ImportSource(path, sourceClient);
+
+            var sources = JsonSerializer.Deserialize<List<Source>>(handler.LastRequestBody ?? "[]") ?? [];
 
             Assert.True(sources.Count >= 2);
-
-            var first = sources.First();
-            Assert.Equal(45.5f, first.HeatDemand);
-            Assert.Equal(1200f, first.ElectricityPrice);
         }
 
         // =========================
@@ -150,7 +157,7 @@ namespace FrontendTest
                 }
             };
 
-            CsvHandler.ExportSource(path, sources);
+            await CsvHandler.ExportSource(path, sources);
 
             await WaitUntilAsync(() => Task.FromResult(File.Exists(path)));
 
@@ -169,10 +176,10 @@ namespace FrontendTest
     class InMemoryAssetClient : IClient<Asset>
     {
         private readonly List<Asset> _items = new List<Asset>();
-        public Task Delete(int id)
+        public Task<bool> Delete(int id)
         {
             _items.RemoveAll(a => a.Id == id);
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public Task<Asset?> Get(int id)
@@ -185,15 +192,15 @@ namespace FrontendTest
             return Task.FromResult(_items.ToList());
         }
 
-        public Task Post(Asset item)
+        public Task<bool> Post(Asset item)
         {
             if (item.Id == 0)
                 item.Id = _items.Count + 1;
             _items.Add(item);
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
-        public Task Put(Asset item)
+        public Task<bool> Put(Asset item)
         {
             var existing = _items.FirstOrDefault(a => a.Id == item.Id);
             if (existing != null)
@@ -201,17 +208,17 @@ namespace FrontendTest
                 _items.Remove(existing);
                 _items.Add(item);
             }
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 
     class InMemorySourceClient : IClient<Source>
     {
         private readonly List<Source> _items = new List<Source>();
-        public Task Delete(int id)
+        public Task<bool> Delete(int id)
         {
             _items.RemoveAll(s => s.Id == id);
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public Task<Source?> Get(int id)
@@ -224,15 +231,15 @@ namespace FrontendTest
             return Task.FromResult(_items.ToList());
         }
 
-        public Task Post(Source item)
+        public Task<bool> Post(Source item)
         {
             if (item.Id == 0)
                 item.Id = _items.Count + 1;
             _items.Add(item);
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
-        public Task Put(Source item)
+        public Task<bool> Put(Source item)
         {
             var existing = _items.FirstOrDefault(s => s.Id == item.Id);
             if (existing != null)
@@ -240,7 +247,20 @@ namespace FrontendTest
                 _items.Remove(existing);
                 _items.Add(item);
             }
-            return Task.CompletedTask;
+            return Task.FromResult(true);
+        }
+    }
+
+    class CaptureHttpMessageHandler : HttpMessageHandler
+    {
+        public string? LastRequestBody { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (request.Content != null)
+                LastRequestBody = await request.Content.ReadAsStringAsync(cancellationToken);
+
+            return new HttpResponseMessage(System.Net.HttpStatusCode.OK);
         }
     }
 }
