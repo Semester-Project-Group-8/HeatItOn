@@ -411,8 +411,8 @@ public class ResultsTabViewModel : INotifyPropertyChanged
 
         OnPropertyChanged(nameof(HasNoOptimizedResults));
         
-        StatusMessage = "Result deleted successfully.";
-        IsNotificationOpen = true;
+        ShowNotification("Result deleted successfully.");
+    
     }
 
     private void RebuildRows()
